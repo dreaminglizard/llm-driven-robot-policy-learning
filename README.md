@@ -10,6 +10,14 @@
 
 **처음 보는 분께:** 아래에서 개발·실행 구조를 보고, 로봇 없이 첫 예제를 실행한 다음, 코드와 공개 근거를 확인할 수 있습니다. 라쿤봇은 이 연구 방향을 적용한 사례입니다.
 
+### English overview
+
+This repository explores **LLM-assisted development of small robot manipulation policies**. LLM assistance in design and data preparation is distinct from the offline optimizer that updates policy weights. At runtime, Gemma interprets instructions; learned policies and the controller/SDK handle downstream behavior. RaccoonBot is the application case.
+
+Start with the [technical guide](docs/TECHNICAL_GUIDE.md) or the dependency-free [symbolic smoke check](examples/offline_world_smoke.py). The public source contains several model families, including a planning path with optional symbolic search. Recorded prediction metrics, simulated behavior and physical demonstration are different evidence. This is a research snapshot, not a claim of general-purpose robotics or complete independent reproduction.
+
+**Feedback / 피드백:** [재현 결과·설치 문제 / Reproduction report](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/issues/new?template=reproduction.md) · [방법·근거 검토 / Technical review](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/issues/new?template=technical_review.md). 한국어와 영어 모두 환영합니다. 코드 위치와 실제 확인한 결과를 함께 알려 주세요.
+
 ## 로봇보다, 로봇의 능력을 만드는 과정
 
 이 프로젝트가 다루는 핵심은 특정 로봇의 이름이 아니라 **LLM을 활용해 로봇 조작 모델을 설계하고, 학습 자료를 만들고, 학습을 통해 가중치를 수정하고, 실행 결과를 검토하는 개발 과정**입니다. 라쿤봇은 이 과정을 실제로 적용해 본 검증 사례입니다.
