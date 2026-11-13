@@ -1,5 +1,7 @@
 # LLM-Driven Robot Policy Learning
 
+[기술 구조·최소 실행 안내 / Technical guide (한국어 · English)](docs/TECHNICAL_GUIDE.md)
+
 ## 로봇보다, 로봇의 능력을 만드는 과정
 
 이 프로젝트가 다루는 핵심은 특정 로봇의 이름이 아니라 **LLM을 활용해 로봇 조작 모델을 설계하고, 학습 자료를 만들고, 학습을 통해 가중치를 수정하고, 실행 결과를 검토하는 개발 과정**입니다. 라쿤봇은 이 과정을 실제로 적용해 본 검증 사례입니다.
