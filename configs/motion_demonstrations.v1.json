@@ -1,0 +1,32 @@
+{
+  "schema": "raccoon-motion-demonstrations-manifest.v1",
+  "base_dir": "..",
+  "episodes": [
+    {
+      "episode_id": "stack_20261028_confirmed",
+      "trial": "docs/검증/2026-10-28_2120_진단후_1번에서3번_실물시도.json",
+      "journal": ".runtime/diagnostic-20261028-2115/events.jsonl",
+      "confirmation": "docs/검증/2026-10-28_사용자확인_1번에서3번_적재성공.json",
+      "registration": "docs/검증/2026-10-28_사용자_원위치복원.json",
+      "task": {"source_slot": 1, "destination_slot": 3, "source_level": 1, "destination_level": 2}
+    },
+    {
+      "episode_id": "unstack_20261029_confirmed_with_offset",
+      "trial": ".runtime/object-roundtrips/2026-10-29_기존속도_왕복재개/runs/20261029T072455Z-518e445e14da49b2805496914d844212.json",
+      "journal": ".runtime/hardware-app/events.jsonl",
+      "confirmation": "docs/검증/2026-10-29_사용자사진_풀기확인과위치오차.json",
+      "registration": "docs/검증/2026-10-29_배치재등록_왕복재개.json",
+      "prior_trial": "docs/검증/2026-10-29_기존속도_왕복재개.json",
+      "task": {"source_slot": 3, "destination_slot": 1, "source_level": 2, "destination_level": 1}
+    },
+    {
+      "episode_id": "stack_20261029_confirmed_on_20261030",
+      "trial": "docs/검증/2026-10-29_관절진단후_1번3번_쌓기.json",
+      "execution": ".runtime/object-transfers/2026-10-29_관절진단후_1번3번_쌓기/runs/20261029T093935Z-174af4c5e0c14d33a7a11e9b475f2d50.json",
+      "journal": ".runtime/hardware-app/events.jsonl",
+      "confirmation": "docs/검증/2026-10-30_사용자정정_마지막쌓기_놓기오차.json",
+      "registration": "docs/검증/2026-10-29_사용자사진_풀기확인과위치오차.json",
+      "task": {"source_slot": 1, "destination_slot": 3, "source_level": 1, "destination_level": 2}
+    }
+  ]
+}

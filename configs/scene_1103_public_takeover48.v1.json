@@ -1,0 +1,3886 @@
+{
+  "schema": "scene-1103-public-takeover48.v1",
+  "status": "prepared_no_simulation_no_teacher",
+  "source_plan": "artifacts/architecture_research/20261103_public_teacher_192_v2/plan.json",
+  "source_plan_sha256": "7cd01828a81f6462d3aadcdab53018d3c72fb18cb7a63a9e92af567e768b2d54",
+  "source_scope": "Previously used training coordinates and seeds. Four-cylinder source scene is unchanged; three-cylinder scene is newly derived by removing the other-slot singleton. No independence, unused historical seed or closed-test disjointness is certified.",
+  "student_candidate_path": "artifacts/architecture_research/20261104_unified_applied_target_direct_seed20261103_v1/training/runtime_package/candidate.pt",
+  "student_candidate_sha256": "92041ff58ac4465b7dee95472ea7d482c9d1bb445e69d1cae66f6f9322eb012d",
+  "runtime_archive": "artifacts/scene_runtime/20261104_applied_target_1103_development_v1.zip",
+  "runtime_archive_sha256": "a7db4dee2b2d5d1fbc06a823bbe01caafb17d649a5ad2a19557857004abb510d",
+  "selection_rule": "For each ordered direction, take source 4-cylinder tower registrations r1..r4. Use r1,r2 unchanged for four cylinders; for r3,r4 remove the singleton from the other slots to construct three-cylinder towers. Alternate replicate-to-allocation by direction and count. Use only the first move; pilot directions are 1->2, 1->3, 2->1 and 3->4 with one case per count and opposite allocations.",
+  "scope_reason": "n4_s2_d2_other01 is one of the 1103 checkpoint training groups. n3_s2_d2_other00 was not in those eight groups and is explicitly newly exposed for future candidate training; after training, repeated 216 cases of this structure are exposed development conditions, not held-out evaluation.",
+  "intervention": {
+    "decision_limit": 60,
+    "prefix_fallback_confirmed_commands": 40,
+    "normal_destination_radius_mm": 60.0,
+    "stall_destination_radius_mm": 60.0,
+    "stall_consecutive_move_count": 3,
+    "stall_target_delta_deg": 0.25,
+    "teacher_decision_limit": 60,
+    "physical_assessment_after_live_ends_only": true,
+    "sample_count": 501,
+    "stable_seconds": 1.0,
+    "risk_is_allocation_not_realized_outcome": true,
+    "prefix_is_unlabelled_context": true,
+    "replacement_or_retry": false
+  },
+  "pilot_count": 8,
+  "planned_cases": 48,
+  "cases": [
+    {
+      "case_id": "tower3-s1-d2-r3",
+      "object_count": 3,
+      "direction": [
+        1,
+        2
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s1-d2-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1077,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          3,
+          2
+        ],
+        [
+          4
+        ],
+        [],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3,
+            2
+          ],
+          [
+            4
+          ],
+          [],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            3
+          ],
+          [
+            4,
+            2
+          ],
+          [],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 1,
+      "pilot": true
+    },
+    {
+      "case_id": "tower4-s1-d2-r1",
+      "object_count": 4,
+      "direction": [
+        1,
+        2
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s1-d2-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1053,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          1,
+          3
+        ],
+        [
+          2
+        ],
+        [
+          4
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1,
+            3
+          ],
+          [
+            2
+          ],
+          [
+            4
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            1
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4
+          ],
+          []
+        ]
+      },
+      "source_change": "none",
+      "order": 2,
+      "pilot": true
+    },
+    {
+      "case_id": "tower3-s1-d3-r3",
+      "object_count": 3,
+      "direction": [
+        1,
+        3
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s1-d3-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1079,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          3,
+          4
+        ],
+        [],
+        [
+          1
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3,
+            4
+          ],
+          [],
+          [
+            1
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            3
+          ],
+          [],
+          [
+            1,
+            4
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 3,
+      "pilot": true
+    },
+    {
+      "case_id": "tower4-s1-d3-r1",
+      "object_count": 4,
+      "direction": [
+        1,
+        3
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s1-d3-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1054,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          3,
+          2
+        ],
+        [],
+        [
+          4
+        ],
+        [
+          1
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3,
+            2
+          ],
+          [],
+          [
+            4
+          ],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            3
+          ],
+          [],
+          [
+            4,
+            2
+          ],
+          [
+            1
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 4,
+      "pilot": true
+    },
+    {
+      "case_id": "tower3-s2-d1-r3",
+      "object_count": 3,
+      "direction": [
+        2,
+        1
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s2-d1-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1090,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [],
+          []
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            3,
+            2
+          ],
+          [
+            1
+          ],
+          [],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 5,
+      "pilot": true
+    },
+    {
+      "case_id": "tower4-s2-d1-r1",
+      "object_count": 4,
+      "direction": [
+        2,
+        1
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s2-d1-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1065,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          1
+        ],
+        [
+          2,
+          4
+        ],
+        [],
+        [
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1
+          ],
+          [
+            2,
+            4
+          ],
+          [],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            1,
+            4
+          ],
+          [
+            2
+          ],
+          [],
+          [
+            3
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 6,
+      "pilot": true
+    },
+    {
+      "case_id": "tower3-s3-d4-r3",
+      "object_count": 3,
+      "direction": [
+        3,
+        4
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s3-d4-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1023,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [],
+        [
+          2,
+          3
+        ],
+        [
+          1
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [],
+          [
+            2,
+            3
+          ],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [],
+          [
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 7,
+      "pilot": true
+    },
+    {
+      "case_id": "tower4-s3-d4-r1",
+      "object_count": 4,
+      "direction": [
+        3,
+        4
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s3-d4-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1085,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          3
+        ],
+        [],
+        [
+          1,
+          4
+        ],
+        [
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3
+          ],
+          [],
+          [
+            1,
+            4
+          ],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            3
+          ],
+          [],
+          [
+            1
+          ],
+          [
+            2,
+            4
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 8,
+      "pilot": true
+    },
+    {
+      "case_id": "tower3-s1-d2-r4",
+      "object_count": 3,
+      "direction": [
+        1,
+        2
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s1-d2-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1090,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          3,
+          4
+        ],
+        [
+          2
+        ],
+        [],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ],
+          [],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 9,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s1-d2-r2",
+      "object_count": 4,
+      "direction": [
+        1,
+        2
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s1-d2-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1065,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          4,
+          1
+        ],
+        [
+          2
+        ],
+        [],
+        [
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            4,
+            1
+          ],
+          [
+            2
+          ],
+          [],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 1
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            4
+          ],
+          [
+            2,
+            1
+          ],
+          [],
+          [
+            3
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 10,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s1-d3-r4",
+      "object_count": 3,
+      "direction": [
+        1,
+        3
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s1-d3-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1091,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          3,
+          1
+        ],
+        [],
+        [
+          4
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3,
+            1
+          ],
+          [],
+          [
+            4
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 1
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            3
+          ],
+          [],
+          [
+            4,
+            1
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 11,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s1-d3-r2",
+      "object_count": 4,
+      "direction": [
+        1,
+        3
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s1-d3-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1073,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          3,
+          4
+        ],
+        [
+          2
+        ],
+        [
+          1
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ],
+          [
+            1
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            3
+          ],
+          [
+            2
+          ],
+          [
+            1,
+            4
+          ],
+          []
+        ]
+      },
+      "source_change": "none",
+      "order": 12,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s1-d4-r3",
+      "object_count": 3,
+      "direction": [
+        1,
+        4
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s1-d4-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1085,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          2,
+          4
+        ],
+        [],
+        [],
+        [
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            2,
+            4
+          ],
+          [],
+          [],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            2
+          ],
+          [],
+          [],
+          [
+            3,
+            4
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 13,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s1-d4-r4",
+      "object_count": 3,
+      "direction": [
+        1,
+        4
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s1-d4-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1094,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          2,
+          3
+        ],
+        [],
+        [],
+        [
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            2,
+            3
+          ],
+          [],
+          [],
+          [
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            2
+          ],
+          [],
+          [],
+          [
+            4,
+            3
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 14,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s1-d4-r2",
+      "object_count": 4,
+      "direction": [
+        1,
+        4
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s1-d4-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1075,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          2,
+          4
+        ],
+        [],
+        [
+          3
+        ],
+        [
+          1
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            2,
+            4
+          ],
+          [],
+          [
+            3
+          ],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            2
+          ],
+          [],
+          [
+            3
+          ],
+          [
+            1,
+            4
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 15,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s1-d4-r1",
+      "object_count": 4,
+      "direction": [
+        1,
+        4
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s1-d4-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1061,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          1,
+          2
+        ],
+        [
+          4
+        ],
+        [],
+        [
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1,
+            2
+          ],
+          [
+            4
+          ],
+          [],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            1
+          ],
+          [
+            4
+          ],
+          [],
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 16,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s2-d1-r4",
+      "object_count": 3,
+      "direction": [
+        2,
+        1
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s2-d1-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1017,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [],
+          []
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ],
+          [],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 17,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s2-d1-r2",
+      "object_count": 4,
+      "direction": [
+        2,
+        1
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s2-d1-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1077,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          4
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            2,
+            3
+          ],
+          [
+            1
+          ],
+          [
+            4
+          ],
+          []
+        ]
+      },
+      "source_change": "none",
+      "order": 18,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s2-d3-r3",
+      "object_count": 3,
+      "direction": [
+        2,
+        3
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s2-d3-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1091,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          3,
+          1
+        ],
+        [
+          2
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            3,
+            1
+          ],
+          [
+            2
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 1
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            3
+          ],
+          [
+            2,
+            1
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 19,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s2-d3-r4",
+      "object_count": 3,
+      "direction": [
+        2,
+        3
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s2-d3-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1020,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          4,
+          2
+        ],
+        [
+          1
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            4,
+            2
+          ],
+          [
+            1
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            4
+          ],
+          [
+            1,
+            2
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 20,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s2-d3-r2",
+      "object_count": 4,
+      "direction": [
+        2,
+        3
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s2-d3-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1079,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          1,
+          4
+        ],
+        [
+          3
+        ],
+        [
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            1,
+            4
+          ],
+          [
+            3
+          ],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [],
+          [
+            1
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 21,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s2-d3-r1",
+      "object_count": 4,
+      "direction": [
+        2,
+        3
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s2-d3-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1073,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            4,
+            3
+          ],
+          []
+        ]
+      },
+      "source_change": "none",
+      "order": 22,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s2-d4-r4",
+      "object_count": 3,
+      "direction": [
+        2,
+        4
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s2-d4-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1023,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          2,
+          3
+        ],
+        [],
+        [
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            2,
+            3
+          ],
+          [],
+          [
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            2
+          ],
+          [],
+          [
+            4,
+            3
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 23,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s2-d4-r3",
+      "object_count": 3,
+      "direction": [
+        2,
+        4
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s2-d4-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1094,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          4,
+          1
+        ],
+        [],
+        [
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            4,
+            1
+          ],
+          [],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 1
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            4
+          ],
+          [],
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 24,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s2-d4-r1",
+      "object_count": 4,
+      "direction": [
+        2,
+        4
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s2-d4-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1075,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          2,
+          3
+        ],
+        [
+          1
+        ],
+        [
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            2,
+            3
+          ],
+          [
+            1
+          ],
+          [
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [],
+          [
+            2
+          ],
+          [
+            1
+          ],
+          [
+            4,
+            3
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 25,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s2-d4-r2",
+      "object_count": 4,
+      "direction": [
+        2,
+        4
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s2-d4-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1085,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          2
+        ],
+        [
+          4,
+          1
+        ],
+        [],
+        [
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            2
+          ],
+          [
+            4,
+            1
+          ],
+          [],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 1
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            2
+          ],
+          [
+            4
+          ],
+          [],
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 26,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s3-d1-r3",
+      "object_count": 3,
+      "direction": [
+        3,
+        1
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s3-d1-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1017,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          1
+        ],
+        [],
+        [
+          4,
+          3
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1
+          ],
+          [],
+          [
+            4,
+            3
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            1,
+            3
+          ],
+          [],
+          [
+            4
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 27,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s3-d1-r4",
+      "object_count": 3,
+      "direction": [
+        3,
+        1
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s3-d1-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1025,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          2
+        ],
+        [],
+        [
+          4,
+          3
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            2
+          ],
+          [],
+          [
+            4,
+            3
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            2,
+            3
+          ],
+          [],
+          [
+            4
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 28,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s3-d1-r2",
+      "object_count": 4,
+      "direction": [
+        3,
+        1
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s3-d1-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1090,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          2
+        ],
+        [],
+        [
+          4,
+          3
+        ],
+        [
+          1
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            2
+          ],
+          [],
+          [
+            4,
+            3
+          ],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            2,
+            3
+          ],
+          [],
+          [
+            4
+          ],
+          [
+            1
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 29,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s3-d1-r1",
+      "object_count": 4,
+      "direction": [
+        3,
+        1
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s3-d1-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1077,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          4
+        ],
+        [
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            4
+          ],
+          [
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            4,
+            2
+          ],
+          [
+            3
+          ],
+          [
+            1
+          ],
+          []
+        ]
+      },
+      "source_change": "none",
+      "order": 30,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s3-d2-r4",
+      "object_count": 3,
+      "direction": [
+        3,
+        2
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s3-d2-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1027,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 31,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s3-d2-r3",
+      "object_count": 3,
+      "direction": [
+        3,
+        2
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s3-d2-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1020,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          3
+        ],
+        [
+          4,
+          2
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            3
+          ],
+          [
+            4,
+            2
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            3,
+            2
+          ],
+          [
+            4
+          ],
+          []
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 32,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s3-d2-r1",
+      "object_count": 4,
+      "direction": [
+        3,
+        2
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s3-d2-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1079,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          2
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            2
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 1
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [],
+          [
+            2,
+            1
+          ],
+          [
+            4
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 33,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s3-d2-r2",
+      "object_count": 4,
+      "direction": [
+        3,
+        2
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s3-d2-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1091,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          1
+        ],
+        [
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        []
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1
+          ],
+          [
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          []
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            1
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ],
+          []
+        ]
+      },
+      "source_change": "none",
+      "order": 34,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s3-d4-r4",
+      "object_count": 3,
+      "direction": [
+        3,
+        4
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s3-d4-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1031,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [],
+        [
+          1,
+          4
+        ],
+        [
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [],
+          [
+            1,
+            4
+          ],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [],
+          [
+            1
+          ],
+          [
+            2,
+            4
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 35,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s3-d4-r2",
+      "object_count": 4,
+      "direction": [
+        3,
+        4
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s3-d4-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1094,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          2
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          1
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            2
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 4,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [],
+          [
+            2
+          ],
+          [
+            4
+          ],
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 36,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s4-d1-r4",
+      "object_count": 3,
+      "direction": [
+        4,
+        1
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s4-d1-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1032,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          3
+        ],
+        [],
+        [],
+        [
+          1,
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3
+          ],
+          [],
+          [],
+          [
+            1,
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            3,
+            4
+          ],
+          [],
+          [],
+          [
+            1
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 37,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s4-d1-r3",
+      "object_count": 3,
+      "direction": [
+        4,
+        1
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s4-d1-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1025,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [
+          1
+        ],
+        [],
+        [],
+        [
+          3,
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1
+          ],
+          [],
+          [],
+          [
+            3,
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [
+            1,
+            2
+          ],
+          [],
+          [],
+          [
+            3
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 38,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s4-d1-r1",
+      "object_count": 4,
+      "direction": [
+        4,
+        1
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s4-d1-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1090,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          1
+        ],
+        [],
+        [
+          4
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1
+          ],
+          [],
+          [
+            4
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            1,
+            3
+          ],
+          [],
+          [
+            4
+          ],
+          [
+            2
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 39,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s4-d1-r2",
+      "object_count": 4,
+      "direction": [
+        4,
+        1
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s4-d1-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1017,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          3
+        ],
+        [
+          2
+        ],
+        [],
+        [
+          1,
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            3
+          ],
+          [
+            2
+          ],
+          [],
+          [
+            1,
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ],
+          [],
+          [
+            1
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 40,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s4-d2-r3",
+      "object_count": 3,
+      "direction": [
+        4,
+        2
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s4-d2-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1027,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          1
+        ],
+        [],
+        [
+          3,
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            1
+          ],
+          [],
+          [
+            3,
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            1,
+            2
+          ],
+          [],
+          [
+            3
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 41,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s4-d2-r4",
+      "object_count": 3,
+      "direction": [
+        4,
+        2
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s4-d2-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1034,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          2
+        ],
+        [],
+        [
+          1,
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            2
+          ],
+          [],
+          [
+            1,
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [
+            2,
+            4
+          ],
+          [],
+          [
+            1
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 42,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s4-d2-r2",
+      "object_count": 4,
+      "direction": [
+        4,
+        2
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s4-d2-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1020,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          3
+        ],
+        [
+          1
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            3
+          ],
+          [
+            1
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [],
+          [
+            3,
+            4
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 43,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s4-d2-r1",
+      "object_count": 4,
+      "direction": [
+        4,
+        2
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s4-d2-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1091,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [
+          4
+        ],
+        [
+          3
+        ],
+        [],
+        [
+          1,
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            4
+          ],
+          [
+            3
+          ],
+          [],
+          [
+            1,
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            4
+          ],
+          [
+            3,
+            2
+          ],
+          [],
+          [
+            1
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 44,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s4-d3-r4",
+      "object_count": 3,
+      "direction": [
+        4,
+        3
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s4-d3-r4",
+      "source_case_replicate": 4,
+      "physics_seed": 1037,
+      "registered_slot_xy_mm": [
+        [
+          154.0,
+          150.8
+        ],
+        [
+          150.2,
+          -5.7
+        ],
+        [
+          -141.0,
+          150.1
+        ],
+        [
+          -159.9,
+          5.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [],
+        [
+          1
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [],
+          [
+            1
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [],
+          [
+            1,
+            4
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 45,
+      "pilot": false
+    },
+    {
+      "case_id": "tower3-s4-d3-r3",
+      "object_count": 3,
+      "direction": [
+        4,
+        3
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s4-d3-r3",
+      "source_case_replicate": 3,
+      "physics_seed": 1031,
+      "registered_slot_xy_mm": [
+        [
+          149.7,
+          155.5
+        ],
+        [
+          159.9,
+          0.3
+        ],
+        [
+          -154.3,
+          145.2
+        ],
+        [
+          -158.9,
+          2.0
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [],
+        [
+          3
+        ],
+        [
+          4,
+          2
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [],
+          [
+            3
+          ],
+          [
+            4,
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "split_group": "n3_s2_d2_other00",
+        "expected_after": [
+          [],
+          [],
+          [
+            3,
+            2
+          ],
+          [
+            4
+          ]
+        ]
+      },
+      "source_change": "remove_the_other_singleton",
+      "order": 46,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s4-d3-r1",
+      "object_count": 4,
+      "direction": [
+        4,
+        3
+      ],
+      "allocation": "normal",
+      "source_case_id": "transfer_between_stacks-s4-d3-r1",
+      "source_case_replicate": 1,
+      "physics_seed": 1094,
+      "registered_slot_xy_mm": [
+        [
+          145.5,
+          148.3
+        ],
+        [
+          149.6,
+          -5.8
+        ],
+        [
+          -142.6,
+          147.6
+        ],
+        [
+          -159.8,
+          -1.6
+        ]
+      ],
+      "initial_scene": [
+        [],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          4,
+          3
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [],
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 3
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [],
+          [
+            1
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 47,
+      "pilot": false
+    },
+    {
+      "case_id": "tower4-s4-d3-r2",
+      "object_count": 4,
+      "direction": [
+        4,
+        3
+      ],
+      "allocation": "stall_risk",
+      "source_case_id": "transfer_between_stacks-s4-d3-r2",
+      "source_case_replicate": 2,
+      "physics_seed": 1023,
+      "registered_slot_xy_mm": [
+        [
+          152.8,
+          151.9
+        ],
+        [
+          153.0,
+          -6.0
+        ],
+        [
+          -157.5,
+          149.2
+        ],
+        [
+          -156.4,
+          -5.2
+        ]
+      ],
+      "initial_scene": [
+        [
+          1
+        ],
+        [],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "move": {
+        "index": 1,
+        "before": [
+          [
+            1
+          ],
+          [],
+          [
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 4
+        },
+        "split_group": "n4_s2_d2_other01",
+        "expected_after": [
+          [
+            1
+          ],
+          [],
+          [
+            2,
+            4
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "source_change": "none",
+      "order": 48,
+      "pilot": false
+    }
+  ],
+  "notes": [
+    "Use only public registered scene/task/slots, joint observations, nominal FK, prior confirmed applied targets/actions for the handoff and teacher actions.",
+    "The three-cylinder tower group is newly exposed, not a previously trained 1103 group; its repeated 216 results after candidate training are exposed development results.",
+    "A normal or stall-risk allocation may be untriggered; at 40 confirmed student commands hand off as fallback_untriggered, never report this as realized stall.",
+    "Early student DONE, command refusal, interruption, unconfirmed result and teacher failure stay in the denominator; never synthesize a teacher label.",
+    "A train-range seed does not prove historical nonuse or independence; these start conditions are based on already used registrations.",
+    "Operator/model identity is not independently verified; preserve the official direct submission transcript separately.",
+    "Simulation only; no closed final test or real hardware. This local plan is not a trusted timestamp."
+  ],
+  "future_evaluation": {
+    "scope": "Use the already completed public 1103 tower 24-session development set for a same-budget control/candidate comparison after training; distinguish first move, full three moves, three/four cylinders, non-target checks and unconfirmed cases.",
+    "interpretation": "Exposed development comparison; no closed final starts or outcomes become teacher labels.",
+    "execution_now": false
+  }
+}

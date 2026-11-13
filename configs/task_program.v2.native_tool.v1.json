@@ -1,0 +1,27 @@
+{
+  "type": "function",
+  "function": {
+    "name": "submit_task_program",
+    "description": "Collect the proposal only; do not execute.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "description": "The proposal schema name."
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "Each ordered proposed step follows the stated field contract."
+          }
+        }
+      },
+      "required": [
+        "schema",
+        "steps"
+      ]
+    }
+  }
+}

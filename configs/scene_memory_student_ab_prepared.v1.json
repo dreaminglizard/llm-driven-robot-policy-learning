@@ -1,0 +1,88 @@
+{
+  "schema": "scene-model-pipeline-freeze.v1",
+  "input_schema": "task_program.v1",
+  "validator_version": "task-program-validator.v2",
+  "language_model_called": false,
+  "fixed_proposals_sha256": "7c16a9c8f2b4fb8af4cc31cd626974d12540f4054d12b2dc403b32f15da74dd7",
+  "initial_scene": [
+    [
+      1,
+      2
+    ],
+    [
+      3
+    ],
+    [
+      4
+    ],
+    []
+  ],
+  "branches": [
+    {
+      "branch": "a",
+      "destination": 2,
+      "groups": [
+        "n4_s2_d2_other01",
+        "n4_s2_d2_other01"
+      ],
+      "validated_request_ids": [
+        "a-register",
+        "a-make",
+        "a-remember",
+        "a-return_to_common",
+        "a-recall"
+      ]
+    },
+    {
+      "branch": "b",
+      "destination": 3,
+      "groups": [
+        "n4_s2_d2_other01",
+        "n4_s2_d2_other01"
+      ],
+      "validated_request_ids": [
+        "b-register",
+        "b-make",
+        "b-remember",
+        "b-return_to_common",
+        "b-recall"
+      ]
+    }
+  ],
+  "split_plan_sha256": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7",
+  "source_sha256": {
+    "scripts/evaluate_scene_model_pipeline.py": "3dffc98761e9c6bf5506c103f10bd1115a309ac0b58a7cedc13fbad30219ead0",
+    "raccoon_memory/scene_model_session.py": "9246f8f83466af7b686deba95e179ee25c40d18bd1b21db520e452d1c042d06b",
+    "raccoon_memory/scene_recall.py": "c09d4982c4534674df26f172735705387e4baca3ff8f5988526884d031f3a01b",
+    "raccoon_memory/task_program.py": "2c2589bbdc8513ec921c47e87e81394f480516028e3854d467b5c895271140f3",
+    "raccoon_memory/language_intent.py": "54e073339017e5995fbe4e1e339321a3cd781931c826ff3bc16dd06410eb69d5",
+    "raccoon_memory/language_intent_bilingual.py": "7ddc820ce6cf8169e91b3248f832efc133213d2e65e7b2fc9137bfaf44013df7",
+    "configs/task_program.schema.json": "e946c4e1fb0772649ae4ff0ab91d89f873e8765184826b0fafbfceeea7c03b1c",
+    "raccoon_memory/task_catalog.py": "230516c688ed3b914a911aa55cc0fd3f5677cabf548a947336d1740c65c320b0",
+    "raccoon_memory/scene_features.py": "0be50dc0aebda5d461ebfbcc23d5bf3e19a206387fd17f31e86d2338186aaf53",
+    "raccoon_memory/scene_policy.py": "a72eac245f3bca9c96c988e3c2ef375292b1c84b35430aba5c3a822a00efa2e0",
+    "raccoon_memory/scene_demo_data.py": "a95ef4f12fb85eb75a478bf768d0d1a0732612cc0d4e16e3461125ecbf88eeb3",
+    "raccoon_memory/scene_motion_sim.py": "fb2522c40a09a8cd9b99cc42b23f46ee63fcf390df5a6bb734dd79b12a62d17d",
+    "raccoon_memory/motion_sim.py": "b9ea4bcac834d384f8f3f47985378e31dd965e375909e94be5a839fb16eae38c",
+    "raccoon_memory/sim_data.py": "dd6aa987b63e6685bab775cb055096eee538d64dcb4952fe0fc5acac20ba5be1",
+    "raccoon_memory/motion_policy.py": "73e6897d0d9fa8d940136748714e872e73f0f41d40f23e4167bca5555410cd26",
+    "raccoon_control/kinematics.py": "33bddaf997de304754f1c4632dc33fe1283fbe25803f6b5a2e25ad912aff4e1a",
+    "raccoon_control/validation.py": "95de0abfede6bba28fc294f255703a795205c21fa823c684c31964c1f8faf8a0",
+    "raccoon_control/errors.py": "fd166573dcb4738bfbae9fd388592c4a3ae754ce44b6e57e5ebf1bcb5c4710f6",
+    "configs/sim/raccoon_pick_place.xml": "8f03de8c00cafa56fa2f00f435b126687ad8abc4946260ac3ba9d18f44b08662",
+    "scripts/evaluate_scene_policy.py": "fd081c4ec170753e6ba70b3111d47538bdb9f9b2f9ba6ea300d5ce77b1bcef3a",
+    "configs/scene_split_plan.v1.json": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7"
+  },
+  "memory_checkpoint": {
+    "path": "artifacts/scene_recall_extended/20261030_gru128_long_seed20261030_v1/model.pt",
+    "sha256": "2f23e47f1e4d441bb417263ef83e227f8bec43e49ae712647df1cc1ab6f25879"
+  },
+  "student_checkpoint": {
+    "path": "artifacts/motion_models/20261030_scene_mlp_tailavg_u3000_s20261030/checkpoint_avg.pt",
+    "sha256": "fb33d349496c2367446dd1d4a44a3ec7a0e0d6809fedcfa1fad06af13006cec8"
+  },
+  "seed": 1000,
+  "max_decisions": 24,
+  "output": "artifacts/motion_evaluations/20261030_scene_memory_student_ab_v1",
+  "scope": "training-group short integration, not final-test or voice evaluation"
+}

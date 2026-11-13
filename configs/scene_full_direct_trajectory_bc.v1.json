@@ -1,0 +1,43 @@
+{
+  "schema": "scene-full-direct-trajectory-paired-bc.v1",
+  "dataset": "artifacts/architecture_research/20261031_direct_teacher_trajectories_replay_v1",
+  "dataset_files_sha256": {
+    "samples.jsonl": "e0e1bcd55e879d4cac6ddce3bae7e46a0e0c7bc84bbc4298008f70780cde1cc0",
+    "episodes.jsonl": "bdd2a679808561f56cba790f257ba19e9e64e7bf288a737c20dba9ef81b1d3e7",
+    "verified_state_pairs.jsonl": "fad8217f71d714a76c481fc0ba1b5f8cefd85bd67c5aef71ec12ce192945b062",
+    "report.json": "8147c66f79bdf9caebe3871470591973d81b17a789903b6533ed7f6be4df16e2",
+    "saved_data_audit.json": "25f04b78b0ce7a604baf1d25391755ba5f0c06642bc3e3e7d05154e12c48fce1"
+  },
+  "previous_control": "artifacts/architecture_research/20261031_first_action_paired_bc_v1",
+  "previous_control_config_sha256": "d235b3547d766487e26e4079eb2bed58ffa19056a41e5fdbecad8512aed6b496",
+  "previous_control_training_sha256": "a3f0cff832c04689269da2d2e5515b163b86a72f674f63d65777701806b97558",
+  "previous_control_recorded_sha256": "952fca38246ee245692e5a870a08adcceac58db083ed4b76f14f8a1ae455de28",
+  "previous_diagnostic": "artifacts/architecture_research/20261031_first_action_continuation_diagnostic_v1",
+  "previous_diagnostic_config_sha256": "8c1295605518faa8206d266c3cb92cd794901e22badf07f8a056bae6cdcc8eb8",
+  "previous_diagnostic_summary_sha256": "74085565e5c3243f93e27157c1156e055ab7e1ffc76757cec53cbe89f54e1ed6",
+  "previous_diagnostic_audit_sha256": "723459b66cbfb1c0ad72c48aaaa1e057f0468b67ceec348ba679dd7dc5547897",
+  "seeds": [20261030, 20261031, 20261101],
+  "conditions": ["recorded_control", "direct_full_trajectory"],
+  "architecture": "mlp", "hidden_size": 64, "features": 82, "history_length": 8,
+  "optimizer": "new Adam", "learning_rate": 0.00001,
+  "batch_size": 256, "updates_per_condition_seed": 1000, "joint_loss_weight": 100.0,
+  "common_per_batch": 192, "groups": 8, "direct_rows_per_group_per_batch": 8,
+  "sampling": "seeded shuffled balanced cycles; no duplicate within a group in one batch; per-row exposure counts differ by at most one per group and seed",
+  "checkpoint_selection": "last fixed update; no validation selection",
+  "recorded_gate": {
+    "direct_correct_actions": 94, "direct_max_each_move_joint_error_deg": 5.0,
+    "direct_outside_predicted_move": 0,
+    "teacher_and_validation_action_accuracy_max_drop_percentage_points": 1.0,
+    "teacher_and_validation_move_mae_max_increase_deg": 0.25,
+    "teacher_and_validation_outside_predicted_move_max_increase": 2
+  },
+  "diagnostic": {
+    "candidate_rollouts": 18, "control_rollouts_reused": 18, "independent_start_cases": 6,
+    "max_decisions": 24, "command_seconds": 1.0, "stability_seconds": 1.0,
+    "student_only": true, "run_even_if_recorded_gate_fails": true,
+    "candidate_total_net_success_gain_min": 3, "distinct_improved_cases_min": 2,
+    "each_seed_success_gain_min": 0, "errors_make_comparison_unknown": true
+  },
+  "promotion_decision": false, "ab_used": false, "single_transfer_60_used": false,
+  "actual_hardware": false, "final_test_used": false
+}

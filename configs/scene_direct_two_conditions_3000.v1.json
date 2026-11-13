@@ -1,0 +1,38 @@
+{
+  "schema": "scene-direct-two-conditions-resume-3000.v1",
+  "previous_full": "artifacts/architecture_research/20261031_full_direct_trajectory_bc_v1",
+  "previous_full_sha256": {
+    "config.json": "9114cf1c5a79dbba979237f6a41716bd9e6fffad0cedc3f4ef7490cd3c72a0e8",
+    "training_summary.json": "2eed8ffbdaa74942b0b4f61c887dfd38c945ac998318e4a8aa3f0c929b84aef9",
+    "training_updates.jsonl": "ca09956411e8f01a8e20868fa21f43d7c93b497a291d583aac6e934bcec0cd9b",
+    "recorded_summary.json": "a6fabfdf6a6c1033ef0e6bd8389d359b473e8be83d75c81851aca861dfffbb20",
+    "diagnostic_summary.json": "21e0cbeedb9fdeaf89378f0b57852912088961b338dbc9a2a93de04a6bbfd864",
+    "diagnostic_lock.json": "8ff126b047c30c805423f9412198bbdf15526c857d73bac10e6e424cf0fc5a91",
+    "audit.json": "f2eddd51b67a1b3657d2e5ddca60fdb47d8ffb410f788fc8e0e6f20a2ee8ba87"
+  },
+  "seeds": [20261030, 20261031, 20261101],
+  "conditions": ["recorded_control", "direct_full_trajectory"],
+  "starting_checkpoint_and_optimizer_sha256": {
+    "20261030:recorded_control": ["47f36b50afd98ffb64344bc0f78e3fbdb701bbf19ad3fa3770789124085455c1", "ab1b15237078f922f3333696be4e7d79e052b4e2384ee4fdbabdde0afb98b72c"],
+    "20261031:recorded_control": ["92602c1fa15bba2abe29a1d11d33427e6ba135c9a72c3f600d4ca0b304c9d851", "070642f442590cb73a19acbbd8a37681905287b70900f6ba0f9865cb75f5abc7"],
+    "20261101:recorded_control": ["e0330bb3616e8a4dbc69ed1e6f01363e102f002171c4825eba9aae35b1df9677", "32a03f07898a9a1c48a472bb1c4367f10af7eaaafc403841fb49e3e12a0df3ff"],
+    "20261030:direct_full_trajectory": ["17116b0c344abc2c75e47e55256dbae06bca20fc8c46048100573044e132f7d6", "8f208ca02429e50323c4fe95e9da99c16414cc2cb2b065b76db518ec59c16bb0"],
+    "20261031:direct_full_trajectory": ["9c17240c272aa014146ec65578df10425dbb767b8552636bd0c81af657041ef9", "dd416a0d8061c0b6fd386bdc357e35d12c776e239bb33212c9fe0b4daef51d25"],
+    "20261101:direct_full_trajectory": ["814056b71ed07c92cd0139ddfb644a2c28802324277b5428fe90421725a8a064", "b3a779f151d95a0406d3b89ef7303140f0e5d81635f460c2a47086b520152fb4"]
+  },
+  "architecture": "mlp", "hidden_size": 64, "features": 82, "history_length": 8,
+  "optimizer": "restore existing Adam state", "learning_rate": 0.00001,
+  "starting_step": 1000, "final_step": 3000, "extra_updates_per_condition_seed": 2000,
+  "batch_size": 256, "common_per_batch": 192, "tail_per_batch": 64,
+  "joint_loss_weight": 100.0, "repeated_prior_1000_batch_cycles": 2,
+  "history_augmentation": false, "new_unique_observations": 0,
+  "selection": "only fixed final 3000 update; no intermediate model evaluation or selection",
+  "evaluation": {"direct_rows": 94, "teacher_rows": 389, "validation_rows": 962,
+    "direct_close_and_next_lift_rows_each": 8, "new_student_rollouts": 36,
+    "independent_start_cases": 6, "max_decisions": 24,
+    "physical_reference": "same-budget 3000-step recorded_control",
+    "minimum_net_success_gain": 3, "minimum_distinct_improved_cases": 2,
+    "minimum_each_seed_gain": 0, "errors_make_comparison_unknown": true},
+  "promotion_decision": false, "ab_used": false, "single_transfer_60_used": false,
+  "actual_hardware": false, "final_test_used": false
+}

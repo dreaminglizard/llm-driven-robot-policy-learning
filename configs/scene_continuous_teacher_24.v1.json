@@ -1,0 +1,2276 @@
+{
+  "schema": "raccoon-scene-continuation-collection.v1",
+  "split": "train",
+  "groups_in_order": [
+    "n1_s1_d1_other00",
+    "n2_s1_d1_other01",
+    "n2_s1_d2_other00",
+    "n2_s2_d1_other00",
+    "n3_s1_d2_other01",
+    "n3_s2_d1_other01",
+    "n4_s1_d1_other12",
+    "n4_s2_d2_other01"
+  ],
+  "seeds_in_order": [
+    1000,
+    1001,
+    1002
+  ],
+  "source_files_sha256": {
+    "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl": "cf633831fd321945700a6d915987f042b1d01b32aa64a786521683d0fbf233e6",
+    "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/report.json": "62c14b4e97455d38d941721a8782850f48a7b70baed508cf3e88bc28c20e5187",
+    "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl": "345f89799e17b4b45f427ff4c587f7aed897d55273b4a3b3ca951f84a8cdc772",
+    "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/report.json": "c21790a8c9f821ee3c67183fd7255aaee2150aa0dd3a86fb45323c906a0d29de",
+    "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1/manifest.json": "3d811df9b5a60fba7d19bb7c70c98de275e00d33ec661f17de5cbf3f96e89eba",
+    "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1/episodes.jsonl": "c9b24ccef180fb47f7c23ca3bc345cbae35c21cf6226b6388a6275c5b162ead9",
+    "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1/train.json": "0dbfa3bb3e9325ed3352d247791ae7bbae75ad10fecd7f609677741a74ecfe18",
+    "configs/scene_split_plan.v1.json": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7"
+  },
+  "split_plan_sha256": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7",
+  "records": [
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 1,
+        "line_sha256": "f3f590493c880d22f5da06c96be3b0930458902136183f5c6a714b9adf1c1559",
+        "episode_id": "sim-scene-train-layout_0001_s4_d1-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n1_s1_d1_other00",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_1000_s1_d4",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 4,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n1_s1_d1_other00"
+      },
+      "parent_state_sha256": "e03b53513ba5e05fc4c0e2550123232c639cc256b230a2d93be4ba569736bec6",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1000_s1_d4-ids1234-seed1000",
+        "line": 1633,
+        "line_sha256": "467f2c2f567389e8f16dff72f0f5f5c6e85853845bbb8c9448ac8e95386e82f6",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 69,
+          "line_sha256": "d57df777346e5185a0c2b73c5128438dd2d069844d39bdc97656a5667dd594f8",
+          "episode_id": "sim-scene-train-layout_1000_s1_d4-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 16
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 1,
+        "line_sha256": "3eb9f4f762e9da0c0f33681120aa26c2148aaacda9127e41a3b20e459d0a2ba5",
+        "episode_id": "sim-scene-train-layout_0001_s4_d1-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n1_s1_d1_other00",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_1000_s1_d4",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 4,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n1_s1_d1_other00"
+      },
+      "parent_state_sha256": "3cda6808300bc2e027dc7eb75f85cefedd720d8c9706d9bf2d1f79760ca1bf06",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1000_s1_d4-ids1234-seed1001",
+        "line": 8641,
+        "line_sha256": "8992e1fac2d48c28592605920e2229dafeb582af398cd0b095f85a4b2ba17d75",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 205,
+          "line_sha256": "aff7cfc9f97eaffcdfdb8b07dd3d46fbd369404d213e80178b3ddacb657ea948",
+          "episode_id": "sim-scene-train-layout_1000_s1_d4-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 16
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 2,
+        "line_sha256": "38b7c998ce70cc65e1562ee52a94ddb4930f9eefdff70d41c8c05653f14f1bbc",
+        "episode_id": "sim-scene-train-layout_0001_s4_d1-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n1_s1_d1_other00",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_1000_s1_d4",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [],
+          []
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 4,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n1_s1_d1_other00"
+      },
+      "parent_state_sha256": "d905701debf784697ad44ce44e6eddfb0b4e7d15a803eb631451238c7fba560c",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1000_s1_d4-ids1234-seed1002",
+        "line": 8665,
+        "line_sha256": "ec88955b24f3cfc7083b55016d2b66232c629516d778d55cbb901b59542ab73b",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 206,
+          "line_sha256": "447c46f5d3224c4e9ab4db9edd85d9ce66d2eac51cb1565c58fb4b3f4fe12416",
+          "episode_id": "sim-scene-train-layout_1000_s1_d4-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 16
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 10,
+        "line_sha256": "8f89b84524a518f403003b0c457c1ae48955570c0e3c04153854d97605c9a1ed",
+        "episode_id": "sim-scene-train-layout_0011_s3_d1-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s1_d1_other01",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_1001_s1_d3",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 3,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s1_d1_other01"
+      },
+      "parent_state_sha256": "e2bd7eac40cbc6ac75677c8daae1037086afec1bc16464be44562bc637bb288b",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1001_s1_d3-ids1234-seed1000",
+        "line": 1681,
+        "line_sha256": "0f987791fb8f5daaa5b4b5fb766586335fa5aadb4c8c7968e14021278007b286",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 71,
+          "line_sha256": "1e466034f0d1088047bc9b08e37549e6d5fcd3e87938498497c12deeaade030d",
+          "episode_id": "sim-scene-train-layout_1001_s1_d3-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 14
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 28,
+        "line_sha256": "6a3c9a780efa0721e743d5d0a8585b8d9ce8d87ca0050b99e6f501e02d06833c",
+        "episode_id": "sim-scene-train-layout_0011_s3_d1-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s1_d1_other01",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_1001_s1_d3",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 3,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s1_d1_other01"
+      },
+      "parent_state_sha256": "81b59a53987d0ffe4146b1d54d70191b9029ebd6ad82e962f503e9e41dd936e7",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1001_s1_d3-ids1234-seed1001",
+        "line": 8785,
+        "line_sha256": "d66080a7eed9243a14751b028ef232801bdec159e62251be24b36ea25d16ed92",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 211,
+          "line_sha256": "82e9fa8e66be55181b2bc0d1d9e92662c41bb0946a906108732728e08aef4561",
+          "episode_id": "sim-scene-train-layout_1001_s1_d3-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 15
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 29,
+        "line_sha256": "521f642dc408c6ed97dfaa9fb42e4e29ee2547f2733515900bd53f5a444868cd",
+        "episode_id": "sim-scene-train-layout_0011_s3_d1-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s1_d1_other01",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_1001_s1_d3",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 1,
+          "destination_slot": 3,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s1_d1_other01"
+      },
+      "parent_state_sha256": "0d3bb4fd7c5c5be0d0f8f0e5d8042101938b8eb5e8b2feac0f494fbbbb70dcb0",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1001_s1_d3-ids1234-seed1002",
+        "line": 8809,
+        "line_sha256": "1d22997a69bf4071c488b35e31484c2c48157cc8afc246674b904ee5f69c8a14",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 212,
+          "line_sha256": "8d034a8dc9a64bee026a53756961305c4b9b530371e5c1ecfd7fcb120fc99a78",
+          "episode_id": "sim-scene-train-layout_1001_s1_d3-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 14
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 12,
+        "line_sha256": "d5c3ed4e229bc169000ae4bd49d66f06c37db0baf54db97c2ae1800d9bf2a7db",
+        "episode_id": "sim-scene-train-layout_0011_s3_d4-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s1_d2_other00",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_0002_s4_d3",
+        "registered_scene": [
+          [],
+          [],
+          [],
+          [
+            2,
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          0,
+          0,
+          0,
+          2
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s2_d1_other00"
+      },
+      "parent_state_sha256": "1b2d96d5dca63d018739cd34740c0b73041e1c50230edb0fb1f69f3e0696a985",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0002_s4_d3-ids1234-seed1000__idperm_2134",
+        "line": 127,
+        "line_sha256": "912babd07cb78c80bc734cd9848527b727423bbe0a1084ce200077684fc4b183",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 6,
+          "line_sha256": "ce3ff5d0870e26e42c36b0696a141bb9a276846e083f32b33313d2fcdd6abec0",
+          "episode_id": "sim-scene-train-layout_0002_s4_d3-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 13
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 34,
+        "line_sha256": "3a65ff523ed1013f0188291662e1b37fdfcb0dd936010a9ce23c7e8da5f30af3",
+        "episode_id": "sim-scene-train-layout_0011_s3_d4-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s1_d2_other00",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_0002_s4_d3",
+        "registered_scene": [
+          [],
+          [],
+          [],
+          [
+            2,
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          0,
+          0,
+          0,
+          2
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s2_d1_other00"
+      },
+      "parent_state_sha256": "4ae8121eac30294bf452792bd5925456234642325d0ad2bb592f7a1771d3e0f4",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0002_s4_d3-ids1234-seed1001__idperm_2134",
+        "line": 4111,
+        "line_sha256": "b4b5a4d485df31c3d35f8e01ea2b1d1d9cf29b2b47d119cb243f7c0f9da43e6c",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 16,
+          "line_sha256": "3a0fe4da273818560c6c40e95b6200e37eb4e7199ca3dbda54af5443fab46c09",
+          "episode_id": "sim-scene-train-layout_0002_s4_d3-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 13
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 35,
+        "line_sha256": "5b34c6f7469d9d89feaf86b2b01957bdea5657dfd4eb20d216db89fed450865f",
+        "episode_id": "sim-scene-train-layout_0011_s3_d4-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s1_d2_other00",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_0002_s4_d3",
+        "registered_scene": [
+          [],
+          [],
+          [],
+          [
+            2,
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 3,
+          "source_level": 2,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          0,
+          0,
+          0,
+          2
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s2_d1_other00"
+      },
+      "parent_state_sha256": "82b63f7651eba25f402f8b27816926fde63c8015d4c1802d01c5956d751f1b06",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0002_s4_d3-ids1234-seed1002__idperm_2134",
+        "line": 4135,
+        "line_sha256": "bdab4f3b6c2e6717a2ed6f81f5a9cd0573ecbfed141f6081f12d32ab50cbf544",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 17,
+          "line_sha256": "c17ba2ee28675c87470676d496c12ba30eaf1951a2d093c781e7af227b1d2640",
+          "episode_id": "sim-scene-train-layout_0002_s4_d3-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 13
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 5,
+        "line_sha256": "f1eac2e050ee756f67f0fdbee68af4cdaf2700a631a490e8446971798124bcec",
+        "episode_id": "sim-scene-train-layout_0002_s4_d2-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s2_d1_other00",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_0101_s2_d4",
+        "registered_scene": [
+          [],
+          [
+            2
+          ],
+          [],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 4,
+          "source_level": 1,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          0,
+          1,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s1_d2_other00"
+      },
+      "parent_state_sha256": "d8e41190bf0038ce76916e7ce4ee5dbedc2211086fb3e5ab648a68a3539308e0",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0101_s2_d4-ids1234-seed1000__idperm_2134",
+        "line": 655,
+        "line_sha256": "2f01a1399b214b8f16200fa137edb21f9a2ab8f9f73ece2a2033911246db81d7",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 28,
+          "line_sha256": "9806efe18197975e3ee171dadac4f99e9ecfde9afa32d583bf1f6efb08a54dba",
+          "episode_id": "sim-scene-train-layout_0101_s2_d4-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 18
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 13,
+        "line_sha256": "0554dd98c4220b0d9eca4d41840aec1c4b26a5f86671fc3e3d85e14762629921",
+        "episode_id": "sim-scene-train-layout_0002_s4_d2-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s2_d1_other00",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_0101_s2_d4",
+        "registered_scene": [
+          [],
+          [
+            2
+          ],
+          [],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 4,
+          "source_level": 1,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          0,
+          1,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s1_d2_other00"
+      },
+      "parent_state_sha256": "c3144ead0fa0bc9aae4f520336379f840ef4a2b50f55d0385a19e5df5e1a8d8e",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0101_s2_d4-ids1234-seed1001__idperm_2134",
+        "line": 5695,
+        "line_sha256": "64a7512451cd84170f882b0bdf728b69da8a9c1d6bb9bf188a828192d5c64da7",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 82,
+          "line_sha256": "36c8e83cd6c2e2238258728188e82e150a6ad0d3863b5d79350a5435c50b27d0",
+          "episode_id": "sim-scene-train-layout_0101_s2_d4-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 18
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 14,
+        "line_sha256": "8a603b13fdc4ecd4a26ce287e92323e8d56590cdaf1ca7ae548aac9b73719302",
+        "episode_id": "sim-scene-train-layout_0002_s4_d2-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n2_s2_d1_other00",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_0101_s2_d4",
+        "registered_scene": [
+          [],
+          [
+            2
+          ],
+          [],
+          [
+            1
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 4,
+          "source_level": 1,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          0,
+          1,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n2_s1_d2_other00"
+      },
+      "parent_state_sha256": "8f5490760bb7854f3dd57bc27bd98f3108d0ff8664b58e369256e7077fe85de0",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0101_s2_d4-ids1234-seed1002__idperm_2134",
+        "line": 5719,
+        "line_sha256": "9153716f99006f714d1b6c62908a9967b3d86fc15e092b8056424ae8eac8cb09",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 83,
+          "line_sha256": "cd1093155d409cc9291b3c5611ea01cacedb3c05f2f120f7fedd1eb778bdc9ff",
+          "episode_id": "sim-scene-train-layout_0101_s2_d4-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 17
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 40,
+        "line_sha256": "2be1c0b490ca0d22a4be7fdfb45b6e5a0c8589b77f179c9a18a9333d09c869b7",
+        "episode_id": "sim-scene-train-layout_0111_s2_d3-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n3_s1_d2_other01",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_0021_s3_d2",
+        "registered_scene": [
+          [],
+          [],
+          [
+            2,
+            1
+          ],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          0,
+          0,
+          2,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n3_s2_d1_other01"
+      },
+      "parent_state_sha256": "7618e8b2a15c690d1ec6dd36618035e4043f1974ba3b8693a7f2a62e269c27a6",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0021_s3_d2-ids1234-seed1000__idperm_2134",
+        "line": 511,
+        "line_sha256": "4e15d96bbc755d19915d656bdbc86164d3cc36675fa007b7c9058412e7c625ac",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 22,
+          "line_sha256": "72d8f44446afa6afbdb2f05b08ea3d8d73892f3cdc209ee67aa32c40ed27613e",
+          "episode_id": "sim-scene-train-layout_0021_s3_d2-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 16
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 118,
+        "line_sha256": "9fcfdf95248ecc81e5294a57d1873966d2586eaeae5c65a35fd5b7d11e01d97f",
+        "episode_id": "sim-scene-train-layout_0111_s2_d3-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n3_s1_d2_other01",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_0021_s3_d2",
+        "registered_scene": [
+          [],
+          [],
+          [
+            2,
+            1
+          ],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          0,
+          0,
+          2,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n3_s2_d1_other01"
+      },
+      "parent_state_sha256": "5ba5b49be57b3d6d19726dff40c046fe72c386176f9767021705a1c09a1d6fbe",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0021_s3_d2-ids1234-seed1001__idperm_2134",
+        "line": 5263,
+        "line_sha256": "162c4d1066bb818de27aa48e78e826f14ecaeba6a048f745aa5af56559e1675b",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 64,
+          "line_sha256": "ae42defc9b1b89537af0f91db9effe57bd0d9ec592d381ad94052a19cba79c1b",
+          "episode_id": "sim-scene-train-layout_0021_s3_d2-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 16
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 119,
+        "line_sha256": "92773400fe5cf4fd94869e33101009d3419c97e180ca369e99a9d42f87fc59b6",
+        "episode_id": "sim-scene-train-layout_0111_s2_d3-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n3_s1_d2_other01",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_0021_s3_d2",
+        "registered_scene": [
+          [],
+          [],
+          [
+            2,
+            1
+          ],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 2,
+          "source_level": 2,
+          "destination_level": 1,
+          "object_id": 1
+        },
+        "counts_before": [
+          0,
+          0,
+          2,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n3_s2_d1_other01"
+      },
+      "parent_state_sha256": "984bd71555fb4c0b3d58a3550dfd8a679e637cfd264758e4936cf017ba1abff2",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_0021_s3_d2-ids1234-seed1002__idperm_2134",
+        "line": 5287,
+        "line_sha256": "e208220dd5b0cb0110c29339431758de77c0301b683e74d800ad0d47b2d72dfc",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 65,
+          "line_sha256": "29fae25235e63d2861bbdca9a2c36469a12936b8ce77826ab2d3f539d8b08225",
+          "episode_id": "sim-scene-train-layout_0021_s3_d2-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 16
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 140,
+        "line_sha256": "0bbda23a054d133d496efcac9b7317aba4fc38d45520d0ca525b9968ec7616ce",
+        "episode_id": "sim-scene-train-layout_2001_s1_d3-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n3_s2_d1_other01",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_1011_s3_d1",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 1,
+          "source_level": 1,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          0,
+          1,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n3_s1_d2_other01"
+      },
+      "parent_state_sha256": "091dad3dfca594377c038e50c3ae7146fdf7eb6474c8b28f9a43213067b5ecd4",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1011_s3_d1-ids1234-seed1000",
+        "line": 2041,
+        "line_sha256": "526c833dafae98fb91459ce07c151dce0c6e27f58757bec075ca06ef87070d5e",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 86,
+          "line_sha256": "1425054ed5cbefa2509e02693ed3045241e26b488888ff7d133c71f0bb61859c",
+          "episode_id": "sim-scene-train-layout_1011_s3_d1-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 14
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 418,
+        "line_sha256": "373f7d07db8789bbd8b3bf9b3f6fe690161a6f68e13f02ba89258426a6ed6622",
+        "episode_id": "sim-scene-train-layout_2001_s1_d3-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n3_s2_d1_other01",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_1011_s3_d1",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 1,
+          "source_level": 1,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          0,
+          1,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n3_s1_d2_other01"
+      },
+      "parent_state_sha256": "b6a9178ffed00b2c6ed70b0cfc5b6de5aef215f2c28e1fa358c0925898db943d",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1011_s3_d1-ids1234-seed1001",
+        "line": 9865,
+        "line_sha256": "f582b5d7332e96767340533f3a2e3ef1001a48a0349abee57dfcabb276ed0dab",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 256,
+          "line_sha256": "bec3c2fda5f2607c3e596088538a353cf5ead32f80bd53284b1227b99ffab49e",
+          "episode_id": "sim-scene-train-layout_1011_s3_d1-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 14
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 419,
+        "line_sha256": "5609705331a924fadd7d11825daf5d4837074c55963d43c98b10874c27e5438d",
+        "episode_id": "sim-scene-train-layout_2001_s1_d3-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n3_s2_d1_other01",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_1011_s3_d1",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "task": {
+          "source_slot": 3,
+          "destination_slot": 1,
+          "source_level": 1,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          0,
+          1,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n3_s1_d2_other01"
+      },
+      "parent_state_sha256": "a5a6ae8601884e91c0b43f302a6e5739422b501c2362384565e28fb4ab22e20e",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1011_s3_d1-ids1234-seed1002",
+        "line": 9889,
+        "line_sha256": "eb952467d36bc7ae0aa2957ce48e4b749e7cb31893e42261563b4565dad06cad",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 257,
+          "line_sha256": "c10910d43dd826058654363d682e73777bff15aa48f2732bd481e6150e419b5d",
+          "episode_id": "sim-scene-train-layout_1011_s3_d1-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 15
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 123,
+        "line_sha256": "4e3e8348d6ab39836140af975d8ee93cd63258340b3657a548f55a78be926367",
+        "episode_id": "sim-scene-train-layout_1120_s2_d4-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n4_s1_d1_other12",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_1021_s4_d2",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 2,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          0,
+          2,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n4_s1_d1_other12"
+      },
+      "parent_state_sha256": "10361322d12ff35d5987df80104a56f0698f6298156d233c1bc04a77e0c93835",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1021_s4_d2-ids1234-seed1000__idperm_1342",
+        "line": 2356,
+        "line_sha256": "335cf732c045175fcea1feb4b7c1d3f60acdd112051941b5e7188b383185ec79",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 99,
+          "line_sha256": "acc5c19887ed56c9f751f90741684c92527a4054faf4212bb37675ed07c8828b",
+          "episode_id": "sim-scene-train-layout_1021_s4_d2-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 18
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 367,
+        "line_sha256": "a2e7a200f41602b597d70d39fcf5de4ebd04d33969540dadf80cffdef77753ea",
+        "episode_id": "sim-scene-train-layout_1120_s2_d4-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n4_s1_d1_other12",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_1021_s4_d2",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 2,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          0,
+          2,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n4_s1_d1_other12"
+      },
+      "parent_state_sha256": "95b3f7a2fe8fbdba2ead06b2a6c477d2faf8305b820a05ecb5325dbe09998954",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1021_s4_d2-ids1234-seed1001__idperm_1342",
+        "line": 10804,
+        "line_sha256": "d28b34c5519a0fbe2daaf77606eda48535f02f3bb6ec64b550bd77e2a9478727",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 295,
+          "line_sha256": "f8aa2b50efc155dd9191ce22d5487003c81f2ae45f9a34e5b4afdc255aa0a0e7",
+          "episode_id": "sim-scene-train-layout_1021_s4_d2-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 17
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 368,
+        "line_sha256": "f82e79ae1524f36d7a46e27bba68259caa28b58ddc5b8b8bacbe877ae3b571ae",
+        "episode_id": "sim-scene-train-layout_1120_s2_d4-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n4_s1_d1_other12",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_1021_s4_d2",
+        "registered_scene": [
+          [
+            1
+          ],
+          [],
+          [
+            3,
+            4
+          ],
+          [
+            2
+          ]
+        ],
+        "task": {
+          "source_slot": 4,
+          "destination_slot": 2,
+          "source_level": 1,
+          "destination_level": 1,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          0,
+          2,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n4_s1_d1_other12"
+      },
+      "parent_state_sha256": "cf900683ad6f75a9a7fbab6f6c2e0da636e4b5be1d552a420902082c79e364c6",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1021_s4_d2-ids1234-seed1002__idperm_1342",
+        "line": 10828,
+        "line_sha256": "fb883be2366339685f842b7271aa5cd205fb4464d19011c7f649da8387685261",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 296,
+          "line_sha256": "0bbeee5841230e7aa9078fa0c456de929d821e10b974efcc8fd2e81e9c3b40db",
+          "episode_id": "sim-scene-train-layout_1021_s4_d2-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 18
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+        "line": 149,
+        "line_sha256": "746c33d0e9f9e3b1c317da68874798f47e86ca30cb99d18ef8822a8e3949c213",
+        "episode_id": "sim-scene-train-layout_2101_s1_d2-ids1234-seed1000",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n4_s2_d2_other01",
+      "seed": 1000,
+      "case": {
+        "case_id": "layout_1201_s2_d1",
+        "registered_scene": [
+          [
+            1
+          ],
+          [
+            3,
+            2
+          ],
+          [],
+          [
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          2,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n4_s2_d2_other01"
+      },
+      "parent_state_sha256": "e5ee1f9709b18ec08634d9efd744da84a72daf47cde3291a62a3653c7f58dcfd",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1201_s2_d1-ids1234-seed1000__idperm_1324",
+        "line": 3075,
+        "line_sha256": "315eefe9182f677b0cc2c88219704c040178659cb464d83331f7f951834967d0",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1/attempts.jsonl",
+          "line": 129,
+          "line_sha256": "60fb983d4c593d2477139b5de7020d4de917cdac7d87f32c567055073798dd92",
+          "episode_id": "sim-scene-train-layout_1201_s2_d1-ids1234-seed1000",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 13
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 445,
+        "line_sha256": "6a02c0f0ee1b7e5c106972168423e9f87c779fac1dba1d72b647ecaa8ed97204",
+        "episode_id": "sim-scene-train-layout_2101_s1_d2-ids1234-seed1001",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n4_s2_d2_other01",
+      "seed": 1001,
+      "case": {
+        "case_id": "layout_1201_s2_d1",
+        "registered_scene": [
+          [
+            1
+          ],
+          [
+            3,
+            2
+          ],
+          [],
+          [
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          2,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n4_s2_d2_other01"
+      },
+      "parent_state_sha256": "441f483f7dc22a8118fddbb3ccc720c994746ca30882b7ecf4f89d1c0fe78dea",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1201_s2_d1-ids1234-seed1001__idperm_1324",
+        "line": 12915,
+        "line_sha256": "0c2af368650d605318dbdb413e4f2bc267763e188ba1d24ba15354798dc27f88",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 385,
+          "line_sha256": "7f2c0da0f1fff985ad4c03b408bffd29b47e6d0885661aa55611a1dee9c8dca6",
+          "episode_id": "sim-scene-train-layout_1201_s2_d1-ids1234-seed1001",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 13
+      }
+    },
+    {
+      "parent": {
+        "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+        "line": 446,
+        "line_sha256": "edeba11e09112f7f12e9075c94fb3e3fa6a2b84a8fb85b5ddb4baad875914024",
+        "episode_id": "sim-scene-train-layout_2101_s1_d2-ids1234-seed1002",
+        "success": true,
+        "stages": [
+          "source_approach",
+          "source_pregrasp",
+          "grasp_descent",
+          "gripper_close",
+          "grasp_lift",
+          "clearance_lift",
+          "transit_turn",
+          "transit_turn",
+          "destination_above",
+          "destination_preposition",
+          "placement",
+          "gripper_open",
+          "retreat"
+        ]
+      },
+      "parent_group": "n4_s2_d2_other01",
+      "seed": 1002,
+      "case": {
+        "case_id": "layout_1201_s2_d1",
+        "registered_scene": [
+          [
+            1
+          ],
+          [
+            3,
+            2
+          ],
+          [],
+          [
+            4
+          ]
+        ],
+        "task": {
+          "source_slot": 2,
+          "destination_slot": 1,
+          "source_level": 2,
+          "destination_level": 2,
+          "object_id": 2
+        },
+        "counts_before": [
+          1,
+          2,
+          0,
+          1
+        ],
+        "id_map": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "split_group": "n4_s2_d2_other01"
+      },
+      "parent_state_sha256": "71559ca2186a5dcbb0ec5446731748336c5a9332ebe35a912bc128eae29ba230",
+      "pair": {
+        "episode_id": "sim-scene-train-layout_1201_s2_d1-ids1234-seed1002__idperm_1324",
+        "line": 12939,
+        "line_sha256": "166e10a70f5a1d9bdce5d91d3c11d1641ea6ac3d9c4448cae1417bd09a83255a",
+        "original_physical_attempt": {
+          "path": "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1/attempts.jsonl",
+          "line": 386,
+          "line_sha256": "00809b4f3a2fd15ee27f9aeaf658e1355b9218873cd46b7d369a1a1176889909",
+          "episode_id": "sim-scene-train-layout_1201_s2_d1-ids1234-seed1002",
+          "success": true,
+          "stages": [
+            "source_approach",
+            "source_pregrasp",
+            "grasp_descent",
+            "gripper_close",
+            "grasp_lift",
+            "clearance_lift",
+            "transit_turn",
+            "transit_turn",
+            "destination_above",
+            "destination_preposition",
+            "placement",
+            "gripper_open",
+            "retreat"
+          ]
+        },
+        "transition_count": 13
+      }
+    }
+  ],
+  "teacher_variant": "segmented_transit_grasp15_placepitch_minus5_v4",
+  "parent_physical_runs_reused": 24,
+  "new_attempts_planned": 24,
+  "actual_hardware": false,
+  "final_test_used": false,
+  "interpretation": "Parents are existing physical simulations; pairs may be ID relabels, not new executions."
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "scene-first-action-paired-bc-spec.v1",
+  "handoff_manifest": "artifacts/architecture_research/20261031_first_action_teacher_handoff_v1/manifest.json",
+  "handoff_sha256": "30c879587e00a5ee5c2495ecf4f02e274ea0257131a52ba12c7cf00ea4211ed2",
+  "previous_experiment": "artifacts/architecture_research/20261030_early_approach_mix_3000_v1",
+  "previous_config_sha256": "9b77afade6869c9efb4d2ead37cb6788daf5891b1cc855778eb340ebc1ccfb47",
+  "previous_checkpoint_sha256": {
+    "20261030": "c84b19b53da1f61a81e34c42cfb9daf4daec00ccd6212f277d0ab422139a55db",
+    "20261031": "f15c409db426a556a72945a89cb6000535557761a20aa3e6ba6b111d55128f11",
+    "20261101": "3bd7d915a542961f6ae7ee6b45692f7aee8ac1432afa70d3e4df4cbb5210e419"
+  },
+  "seeds": [20261030, 20261031, 20261101],
+  "conditions": ["recorded_control", "first_action_correction"],
+  "architecture": "mlp", "hidden_size": 64, "features": 82, "history_length": 8,
+  "optimizer": "new Adam", "learning_rate": 0.00001,
+  "batch_size": 256, "updates_per_condition_seed": 1000,
+  "common_per_batch": 192, "groups": 8, "group_rows": 8,
+  "replacement_group_slots_zero_based": [0, 1],
+  "loss": "action cross entropy + 100 * mean squared normalized joint target error on teacher move rows",
+  "joint_loss_weight": 100.0,
+  "schedule": "first 1000 previously fixed uniform batches per seed; identical common and non-replaced group rows",
+  "checkpoint_selection": "last fixed update; no validation selection",
+  "gate": {
+    "correction_correct_actions": 8, "correction_max_each_joint_error_deg": 5.0,
+    "correction_outside_predicted_move": 0,
+    "teacher_and_validation_action_accuracy_max_drop_percentage_points": 1.0,
+    "teacher_and_validation_move_mae_max_increase_deg": 0.25,
+    "teacher_and_validation_outside_predicted_move_max_increase": 2
+  },
+  "actual_hardware": false, "new_physics_executions": 0, "final_test_used": false
+}

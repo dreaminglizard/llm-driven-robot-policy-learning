@@ -1,0 +1,18 @@
+{
+  "schema": "task-program-v2-combined-development.v1",
+  "combined_path": "combined_development112.jsonl",
+  "combined_sha256": "5bb3274bfb211ee1cd23c91012ee3689b43ee6793f6a16a45b25775b62c7e194",
+  "component_manifest_sha256": "2746043064ce616c96a5fb5dd408c2d5ae1abeb39a192fcc7bc80a2207a8889b",
+  "reused_sha256": "8abc6a637799c068edb00ec6ad3b4b218db6fcf46c14a83f49a84b3994f1bc0a",
+  "additional_sha256": "ab932842c81603286bb638f49d6a3a482382ab6cff688e83480c11985d0ad92d",
+  "counts": {
+    "source_text": 24,
+    "asr_transcript": 48,
+    "silence": 1,
+    "new_development_text": 40
+  },
+  "labeled_cases": 112,
+  "silence_cases": 1,
+  "scope": "tagged development groups; not an independent final evaluation",
+  "model_calls_so_far": 0
+}

@@ -1,0 +1,2 @@
+라쿤봇, 원통, 자리, 배치, 쌓기, 쌓아, 올려, 내려놓기, 내려줘, 이동, 옮겨, 기억, 복원, 원위치, 멈춰, 반복, 취소
+RaccoonBot, cylinder, slot, arrangement, stacking, stack, lift, put down, lower, move, transfer, remember, restore, original position, stop, repeat, cancel

@@ -1,0 +1,42 @@
+{
+  "format": "raccoon-independent-final-holdout-reservation.v2",
+  "created_at_utc": "2026-11-03T10:30:04.105740+00:00",
+  "status": "reserved_not_generated_not_executed",
+  "reason": "An unscoped source-search incident in another worker leaves access to the prior reserved cohort uncertain. Prior reserved results will not establish blind final-test independence for this goal.",
+  "prior_reserved_seed_range_retired_from_blind_claim": [
+    2000,
+    2019
+  ],
+  "prior_reserved_artifacts_action": "preserve; do not open, generate or execute to investigate the incident",
+  "seed_range_inclusive": [
+    800590579,
+    800590598
+  ],
+  "seed_selection": "OS cryptographic random base; chosen before the FK200 reward pilot; no simulator, model or performance consulted",
+  "global_training_split_unchanged": true,
+  "training_split_source_sha256": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7",
+  "generate_only_after": {
+    "candidate_checkpoint_and_runtime_frozen": true,
+    "promising_three_training_seeds_verified": true,
+    "new_development_starts_verified": true,
+    "oracle_free_two_moves_and_actual_memory_restore_AB_verified": true
+  },
+  "evaluation": {
+    "minimum_trials_per_kind": 20,
+    "kinds": [
+      "move_to_empty",
+      "stack",
+      "unstack",
+      "transfer_between_stacks"
+    ],
+    "physical_hold_seconds": 1.0,
+    "samples_per_hold": 501,
+    "minimum_success_fraction_each_kind": 0.95,
+    "other_object_position_or_height_displacement_allowed": false,
+    "oracle_free_execution": true,
+    "expected_and_confirmed_scene_must_remain_separate": true
+  },
+  "case_selection": "Predefine task/slot-coordinate strata from the final protocol without looking at outcomes; generate fresh full initial states only after freeze; reject exact initial-state overlap with retained development manifests before any model execution.",
+  "result_use": "One final assessment; after inspecting final outcomes do not tune and reuse this cohort as an independent final test.",
+  "scope": "Future simulation final test, not real hardware, not a current model result"
+}

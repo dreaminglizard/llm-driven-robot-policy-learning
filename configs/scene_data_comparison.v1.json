@@ -1,0 +1,28 @@
+{
+  "schema": "raccoon-scene-data-comparison.v1",
+  "purpose": "Separate physical-condition diversity and semantic identity relabeling at equal optimizer work",
+  "conditions": {
+    "base": {"bundle": "artifacts/sim_augmentation/20261030_scene_training_bundle_v1", "train_items": 156, "physical_parents": 156},
+    "physics4": {"bundle": "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_v1", "train_items": 621, "physical_parents": 621},
+    "id24": {"bundle": "artifacts/sim_augmentation/20261030_scene_training_bundle_id24_v1", "train_items": 3744, "physical_parents": 156},
+    "physics4_id24": {"bundle": "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1", "train_items": 14904, "physical_parents": 621}
+  },
+  "shared_validation_items": 60,
+  "architecture": "mlp",
+  "hidden_size": 64,
+  "history_length": 8,
+  "optimizer_updates": 3000,
+  "batch_size": 256,
+  "decision_samples_exposed": 768000,
+  "learning_rate": 0.002,
+  "joint_loss_weight": 100,
+  "seed": 20261030,
+  "training_device": "cuda",
+  "evaluation_device": "cpu",
+  "evaluation_split": "validation",
+  "evaluation_seed": 1500,
+  "checkpoint_selection": "Last fixed optimizer update, without best-validation selection",
+  "interpretation": "Identity relabeling creates no new physical runs. The physical4 parents are 621 successes from 624 attempts; all three failures remain in source records.",
+  "old_baseline_note": "The previous 300-epoch model used short final batches; train a new full-batch 3000-update baseline for this comparison.",
+  "final_test_used": false
+}

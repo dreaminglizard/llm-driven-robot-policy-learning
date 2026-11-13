@@ -1,0 +1,32 @@
+{
+  "schema": "scene-retained-start-mix-3000.v1",
+  "prior_same_budget": "artifacts/architecture_research/20261031_direct_two_conditions_3000_v1",
+  "prior_sha256": {
+    "config.json": "80fbe7069a6d426fb8a4803c14e96ff527655b65d8ea8216ab46547ce4b5a63e",
+    "training_summary.json": "afd1b0ea2abb569d50f553dd23fce08c7ac2f7e36baae0a82083f6477f0c97a3",
+    "recorded_summary.json": "12a0eb773df7e1bcd80a028d425e22c735e20e89d102136a5646e2a4bd9a7209",
+    "diagnostic_summary.json": "df4cb3598d4d98fb330df55765ae29996ea0c5a57ca9a63c77e600fa428a57fd",
+    "diagnostic_lock.json": "fc9ad1f8676f22213d8ff573c759926c7711edeeff31d7a49a83e7e0c5fb2817",
+    "audit.json": "5214fe8330a923fb9c0bf9e249595dc03fdb05a45f12da06673bfa4727197bd6"
+  },
+  "reexposure_findings": "artifacts/architecture_research/20261031_start_state_reexposure_diagnosis_v1/findings.json",
+  "reexposure_findings_sha256": "16f72c95d91d1f027d90d18376eeea82c040cb680b09a5b655bc72783fe05bac",
+  "seeds": [20261030, 20261031, 20261101],
+  "architecture": "mlp", "hidden_size": 64, "features": 82, "history_length": 8,
+  "initial_checkpoint": "original uniform_3000 for each seed",
+  "optimizer": "new Adam with no saved state", "learning_rate": 0.00001,
+  "joint_loss_weight": 100.0, "batch_size": 256, "updates_per_seed": 3000,
+  "common_prefix": 128, "original_continuous_teacher": 64, "original_direct_trajectory": 64,
+  "prior_schedule_length": 1000, "repeat_prior_schedule": 3,
+  "history_augmentation": false, "new_unique_observations": 0,
+  "selection": "fixed last checkpoint only",
+  "evaluation": {"direct_rows": 94, "teacher_rows": 389, "validation_rows": 962,
+    "continuous_first_decision_rows": 24, "direct_close_and_next_lift_rows_each": 8,
+    "new_student_rollouts": 18, "independent_start_cases": 6, "max_decisions": 24,
+    "physical_reference": "same-budget 3000-step recorded_control",
+    "secondary_reference": "same-budget 3000-step direct_full_trajectory",
+    "minimum_net_success_gain": 3, "minimum_distinct_improved_cases": 2,
+    "minimum_each_seed_gain": 0, "errors_make_comparison_unknown": true},
+  "promotion_decision": false, "ab_used": false, "single_transfer_60_used": false,
+  "actual_hardware": false, "final_test_used": false
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "workspace-review.v1",
+  "profile_id": "FOUR_SLOTS_CANDIDATE_2026_10_27",
+  "review_only": true,
+  "verified": false,
+  "workspace_min_mm": [-180, -5, 5],
+  "workspace_max_mm": [180, 220, 140],
+  "source": "Nominal swept paths for the four photo-derived slots, with 5 mm mathematical padding rounded outward. Not measured clearance or calibration."
+}

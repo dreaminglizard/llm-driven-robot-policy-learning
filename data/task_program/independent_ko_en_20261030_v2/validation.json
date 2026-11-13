@@ -1,0 +1,122 @@
+{
+  "at_utc": "2026-10-30T06:37:21.732360+00:00",
+  "scope": "independent text-only development set v2, not final test",
+  "rows": 80,
+  "by_language": {
+    "ko": 40,
+    "en": 40
+  },
+  "families": 40,
+  "alternatives": 103,
+  "by_category": {
+    "ordered": 12,
+    "return": 6,
+    "return_context": 10,
+    "stop_return": 2,
+    "repeat_boundary": 8,
+    "repeat": 8,
+    "repeat_reference": 6,
+    "continuation": 6,
+    "negation": 4,
+    "question": 4,
+    "correction": 6,
+    "ambiguity": 2,
+    "out_of_scope": 6
+  },
+  "unique_text_context_inputs": 80,
+  "normalized_exact_duplicates_vs_prior_development112": 0,
+  "existing_v2_evaluator_input_load": "passed",
+  "existing_v2_semantic_projection_mismatches": 0,
+  "v1_unchanged_dataset_sha256": "3b39eca8cc66cf29eae6e2959fcfc3b54b8ac57dde71ac1b5ed8777a22676cac",
+  "v1_unchanged_validation_sha256": "7c46b006e696c2ceb141564c3e0a6051529ae259d3cede7002b3176561674eab",
+  "review_sha256": "45063a79a1197edf9362dbb17a19b008ef121c848267d2944becede18dab5fc9",
+  "changed_text_ids": [
+    "independent.finish_current_no_new_round.ko",
+    "independent.finish_current_no_new_round.en"
+  ],
+  "changed_reason_ids": [
+    "independent.finish_current_no_new_round.ko",
+    "independent.finish_current_no_new_round.en",
+    "independent.negated_memory_positive_move.en"
+  ],
+  "unchanged_gold_semantic_projections": true,
+  "other_rows_and_all_contexts_unchanged": true,
+  "question_review_cases": 22,
+  "schema_failures": [],
+  "rows_with_at_least_one_validator_accepted_gold": 78,
+  "gold_alternative_validator_rejections": [
+    {
+      "id": "independent.repeat_stop_not_motion.ko",
+      "alternative": 0,
+      "code": "missing_explicit_stop",
+      "detail": "an affirmed motion stop was omitted"
+    },
+    {
+      "id": "independent.repeat_stop_not_motion.ko",
+      "alternative": 1,
+      "code": "ungrounded_value",
+      "detail": "continue reference is not supported by evidence"
+    },
+    {
+      "id": "independent.repeat_stop_not_motion.en",
+      "alternative": 1,
+      "code": "ungrounded_value",
+      "detail": "continue reference is not supported by evidence"
+    },
+    {
+      "id": "independent.continue_active.en",
+      "alternative": 0,
+      "code": "ungrounded_value",
+      "detail": "continue reference is not supported by evidence"
+    },
+    {
+      "id": "independent.negated_memory_positive_move.en",
+      "alternative": 1,
+      "code": "ungrounded_value",
+      "detail": "count is not supported by its evidence"
+    }
+  ],
+  "reviewed_incorrect_proposals_still_accepted_by_checker": [
+    {
+      "id": "independent.repeat_stop_not_motion.ko",
+      "checker_accepted": true,
+      "dataset_result": "semantic_mismatch",
+      "evidence_scope": "whole_input"
+    },
+    {
+      "id": "independent.unsupported_height.ko",
+      "checker_accepted": true,
+      "dataset_result": "semantic_mismatch",
+      "evidence_scope": "partial_input"
+    },
+    {
+      "id": "independent.unsupported_height.en",
+      "checker_accepted": true,
+      "dataset_result": "semantic_mismatch",
+      "evidence_scope": "partial_input"
+    },
+    {
+      "id": "independent.unsupported_height.en",
+      "checker_accepted": true,
+      "dataset_result": "semantic_mismatch",
+      "evidence_scope": "whole_input"
+    }
+  ],
+  "note": "A rejected correct gold is retained as a validator compatibility finding; it is not rewritten to match the checker.",
+  "question_review_probe": "local judge marks misleading and null questions manual; existing v2 evaluator never auto-credits them; unresolved target can match structurally",
+  "old_development112_sha256": "5bb3274bfb211ee1cd23c91012ee3689b43ee6793f6a16a45b25775b62c7e194",
+  "dataset_sha256": "e14fde7bde9e600fde5e54775fcca59ee850f42a2894f710c70a9d864772dd18",
+  "source_sha256": {
+    "data\\task_program\\independent_ko_en_20261030_v2\\build_dataset.py": "4a63cee46c6b73ee3f8e2e72a39fcccf6aa3be3925434aecd9560348f08c65ab",
+    "data\\task_program\\independent_ko_en_20261030_v2\\judge.py": "6d53445a1bc3aa3b5bd115b2ce45ba3a3891ceaa6c7131f5d0a153cf203cd51a",
+    "data\\task_program\\independent_ko_en_20261030_v2\\validate_dataset.py": "10b07f4376fdc05c18d6b5c95ed2de8000f0faa21cfa1648a5f352bb0b58ba64",
+    "raccoon_memory\\task_program.py": "2c2589bbdc8513ec921c47e87e81394f480516028e3854d467b5c895271140f3",
+    "raccoon_memory\\task_program_v2.py": "57a849e8b972785450d4c4671d9a66ef00090e089c3d61876ad5fa80cc4fefe7",
+    "configs\\task_program.v2_1.schema.json": "041fa28614503baee94513dcb07197f4254a1e3815438c9cee901d2c1fca715d"
+  },
+  "model_calls": 0,
+  "audio_or_microphone_used": false,
+  "device_calls": 0,
+  "reserved_final_data_opened": false,
+  "example_prompt_opened": false
+}

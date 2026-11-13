@@ -1,0 +1,8 @@
+{
+  "name": "Whisper large-v3-turbo",
+  "backend": "whisper",
+  "model_path": "artifacts/whisper-large-v3-turbo",
+  "device": "cpu",
+  "precision": "int8",
+  "selection_scope": "User-selected CPU execution; real CPU latency and accuracy have not been measured"
+}

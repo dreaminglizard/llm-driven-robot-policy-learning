@@ -1,0 +1,57 @@
+{
+  "schema": "raccoon-scene-development-runtime.v1",
+  "candidate_id": "applied_target_direct_20261103_original_open",
+  "qualification": "public_development_only",
+  "qualified_command_sources": {
+    "raccoon_memory/task_program.py": "1f2d4d7f059b10c089f2469c440a3f6877c56169063062f10cbb0a64850fba14",
+    "raccoon_memory/task_program_v2.py": "b55b6e6fff4886061b5c18ffb29df824aa5b7d635a5c4560557763d4dc949b76",
+    "raccoon_memory/scene_program_coordinator.py": "8c7214216bd30d0f3f952d4833018529322b4f574af8a859c1f1d0f226d08d7e"
+  },
+  "required_assets": {
+    "configs/task_program.schema.json": "e946c4e1fb0772649ae4ff0ab91d89f873e8765184826b0fafbfceeea7c03b1c",
+    "configs/task_program.v2.schema.json": "35472907c63b72a188415d1c63edc1b4299df6eadb24f7679d2b7f6044220de7",
+    "configs/task_program.v2_1.schema.json": "3af9fbe167b60a681013cf4a77c394029df9778a11a548c337943b8e19eb53b2"
+  },
+  "student": {
+    "path": "artifacts/architecture_research/20261104_unified_applied_target_direct_seed20261103_v1/training/runtime_package/candidate.pt",
+    "sha256": "92041ff58ac4465b7dee95472ea7d482c9d1bb445e69d1cae66f6f9322eb012d",
+    "loaded_state_sha256": "bb2f51809db362b8a12adbdd0ccfe4322e96ea2a65eb2c71225d4f6e52993306"
+  },
+  "memory": {
+    "path": "artifacts/scene_recall_extended/20261030_gru128_long_seed20261030_v1/model.pt",
+    "sha256": "2f23e47f1e4d441bb417263ef83e227f8bec43e49ae712647df1cc1ab6f25879",
+    "loaded_state_sha256": "2d5237cef9511c5c5ffc7a8ccea36cfa7c562ce795d9285672299890ca214438",
+    "hidden_size": 128
+  },
+  "split": {
+    "path": "configs/scene_split_plan.v1.json",
+    "sha256": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7"
+  },
+  "checkpoint_train_groups": [
+    "n1_s1_d1_other00",
+    "n2_s1_d1_other01",
+    "n2_s1_d2_other00",
+    "n2_s2_d1_other00",
+    "n3_s1_d2_other01",
+    "n3_s2_d1_other01",
+    "n4_s1_d1_other12",
+    "n4_s2_d2_other01"
+  ],
+  "previously_exposed_development_groups": [
+    "n4_s1_d2_other11",
+    "n4_s2_d1_other11"
+  ],
+  "execution": {
+    "device": "cpu",
+    "max_decisions_per_move": 60,
+    "command_seconds": 1.0,
+    "post_done_hold_seconds": 1.0,
+    "ramp_seconds": 0.5,
+    "ramp_shape": "minimum_jerk",
+    "ramp_threshold_degrees": 0.0,
+    "physics_timestep_seconds": 0.002,
+    "open_behavior": "original",
+    "joint_guard": "one_degree_near_joint_limit",
+    "task_program": "task_program.v2"
+  }
+}

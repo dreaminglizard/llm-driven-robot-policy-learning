@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "not_before": "2026-10-27T09:00:00+09:00",
+  "reason": "2026-10-26 사용자 지시: 오전 9시 전에는 모델 학습과 소프트웨어 준비만 진행",
+  "automatic_start": false
+}

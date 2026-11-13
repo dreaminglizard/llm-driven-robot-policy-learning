@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>라쿤봇 · 로봇 작업대</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d9488'/%3E%3Cpath d='M6 25h20M11 25v-4a5 5 0 0 1 10 0v4M16 16l5-8 5 3' fill='none' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="라쿤봇 로봇 작업대">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M6 25h20"/><path d="M11 25v-4a5 5 0 0 1 10 0v4"/><path d="m16 16 5-8 5 3"/><circle cx="16" cy="16" r="2.2"/><circle cx="21" cy="8" r="1.8"/></svg></span>
+      <span class="brand-text"><strong>라쿤봇</strong><span class="brand-sub">기억하는 로봇 작업대</span></span>
+    </div>
+    <div class="top-actions">
+      <span class="top-chip model-status" title="로컬 언어 모델 상태"><i id="llm-dot"></i><span id="llm-status">로컬 언어 모델 준비 대기 중</span></span>
+      <span class="top-chip local-indicator" id="connection-indicator" role="status" aria-label="로컬 연결 확인 중"><i></i><span id="connection-label">연결 확인 중</span><span class="connection-short" id="connection-short" aria-hidden="true">연결 확인 중</span></span>
+      <button class="exit-button" id="exit-button" type="button" aria-label="시연 종료" title="시연 종료"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg><span>시연 종료</span></button>
+    </div>
+  </header>
+
+  <main class="app-shell" id="app-root">
+    <div class="flowbar">
+      <ol class="stepper" aria-label="진행 단계">
+        <li class="step" id="step-mode"><a class="step-link" href="#mode-group-label"><span class="step-index" aria-hidden="true">1</span><span class="step-text"><strong id="step-mode-title">로봇 연결</strong><span id="step-mode-sub">실물 연결 필요</span></span></a></li>
+        <li class="step" id="step-layout"><a class="step-link" href="#layout-title"><span class="step-index" aria-hidden="true">2</span><span class="step-text"><strong>시작 배치 등록</strong><span id="step-layout-sub">등록 전</span></span></a></li>
+        <li class="step" id="step-command"><a class="step-link" href="#command-title"><span class="step-index" aria-hidden="true">3</span><span class="step-text"><strong>작업 요청</strong><span id="step-command-sub">등록 후 가능</span></span></a></li>
+      </ol>
+      <div class="flowbar-meta"><div class="mode-label"><span class="mode-dot"></span><span id="mode-indicator">실물 모드</span></div><a class="stage-jump" href="#stage-title">작업대 보기 ↓</a></div>
+    </div>
+
+    <div class="workbench">
+      <section class="setup panel" aria-labelledby="setup-title">
+        <div class="panel-head"><span class="heading-mark" aria-hidden="true"></span><h2 id="setup-title">준비</h2></div>
+
+        <div class="field-label" id="mode-group-label">로봇 연결</div>
+        <div class="segmented" id="development-mode-options" role="group" aria-labelledby="mode-group-label" hidden>
+          <button class="segment" id="mode-virtual" type="button" aria-pressed="false"><b>가상</b><small>시뮬레이션</small></button>
+          <button class="segment" id="mode-mock" type="button" aria-pressed="false"><b>모의</b><small>제어기</small></button>
+          <button class="segment segment-physical" id="mode-physical" type="button" aria-pressed="true"><b>실물</b><small>로봇</small></button>
+        </div>
+        <select id="mode-select" hidden aria-hidden="true"><option value="virtual">가상 시뮬레이션</option><option value="mock">모의 제어기</option><option value="physical" selected>실물 로봇</option></select>
+        <p class="mode-caption" id="mode-caption">실물 로봇은 아래 버튼을 눌러 연결합니다.</p>
+        <p class="mode-caption subtle" id="development-mode-note" hidden>모드를 바꾸면 이전 배치와 기억이 지워집니다.</p>
+
+        <div class="device-card">
+          <p class="device-state" id="device-state" role="status">실물 제어기 연결 전</p>
+          <button class="button button-outline full device-connect" id="device-connect" type="button" hidden disabled>실물 로봇 연결</button>
+          <button class="button button-outline full device-connect" id="device-prepare" type="button" hidden disabled>집게 열기 준비</button>
+          <p class="physical-note" id="prepare-note" hidden>집게 준비 상태를 확인하고 있습니다.</p>
+        </div>
+
+        <div id="physical-setup" hidden>
+          <div class="physical-card" id="physical-alert">
+            <p class="physical-title"><span aria-hidden="true">!</span>실물 로봇 확인</p>
+            <p class="physical-note" id="physical-warning">로봇 준비 상태를 확인해 주세요.</p>
+            <div class="recovery-box" id="physical-recovery" hidden>
+              <p class="physical-note">오류나 중단 뒤에는 현장 상태를 확인하고 제어기의 정지 확인과 오류 복구를 요청해 주세요.</p>
+              <label class="physical-confirm"><input id="recovery-confirm" type="checkbox"> 현재 배치를 직접 확인했고 정지 확인과 오류 복구를 요청합니다.</label>
+              <button class="button button-outline full device-connect" id="recover-controller" type="button" disabled>실물 제어기 복구</button>
+            </div>
+            <button class="button button-outline full device-connect" id="use-confirmed-target" type="button" hidden disabled>확인된 목표각 채우기</button>
+            <div class="joint-inputs" id="physical-target-inputs" hidden>
+              <label>1축 °<input id="physical-joint-1" type="number" step="any" inputmode="decimal"></label>
+              <label>2축 °<input id="physical-joint-2" type="number" step="any" inputmode="decimal"></label>
+              <label>3축 °<input id="physical-joint-3" type="number" step="any" inputmode="decimal"></label>
+              <label>4축 °<input id="physical-joint-4" type="number" step="any" inputmode="decimal"></label>
+            </div>
+            <label class="physical-confirm" id="physical-confirmation"><input id="physical-ready" type="checkbox"> 현장 정지, 열린 집게, 배치와 장치 준비를 확인했습니다.</label>
+          </div>
+          <details class="info-details" id="physical-details">
+            <summary>장치·교정 정보</summary>
+            <p id="calibration-info">좌표 출처와 교정 상태를 확인할 수 없습니다.</p>
+            <p id="physical-target-instructions">연결된 기기의 초기 상태를 확인합니다.</p>
+            <p id="target-provenance">기기의 초기 상태를 아직 확인하지 못했습니다.</p>
+            <p id="register-confirmation">등록을 누르기 전에 현장 정지, 집게 주변과 입력한 배치를 확인해 주세요.</p>
+          </details>
+        </div>
+
+        <div class="section-rule"></div>
+        <div class="subhead">
+          <h3 id="layout-title">시작 배치</h3>
+          <div class="presets" role="group" aria-label="배치 예시">
+            <button class="chip" id="preset-default" type="button">기본</button>
+            <button class="chip" id="preset-stacked" type="button">1·3번 2층</button>
+          </div>
+        </div>
+        <p class="section-intro">자리마다 원통 번호를 아래층부터 쉼표로 입력하세요. 칸 배치는 작업대 그림과 같습니다.</p>
+        <div class="slot-inputs">
+          <label class="slot-row slot-1"><span class="slot-name"><b>1</b>번 자리</span><input class="slot-input" aria-label="1번 자리 원통 번호" placeholder="비어 있음" autocomplete="off" value="1"></label>
+          <label class="slot-row slot-2"><span class="slot-name"><b>2</b>번 자리</span><input class="slot-input" aria-label="2번 자리 원통 번호" placeholder="비어 있음" autocomplete="off" value="2"></label>
+          <label class="slot-row slot-3"><span class="slot-name"><b>3</b>번 자리</span><input class="slot-input" aria-label="3번 자리 원통 번호" placeholder="비어 있음" autocomplete="off" value="3"></label>
+          <label class="slot-row slot-4"><span class="slot-name"><b>4</b>번 자리</span><input class="slot-input" aria-label="4번 자리 원통 번호" placeholder="비어 있음" autocomplete="off" value="4"></label>
+        </div>
+        <p class="field-help">번호 1~4 · 중복 없이 · 한 자리 최대 2개</p>
+        <p class="field-help" id="physical-scope-note">배치는 네 자리 모두 등록할 수 있습니다. 이동 가능한 자리는 연결 후 표시됩니다.</p>
+        <details class="advanced coordinate-settings" id="coordinate-settings">
+          <summary><span class="advanced-title">자리 좌표 (mm)<small>네 자리의 X·Y</small></span></summary>
+          <div class="advanced-body">
+            <p class="field-help">입력한 좌표로 경로를 계산합니다. 테이블 높이는 기존 기준을 사용합니다.</p>
+            <div class="coordinate-rows">
+              <div><b>1번</b><label>X <input id="slot-1-x" type="number" step="any" inputmode="decimal" value="150" aria-label="1번 자리 X 밀리미터"></label><label>Y <input id="slot-1-y" type="number" step="any" inputmode="decimal" value="150" aria-label="1번 자리 Y 밀리미터"></label></div>
+              <div><b>2번</b><label>X <input id="slot-2-x" type="number" step="any" inputmode="decimal" value="150" aria-label="2번 자리 X 밀리미터"></label><label>Y <input id="slot-2-y" type="number" step="any" inputmode="decimal" value="0" aria-label="2번 자리 Y 밀리미터"></label></div>
+              <div><b>3번</b><label>X <input id="slot-3-x" type="number" step="any" inputmode="decimal" value="-150" aria-label="3번 자리 X 밀리미터"></label><label>Y <input id="slot-3-y" type="number" step="any" inputmode="decimal" value="150" aria-label="3번 자리 Y 밀리미터"></label></div>
+              <div><b>4번</b><label>X <input id="slot-4-x" type="number" step="any" inputmode="decimal" value="-150" aria-label="4번 자리 X 밀리미터"></label><label>Y <input id="slot-4-y" type="number" step="any" inputmode="decimal" value="0" aria-label="4번 자리 Y 밀리미터"></label></div>
+            </div>
+          </div>
+        </details>
+        <p class="layout-error" id="coordinate-error" role="status" hidden></p>
+        <p class="layout-error" id="layout-error" aria-live="polite" hidden></p>
+        <button class="button button-primary full" id="register-button" type="button" disabled><span>배치 등록</span><span class="button-arrow" aria-hidden="true">→</span></button>
+        <p class="under-button" id="registration-help">다시 등록하면 이전 기억이 지워집니다.</p>
+
+        <details class="advanced" id="advanced-settings" hidden>
+          <summary><span class="advanced-title">고급 설정<small>학생 모델 · 가상 동작</small></span><span class="advanced-summary" id="advanced-summary">학생별 기본</span></summary>
+          <div class="advanced-body">
+            <label class="field-label" for="model-select">학생 모델</label>
+            <div class="select-wrap"><select id="model-select" aria-label="학생 모델"><option value="close" selected>집게·거리 결합 학생 · 기본</option><option value="close_previous">집게·거리 결합 학생 · 기존 시드</option><option value="default">기존 접근거리 학생</option><option value="rl">강화학습 후보 · 실험용</option></select></div>
+            <p class="model-caption" id="model-caption">배치를 등록할 때 선택한 모델이 적용됩니다.</p>
+            <label class="field-label" for="control-timing-select">가상 이동 시간</label>
+            <div class="select-wrap"><select id="control-timing-select" aria-describedby="control-timing-caption control-timing-note"><option value="auto" selected>학생별 기본</option><option value="demo_1s">시연 시간 · 1초</option><option value="app_2s">기존 앱 시간 · 2초</option></select></div>
+            <p class="profile-caption" id="control-timing-caption">배치를 등록할 때 선택한 시간이 적용됩니다.</p>
+            <p class="profile-note" id="control-timing-note">기본 학생은 시연 시간으로 움직입니다. 기본 학생에서 기존 앱 시간을 선택하면 이전 기본 집게·이동 방식과 받침 보정을 다시 사용할 수 있습니다.</p>
+            <label class="field-label" for="finger-profile-select">집게 열기</label>
+            <div class="select-wrap"><select id="finger-profile-select" aria-describedby="finger-profile-caption finger-profile-note"><option value="auto" selected>학생별 기본</option><option value="instant">즉시 열기</option><option value="minimum_jerk_0p5s">부드럽게 열기 · 0.5초</option></select></div>
+            <p class="profile-caption" id="finger-profile-caption">배치를 등록할 때 선택한 집게 열기가 적용됩니다.</p>
+            <p class="profile-note" id="finger-profile-note">기본 학생은 시연 시간에서 즉시 열고, 기존 앱 시간에서 학생별 기본을 선택하면 0.5초에 걸쳐 엽니다. 다른 학생의 기본은 다를 수 있습니다.</p>
+            <label class="field-label" for="closed-move-profile-select">원통을 잡고 이동</label>
+            <div class="select-wrap"><select id="closed-move-profile-select" aria-describedby="closed-move-profile-caption closed-move-profile-note"><option value="auto" selected>학생별 기본</option><option value="minimum_jerk">기존 곡선</option><option value="smoothstep">부드러운 3차 곡선</option></select></div>
+            <p class="profile-caption" id="closed-move-profile-caption">배치를 등록할 때 선택한 이동 곡선이 적용됩니다.</p>
+            <p class="profile-note" id="closed-move-profile-note">시연 시간에는 받침 위 직선 하강과 높이 보정을 사용하지 않습니다. 기본 학생에서 기존 앱 시간과 집게·이동의 학생별 기본을 선택하면 다시 사용합니다.</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="stage-column" aria-labelledby="stage-title">
+        <div class="stage panel">
+          <div class="stage-header">
+            <div class="stage-heading">
+              <div class="stage-title-row"><h2 id="stage-title">실물 작업대</h2><span class="view-tag">위에서 본 모습</span></div>
+              <p id="scene-label">입력한 설정 · 아직 등록되지 않음</p>
+            </div>
+            <span class="activity-state" id="activity-state"><i></i><span>대기 중</span></span>
+          </div>
+          <div class="canvas-wrap"><svg id="scene" viewBox="0 0 700 480" role="img" aria-label="네 자리와 로봇을 위에서 본 도식">
+            <defs>
+              <radialGradient id="stage-bg" cx="50%" cy="78%" r="80%"><stop offset="0" stop-color="#1b2a44"/><stop offset="1" stop-color="#0b1323"/></radialGradient>
+              <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="#9fb4d6" stroke-opacity=".09" stroke-width="1"/></pattern>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="lift" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity=".45"/></filter>
+            </defs>
+            <rect width="700" height="480" fill="url(#stage-bg)"/><rect width="700" height="480" fill="url(#grid)"/>
+            <path d="M30 30h20M30 30v20M670 30h-20M670 30v20M30 450h20M30 450v-20M670 450h-20M670 450v-20" stroke="#5b7299" stroke-opacity=".55" stroke-width="1.5" fill="none"/>
+            <g class="base-pad"><circle cx="350" cy="370" r="40" fill="none" stroke="#5b7299" stroke-opacity=".35" stroke-dasharray="3 6"/><text x="350" y="432" text-anchor="middle" fill="#7d90b3" font-size="12" font-weight="700">로봇</text></g>
+            <g id="scene-objects" filter="url(#lift)"></g><g id="scene-forecast" filter="url(#glow)"></g><g id="scene-path" filter="url(#glow)"></g><g id="scene-samples"></g><g id="scene-robot" filter="url(#lift)"></g>
+          </svg><div class="canvas-empty" id="canvas-empty"><span></span>실물 로봇 상태를 확인하면 표시됩니다</div></div>
+          <div class="stage-footer">
+            <div class="legend"><span><i class="legend-arm"></i><span id="arm-legend">실물 관절</span></span><span><i class="legend-sample"></i>관절로 계산한 손끝</span><span><i class="legend-path"></i>현재 명령 목표 경로</span><span><i class="legend-forecast"></i>이후 예상 경로</span></div>
+            <p class="forecast-label" id="forecast-label">현재 표시할 이후 예상 경로가 없습니다.</p>
+            <details class="info-details"><summary>경로 표시 기준</summary><p id="forecast-note">현재 명령 목표와 관측된 로봇 상태를 바탕으로 경로를 표시합니다. 이후 예상 경로는 실제 동작과 다를 수 있습니다.</p></details>
+          </div>
+        </div>
+        <section class="activity panel" aria-labelledby="activity-title">
+          <div class="activity-top"><h2 id="activity-title">진행 상태</h2><p id="motion-label">현재 표시할 예상 경로가 없습니다.</p></div>
+          <p class="activity-message" id="status" role="status" aria-live="polite">실물 로봇을 연결하고 준비 상태와 시작 배치를 확인해 주세요.</p>
+          <div class="readings" aria-label="로봇 상태와 명령 목표">
+            <div><span id="observation-label">실물 로봇 상태</span><strong id="joint-reading">관절 확인 전</strong><span id="gripper-reading">집게 확인 전</span></div>
+            <div><span>현재 명령 목표</span><strong id="target-reading">표시할 목표 없음</strong></div>
+          </div>
+          <p class="scene-note">등록 배치는 사용자가 입력한 값입니다. 이동 후 배치는 명령으로 계산한 예상값이며 물체 위치를 확인한 결과가 아닙니다.</p>
+          <details class="activity-detail"><summary>진행 내역</summary><ol id="log-list"><li>아직 처리한 요청이 없습니다.</li></ol></details>
+        </section>
+      </section>
+
+      <section class="command panel" aria-labelledby="command-title">
+        <div class="panel-head command-head"><span class="heading-mark" aria-hidden="true"></span><h2 id="command-title">작업 요청</h2></div>
+        <div class="voice-card">
+          <button class="mic-button" id="chat-button" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11v1a6 6 0 0 0 12 0v-1M12 18v3m-3 0h6"/></svg><span>음성 대화 시작</span></button>
+          <div class="voice-side">
+            <h3>음성 대화</h3>
+            <p class="voice-note" id="voice-note">로봇 연결 후 마이크 듣기를 시작합니다. 운영체제의 마이크 권한이 필요하며, 응답을 재생하는 동안에는 듣지 않습니다.</p>
+            <label class="field-label voice-language" for="language-select">인식 언어</label>
+            <div class="select-wrap compact"><select id="language-select"><option value="auto">자동</option><option value="ko">한국어</option><option value="en">영어</option></select></div>
+          </div>
+        </div>
+        <div class="divider-text"><span>또는 텍스트로</span></div>
+        <label class="field-label command-label" for="command-text">텍스트 명령</label>
+        <textarea id="command-text" maxlength="2000" placeholder="예: 3번에서 1번으로 옮겨 줘"></textarea>
+        <div class="examples" role="group" aria-label="명령 예시">
+          <button class="chip" id="example-1" type="button">3번에서 1번으로 옮겨 줘</button>
+          <button class="chip" id="example-2" type="button">지금 배치 기억해</button>
+          <button class="chip" id="example-3" type="button">초기 배치로 돌아가</button>
+          <button class="chip" id="example-4" type="button">아까대로 복원해</button>
+        </div>
+        <div class="input-meta"><span id="command-hint">등록 후 명령을 실행할 수 있습니다.</span><span><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span></div>
+        <button class="button button-primary full" id="submit-button" type="button" disabled><span>실물 실행</span><span class="button-arrow" aria-hidden="true">→</span></button>
+        <button class="stop-button full" id="stop-button" type="button" disabled><span class="stop-square"></span><span id="stop-label">실물 작업 중단</span><span class="stop-key">Esc</span></button>
+      </section>
+    </div>
+    <div class="bottom-bar"><span>모든 처리는 이 PC에서 이루어집니다.</span><span>중단 <kbd>Esc</kbd> · 실행 <kbd>Ctrl</kbd> + <kbd>Enter</kbd></span></div>
+    <div class="mobile-stop" id="mobile-stop" hidden><span id="mobile-stop-status">작업 진행 중</span><button id="mobile-stop-button" type="button"><span class="stop-square" aria-hidden="true"></span><span id="mobile-stop-label">중단 요청</span></button></div>
+  </main>
+  <div class="toast" id="toast" role="alert" hidden></div>
+  <div class="closed-overlay" id="closed-overlay" hidden><div><div class="closed-icon">✓</div><h2>시연을 종료하고 있습니다</h2><p>작업과 로컬 모델을 정리합니다.<br>이 창은 닫아도 됩니다.</p></div></div>
+</body>
+</html>

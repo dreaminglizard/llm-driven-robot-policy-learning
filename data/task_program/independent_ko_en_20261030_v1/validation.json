@@ -1,0 +1,106 @@
+{
+  "at_utc": "2026-10-30T06:17:31.755890+00:00",
+  "scope": "new text-only development set, not final test",
+  "rows": 80,
+  "by_language": {
+    "ko": 40,
+    "en": 40
+  },
+  "families": 40,
+  "alternatives": 103,
+  "by_category": {
+    "ordered": 12,
+    "return": 6,
+    "return_context": 10,
+    "stop_return": 2,
+    "repeat_boundary": 8,
+    "repeat": 8,
+    "repeat_reference": 6,
+    "continuation": 6,
+    "negation": 4,
+    "question": 4,
+    "correction": 6,
+    "ambiguity": 2,
+    "out_of_scope": 6
+  },
+  "unique_text_context_inputs": 80,
+  "normalized_exact_duplicates_vs_prior_development112": 0,
+  "existing_v2_evaluator_input_load": "passed",
+  "existing_v2_semantic_projection_mismatches": 0,
+  "question_review_cases": 22,
+  "schema_failures": [],
+  "rows_with_at_least_one_validator_accepted_gold": 76,
+  "gold_alternative_validator_rejections": [
+    {
+      "id": "independent.finish_current_no_new_round.ko",
+      "alternative": 0,
+      "code": "ungrounded_value",
+      "detail": "after-task boundary was not stated"
+    },
+    {
+      "id": "independent.finish_current_no_new_round.ko",
+      "alternative": 1,
+      "code": "ungrounded_value",
+      "detail": "after-task boundary was not stated"
+    },
+    {
+      "id": "independent.finish_current_no_new_round.en",
+      "alternative": 0,
+      "code": "unsupported_action",
+      "detail": "repeat stop is negated, questioned, or not stated"
+    },
+    {
+      "id": "independent.finish_current_no_new_round.en",
+      "alternative": 1,
+      "code": "unsupported_action",
+      "detail": "repeat stop is negated, questioned, or not stated"
+    },
+    {
+      "id": "independent.repeat_stop_not_motion.ko",
+      "alternative": 0,
+      "code": "missing_explicit_stop",
+      "detail": "an affirmed motion stop was omitted"
+    },
+    {
+      "id": "independent.repeat_stop_not_motion.ko",
+      "alternative": 1,
+      "code": "ungrounded_value",
+      "detail": "continue reference is not supported by evidence"
+    },
+    {
+      "id": "independent.repeat_stop_not_motion.en",
+      "alternative": 1,
+      "code": "ungrounded_value",
+      "detail": "continue reference is not supported by evidence"
+    },
+    {
+      "id": "independent.continue_active.en",
+      "alternative": 0,
+      "code": "ungrounded_value",
+      "detail": "continue reference is not supported by evidence"
+    },
+    {
+      "id": "independent.negated_memory_positive_move.en",
+      "alternative": 1,
+      "code": "ungrounded_value",
+      "detail": "count is not supported by its evidence"
+    }
+  ],
+  "note": "A rejected correct gold is retained as a validator compatibility finding; it is not rewritten to match the checker.",
+  "question_review_probe": "local judge marks misleading and null questions manual; existing v2 evaluator never auto-credits them; unresolved target can match structurally",
+  "old_development112_sha256": "5bb3274bfb211ee1cd23c91012ee3689b43ee6793f6a16a45b25775b62c7e194",
+  "dataset_sha256": "3b39eca8cc66cf29eae6e2959fcfc3b54b8ac57dde71ac1b5ed8777a22676cac",
+  "source_sha256": {
+    "data\\task_program\\independent_ko_en_20261030_v1\\build_dataset.py": "7356c6be6cddae72bcd882110f8489967a1369a04e31fbd7734136b80186d8e9",
+    "data\\task_program\\independent_ko_en_20261030_v1\\judge.py": "f9642d2c8a4f014461d5a4c1f3e503389a7627d897f4101432f4ea6a54acf527",
+    "data\\task_program\\independent_ko_en_20261030_v1\\validate_dataset.py": "74fbf529ec855b3997f300a9fe5550e1e6515fbb4a77c783b5da8c5263b662a6",
+    "raccoon_memory\\task_program.py": "2c2589bbdc8513ec921c47e87e81394f480516028e3854d467b5c895271140f3",
+    "raccoon_memory\\task_program_v2.py": "57a849e8b972785450d4c4671d9a66ef00090e089c3d61876ad5fa80cc4fefe7",
+    "configs\\task_program.v2_1.schema.json": "041fa28614503baee94513dcb07197f4254a1e3815438c9cee901d2c1fca715d",
+    "configs\\task_program.v2.prompt.txt": "6912ad25d1792a2ccadcd2ad137b253bdf523ae692036c86c7b5ae4a5733035b"
+  },
+  "model_calls": 0,
+  "audio_or_microphone_used": false,
+  "device_calls": 0,
+  "reserved_final_data_opened": false
+}

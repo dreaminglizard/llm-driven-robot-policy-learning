@@ -1,0 +1,10 @@
+{
+  "backend": "mock",
+  "mode": "calibration",
+  "workspace_verified": true,
+  "precision_validated": false,
+  "mock": {
+    "initial_joints_deg": [0, -10, -110, 30],
+    "move_duration": 0.25
+  }
+}

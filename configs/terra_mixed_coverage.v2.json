@@ -1,0 +1,22 @@
+{
+  "schema": "terra-mixed-physical-domain.v2",
+  "legacy_last_attempt": 488,
+  "successful_originals": 1000,
+  "formal_legacy_groups": [
+    "n1_s1_d1_other00", "n2_s1_d1_other01", "n2_s1_d2_other00", "n2_s2_d1_other00",
+    "n3_s1_d2_other01", "n3_s2_d1_other01", "n4_s1_d1_other12", "n4_s2_d2_other01"
+  ],
+  "legal_transition_count": 276,
+  "supplemental_transition_count": 120,
+  "training_order": "Round-robin the seven supplemental groups and any formal legacy layouts absent from the frozen independently verified retained roster. Repeat that catalog on fresh physical starts.",
+  "nominal_xy_mm": [[150, 150], [150, 0], [-150, 150], [-150, 0]],
+  "grid": {"width": 8, "first_micrometers": -3251, "step_micrometers": 900},
+  "partitions": {
+    "train": {"seed_range": [610000, 619999], "family_residues_mod_8": [0, 1, 3, 4, 6, 7]},
+    "development": {"seed_range": [620000, 629999], "family_residues_mod_8": [2]},
+    "final": {"seed_range": [630000, 639999], "family_residues_mod_8": [5]}
+  },
+  "family_rule": "For grid indices x,y in 0..7 use family 8*y+x, with residue (x+3*y) mod 8. Apply the grid offsets (dx,dy), (-dy,dx), (-dx,-dy), (dy,-dx) to the four registered slots respectively.",
+  "evaluation_schedule": {"catalog_order": "ascending public one_step_cases case_id", "repetitions": 2, "index": "i=276*repetition+zero_based_catalog_index", "seed": "partition minimum+i", "family": "ascending allowed family IDs indexed by (i+repetition) modulo family count"},
+  "evaluation_claim": "New physical conditions for the full legal single-transfer catalog. The previous unseen-structure benchmark is reserved for its original model and split."
+}

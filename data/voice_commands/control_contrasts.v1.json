@@ -1,0 +1,19 @@
+{
+  "schema": "raccoon-synthetic-command-texts.v1",
+  "purpose": "Development contrasts for synthesized audio, ASR and task-program interpretation; not human microphone evaluation",
+  "rates": [0, 2],
+  "cases": [
+    {"id":"move","state":"idle","repeat_active":false,"expected_semantics":"move one cylinder from slot 1 to slot 3","ko":"일 번 자리에서 삼 번 자리로 원통 하나를 옮겨.","en":"Move one cylinder from slot one to slot three."},
+    {"id":"correct_source","state":"idle","repeat_active":false,"expected_semantics":"move one cylinder from slot 2 to slot 3; slot 1 is explicitly corrected","ko":"일 번이 아니고 이 번 자리에서 삼 번 자리로 옮겨.","en":"Not slot one. Move one cylinder from slot two to slot three."},
+    {"id":"repeat_current","state":"running","repeat_active":false,"expected_semantics":"repeat the current task continuously, subject to execution feasibility","ko":"지금 하는 작업을 계속 반복해.","en":"Keep repeating the current task."},
+    {"id":"stop_repeat","state":"running","repeat_active":true,"expected_semantics":"finish the current iteration and prevent the next iteration","ko":"반복을 중단해.","en":"Stop repeating."},
+    {"id":"stop_now","state":"running","repeat_active":true,"expected_semantics":"request immediate stop of current motion and future repetitions","ko":"지금 바로 동작을 멈춰.","en":"Stop the motion now."},
+    {"id":"stop_then_home","state":"running","repeat_active":true,"expected_semantics":"stop current motion, then request arm home; preserve order and require stop/state confirmation before return","ko":"동작을 중단하고 팔을 대기 자세로 돌려.","en":"Stop the motion and return the arm to its home pose."},
+    {"id":"return_registered","state":"idle","repeat_active":false,"expected_semantics":"return cylinders to registered initial arrangement, not arm home or learned memory","ko":"원통들을 등록한 초기 배치로 돌려놔.","en":"Return the cylinders to the registered initial arrangement."},
+    {"id":"return_task_start","state":"idle","repeat_active":false,"expected_semantics":"return to the referenced task-start arrangement; a task-start reference is available","ko":"이번 작업을 시작하기 전 배치로 돌아가.","en":"Return to the arrangement from before this task started."},
+    {"id":"ambiguous_return","state":"idle","repeat_active":false,"expected_semantics":"preserve unresolved return reference or clarify; no arbitrary home/initial/memory selection","ko":"원위치 시켜.","en":"Put it back."},
+    {"id":"remember_then_move","state":"idle","repeat_active":false,"expected_semantics":"remember current arrangement, then move one cylinder from slot 1 to slot 3","ko":"지금 배치를 기억하고 일 번에서 삼 번으로 원통 하나를 옮겨.","en":"Remember this arrangement, then move one cylinder from slot one to slot three."},
+    {"id":"do_not_stop","state":"running","repeat_active":false,"expected_semantics":"continue the same running task without stop or duplicate start","ko":"멈추지 말고 지금 작업을 계속해.","en":"Do not stop. Continue the current task."},
+    {"id":"do_not_repeat","state":"running","repeat_active":true,"expected_semantics":"finish only the current task and prohibit further repetition; do not stop current motion immediately","ko":"반복하지 말고 이번 작업만 마쳐.","en":"Do not repeat. Finish only the current task."}
+  ]
+}

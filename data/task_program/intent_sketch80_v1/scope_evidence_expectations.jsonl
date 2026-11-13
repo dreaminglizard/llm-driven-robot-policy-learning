@@ -1,0 +1,16 @@
+{"id":"independent.correct_destination.ko","required":[{"kind":"field_exclusion","op":"move","field":"destination_slot","value":2,"evidence_all":["2번","아니라"]}],"basis":"2번 도착을 부정하고 4번 도착으로 정정한다."}
+{"id":"independent.correct_destination.en","required":[{"kind":"field_exclusion","op":"move","field":"destination_slot","value":2,"evidence_all":["not","slot 2"]}],"basis":"2번 도착을 부정하고 4번 도착으로 정정한다."}
+{"id":"independent.correct_source.ko","required":[{"kind":"field_exclusion","op":"move","field":"source_slot","value":3,"evidence_all":["3번","아니라"]}],"basis":"3번 출발을 부정하고 4번 출발로 정정한다."}
+{"id":"independent.correct_source.en","required":[{"kind":"field_exclusion","op":"move","field":"source_slot","value":3,"evidence_all":["not","slot 3"]}],"basis":"3번 출발을 부정하고 4번 출발로 정정한다."}
+{"id":"independent.correct_return_target.ko","required":[{"kind":"field_exclusion","op":"return","field":"reference","value":"learned_memory","evidence_all":["기억","말고"]}],"basis":"기억한 배치를 배제하고 등록한 초기 배치를 요청한다."}
+{"id":"independent.correct_return_target.en","required":[{"kind":"field_exclusion","op":"return","field":"reference","value":"learned_memory","evidence_all":["not","remembered"]}],"basis":"기억한 배치를 배제하고 등록한 초기 배치를 요청한다."}
+{"id":"independent.negated_memory_positive_move.ko","required":[{"kind":"excluded_step","op":"remember","evidence_all":["기억","하지"]}],"basis":"기억만 부정하고 이동은 긍정한다."}
+{"id":"independent.negated_memory_positive_move.en","required":[{"kind":"excluded_step","op":"remember","evidence_all":["not","remember"]}],"basis":"기억만 부정하고 이동은 긍정한다."}
+{"id":"independent.repeat_previous_not_current.ko","required":[{"kind":"excluded_step","op":"repeat","reference_kind":"active_task","reference_mention_all":["현재 작업"],"evidence_all":["현재 작업","반복하지"]}],"basis":"현재 작업의 반복은 제외하고 이전 작업 반복을 요청한다."}
+{"id":"independent.repeat_previous_not_current.en","required":[{"kind":"excluded_step","op":"repeat","reference_kind":"active_task","reference_mention_all":["current task"],"evidence_all":["not repeat","current task"]}],"basis":"현재 작업의 반복은 제외하고 이전 작업 반복을 요청한다."}
+{"id":"independent.repeat_current_not_previous.ko","required":[{"kind":"excluded_step","op":"repeat","reference_kind":"previous_task","reference_mention_all":["이전 작업"],"evidence_all":["이전 작업","반복하지"]}],"basis":"이전 작업의 반복은 제외하고 현재 작업 반복을 요청한다."}
+{"id":"independent.repeat_current_not_previous.en","required":[{"kind":"excluded_step","op":"repeat","reference_kind":"previous_task","reference_mention_all":["previous task"],"evidence_all":["not repeat","previous task"]}],"basis":"이전 작업의 반복은 제외하고 현재 작업 반복을 요청한다."}
+{"id":"independent.repeat_stop_not_motion.ko","required":[{"kind":"excluded_step","op":"stop_motion","evidence_all":["정지하지"]}],"basis":"현재 작업의 운동 정지는 부정하고 반복 종료만 요청한다."}
+{"id":"independent.repeat_stop_not_motion.en","required":[{"kind":"excluded_step","op":"stop_motion","evidence_all":["not stop"]}],"basis":"현재 작업의 운동 정지는 부정하고 반복 종료만 요청한다."}
+{"id":"independent.negated_transfer_only.ko","required":[{"kind":"excluded_step","op":"move","args":{"source_slot":1,"destination_slot":4},"evidence_all":["1번","4번","옮기지"]}],"basis":"1번에서 4번으로 이동하는 동작만 금지한다."}
+{"id":"independent.negated_transfer_only.en","required":[{"kind":"excluded_step","op":"move","args":{"source_slot":1,"destination_slot":4},"evidence_all":["not move","slot 1","slot 4"]}],"basis":"1번에서 4번으로 이동하는 동작만 금지한다."}

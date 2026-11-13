@@ -1,0 +1,54 @@
+{
+  "schema": "scene-early-approach-mix-3000.v1",
+  "design": "docs/architecture_research/18_접근단계_비중조절_혼합학습_대조안.md",
+  "previous_experiment": "artifacts/architecture_research/20261030_early_approach_mix_v1",
+  "output": "artifacts/architecture_research/20261030_early_approach_mix_3000_v1",
+  "seeds": [20261030, 20261031, 20261101],
+  "conditions": ["uniform_continuation_control", "early_biased_continuation_candidate"],
+  "training": {
+    "updates": 3000,
+    "batch_size": 256,
+    "common": 192,
+    "paired": 64,
+    "per_group": {"first_approach": 2, "next_approach": 1, "other": 5},
+    "learning_rate": 0.00001,
+    "joint_loss_weight": 100.0,
+    "optimizer": "new Adam from the original tail-average checkpoint",
+    "prefix_reproduction_updates": 1000,
+    "observation_updates": [0, 200, 500, 1000, 2000, 3000],
+    "checkpoint_selection": "last fixed update; no validation selection",
+    "final_optimizer_state": "separate file bound to final checkpoint and schedule",
+    "device": "cpu",
+    "threads": 1
+  },
+  "first_approach_gate": {
+    "maximum_each_joint_error_deg": 5.0,
+    "maximum_each_joint_mae_deg": 2.0,
+    "correct_move_count": 24,
+    "outside_count": 0,
+    "candidate_relative_mean_improvement_min": 0.2,
+    "candidate_absolute_mean_improvement_min_deg": 0.5,
+    "candidate_per_seed_max_regression_deg": 1.0
+  },
+  "next_approach_gate": {
+    "joint1_mae_max_deg": 5.0,
+    "all_axes_mae_max_deg": 3.0,
+    "maximum_joint_error_deg": 10.0,
+    "correct_move_count": 24,
+    "outside_count": 0,
+    "candidate_max_joint1_regression_deg": 1.0,
+    "candidate_max_all_axes_regression_deg": 0.5
+  },
+  "preservation_gate": {
+    "teacher_correct_actions": 389,
+    "remaining_move_mae_max_increase_vs_start_deg": 0.5,
+    "remaining_move_mae_max_increase_vs_uniform_deg": 0.25,
+    "validation_accuracy_max_decrease_percentage_points": 1.0,
+    "validation_mae_max_increase_vs_start_deg": 0.5,
+    "validation_mae_max_increase_vs_uniform_deg": 0.25,
+    "outside_max_increase": 2
+  },
+  "physical_evaluation_if_any_condition_passes": true,
+  "actual_hardware": false,
+  "final_test_used": false
+}

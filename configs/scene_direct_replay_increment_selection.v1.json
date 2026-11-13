@@ -1,0 +1,121 @@
+{
+  "schema": "raccoon-direct-replay-selection.v1",
+  "interactive_runs": [
+    "20261103_terra_multitask_manual_trial_v2",
+    "20261103_terra_multitask_stack_manual_trial_v1",
+    "20261103_terra_multitask_varied_trial_v1",
+    "20261103_terra_multitask_unstack_trial_v1",
+    "20261103_terra_multitask_four_trial_v1"
+  ],
+  "pairs": [
+    {
+      "run_id": "20261103_public_takeover_paired_trial_v1",
+      "arms": [
+        "takeover",
+        "normal"
+      ],
+      "transcript_path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_paired_trial_v1\\official_transcript_snapshot.jsonl",
+      "fingerprints": {
+        "result_sha256": "1f272db709650b2d4a0f32bc4014e998f6d075e98d4724bfb3f79077255d4da9",
+        "events_sha256": "6b910838ee4794b79cb94b5ad5db1bf2bfe06f91040c8bab3f188e0c3fab7609",
+        "collector_sha256": "e02f882c9a7bb5ad3f7d52205631a62b80a44693e674ca00552293fe17b8cd97",
+        "transcript_sha256": "a97c0df0e31b2b1c9f5f754dcf6b172e01b6d83fb6f2551def741a842ece8c49"
+      }
+    },
+    {
+      "run_id": "20261103_public_takeover_train_01",
+      "arms": [
+        "takeover"
+      ],
+      "transcript_path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_01\\codex_session_excerpt.jsonl",
+      "fingerprints": {
+        "result_sha256": "f4f42f93fe8a34e01fc4cb87f86d7697528d1cebad48a6b5bf208315aab5f5af",
+        "events_sha256": "3f65161b2e1b87b78e1acf7acc402b10ec5df1e2c28774e47f91b43407b116e8",
+        "collector_sha256": "e02f882c9a7bb5ad3f7d52205631a62b80a44693e674ca00552293fe17b8cd97",
+        "transcript_sha256": "c64dc96f1d7ff2cf80c3d381fa114df594ee78d1361930957405e5ec71bd47ec"
+      },
+      "supporting_evidence": [
+        {
+          "path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_01\\codex_session_excerpt_manifest.json",
+          "sha256": "a9d79ca3a26f8176593a5470b1bd6a1552026bff4faca4e62dfe2678bd3c6da7"
+        }
+      ]
+    },
+    {
+      "run_id": "20261103_public_takeover_train_02",
+      "arms": [
+        "normal"
+      ],
+      "transcript_path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_02\\official_tool_transcript.jsonl",
+      "fingerprints": {
+        "result_sha256": "9989f8a8a09e7cb83c047de750a5d55cb8ca31bf30d7d8ccf0545e1cdd135648",
+        "events_sha256": "dc88f90b76c2d1fe4583439efa2fc5e54648f510f5d0f747992510fe4db4a76e",
+        "collector_sha256": "e02f882c9a7bb5ad3f7d52205631a62b80a44693e674ca00552293fe17b8cd97",
+        "transcript_sha256": "cdc8c772b20ec2069ea87b7cd34f037ae4b39e30fb2cdc2b5c77dd2b9aa81110"
+      },
+      "supporting_evidence": [
+        {
+          "path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_02\\transcript_audit.json",
+          "sha256": "4e8032e4dd3bad65fe67d9ef356209a60d0724985cfe6f966b824c255438a06f"
+        }
+      ]
+    },
+    {
+      "run_id": "20261103_public_takeover_train_05",
+      "arms": [
+        "normal"
+      ],
+      "transcript_path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_05\\official_session_records.jsonl",
+      "fingerprints": {
+        "result_sha256": "50efb16591f483205e345eb9bb68d791703b7f236643fda8193196a7ed7aaf57",
+        "events_sha256": "c11c5ee3670505b2b8b1fdacf8c5298afa2972d28aefaa61494d2d38ae286f00",
+        "collector_sha256": "e02f882c9a7bb5ad3f7d52205631a62b80a44693e674ca00552293fe17b8cd97",
+        "transcript_sha256": "ce790eb0a6c6cdc5af35147bc79ebe787fecb195bb288f5121a509b55cec0681"
+      },
+      "supporting_evidence": [
+        {
+          "path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_05\\session_record_verification.json",
+          "sha256": "a8afccd1a982a1c3560c59cbbda8767678132213bc05ecb04da29456a4ba1a5a"
+        }
+      ]
+    },
+    {
+      "run_id": "20261103_public_takeover_train_07",
+      "arms": [
+        "normal"
+      ],
+      "transcript_path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_07\\official_codex_snapshot.jsonl",
+      "fingerprints": {
+        "result_sha256": "0a4cea9c8ca6a298065b5cb75fb176112ee79ab30536e199ed6c98f5f0a09e1c",
+        "events_sha256": "392e7a43e38d6b597bf9a7abd87c5e50fde470388b552fcf7e6112f57c986a6d",
+        "collector_sha256": "e02f882c9a7bb5ad3f7d52205631a62b80a44693e674ca00552293fe17b8cd97",
+        "transcript_sha256": "35e013aa418ac993479395f3a1fb154da14afa9c8439c95689f2cb978f3748e3"
+      },
+      "supporting_evidence": [
+        {
+          "path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_train_07\\evidence_report.md",
+          "sha256": "4f671cff33fcda7e4dfaad36f9d7015456d32f817acd20fcb49d3ad7a3b516b1"
+        }
+      ]
+    },
+    {
+      "run_id": "20261103_public_takeover_nominal_pilot_v1",
+      "arms": [
+        "normal"
+      ],
+      "transcript_path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_nominal_pilot_v1\\official_codex_transcript.jsonl",
+      "fingerprints": {
+        "result_sha256": "4b0f9bc356d052bade39c9c3fe730f8792feedcd7794685d0d02a529e1a873cb",
+        "events_sha256": "960f37879f8b0ce674eeeb6d6d2884ed2a21187c06d2159597f88d1c6159c329",
+        "collector_sha256": "e02f882c9a7bb5ad3f7d52205631a62b80a44693e674ca00552293fe17b8cd97",
+        "transcript_sha256": "92900dc88443dd1b5f100c76c1e4e7e74d6c27f13f9f88030324f97f1f43cdec"
+      },
+      "supporting_evidence": [
+        {
+          "path": "C:\\Users\\yyh\\Documents\\매니퓰레이터\\artifacts\\architecture_research\\20261103_public_takeover_nominal_pilot_v1\\official_codex_validation.json",
+          "sha256": "d2b4554bc5bf6ad0998f52c622a0a239e12949954f0c2700476966abaf3e753f"
+        }
+      ]
+    }
+  ]
+}

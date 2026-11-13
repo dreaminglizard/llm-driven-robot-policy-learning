@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "raccoon-control"
+version = "0.1.0"
+description = "Windows-first resident controller with an isolated Raccoon SDK worker"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+hardware = ["roboid==1.7.11", "pyserial==3.5"]
+learning = ["torch>=2.6", "numpy>=2.0"]
+simulation = ["mujoco==3.17.0", "numpy>=2.0"]
+voice = ["faster-whisper>=1.1", "sounddevice>=0.5", "soundfile>=0.13", "scipy>=1.11",
+         "psutil>=5.9", "pywin32>=306; sys_platform == 'win32'",
+         "pywebrtc-audio>=0.2.0; sys_platform == 'win32'"]
+
+[project.scripts]
+raccoon-control = "raccoon_control.cli:main"
+raccoon-memory = "raccoon_memory.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["raccoon_control*", "raccoon_memory*"]

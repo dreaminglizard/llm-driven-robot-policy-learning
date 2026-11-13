@@ -1,0 +1,10 @@
+{
+  "schema": "terra-teacher-multitask-train.v1",
+  "physics_seed": 1005,
+  "initial_scene": [[1, 2], [3], [4], []],
+  "registered_slot_xy_mm": [[155, 135], [165, 20], [-140, 165], [-170, 5]],
+  "moves": [
+    {"source_slot": 1, "destination_slot": 2, "group": "n4_s2_d2_other01"},
+    {"source_slot": 3, "destination_slot": 4, "group": "n4_s1_d1_other12"}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "calibration_id": "UNVERIFIED_PHOTO_CANDIDATES_DO_NOT_EXECUTE",
+  "verified": false,
+  "simulation_only": false,
+  "slot_xy_mm": [[150,150],[150,0],[-150,150],[-150,0]],
+  "table_z_mm": 0,
+  "cylinder_height_mm": 20,
+  "grip_offset_mm": 15,
+  "travel_z_mm": 130,
+  "clearance_mm": 10,
+  "vertical_corridor_mm": 5,
+  "max_height": 2,
+  "speed_pct": 8,
+  "tool_forward_mm": 80,
+  "tool_vertical_mm": -6
+}

@@ -1,0 +1,143 @@
+{
+  "schema": "public-takeover-plan-7.v1",
+  "scope": "train",
+  "prior_pair": {
+    "plan": "artifacts/architecture_research/20261103_public_takeover_paired_trial_v1/precommitted_plan.json",
+    "result": "artifacts/architecture_research/20261103_public_takeover_paired_trial_v1/result.json",
+    "first_move_kind": "move_to_empty",
+    "result_already_observed": true,
+    "included_in_target_counts": true
+  },
+  "protocol": {
+    "arms_in_order": ["takeover", "normal"],
+    "moves_per_pair": 2,
+    "student_decisions_first_move": 4,
+    "teacher_limit_per_move_each_arm": 60,
+    "same_initial_scene_seed_and_coordinates": true,
+    "direct_public_observations_only": true,
+    "second_transfer_fixed_before_collection": true,
+    "retain_failure_and_unconfirmed_without_replacement": true,
+    "no_outcome_based_plan_changes": true,
+    "initial_state": "The two arms use the same fixed scene, seed and registered coordinates. The collector checks saved initial-state equality only after both arms finish; an unequal or unverified state is not a confirmed matched pair.",
+    "decision_source": "Direct decisions use only the collector's public observations and registered task information. Do not inspect object truth, contact, private checkpoints or posthoc assessments while deciding.",
+    "second_move": "The second train-group transfer is fixed in advance and is not selected using a physical outcome. If an arm ends early, preserve the unattempted move as unattempted.",
+    "terminal_handling": "Retain failures, refusals, early student DONE, interruption, missing assessment and other unconfirmed results without replacement or automatic retry. Four student decisions are a fixed requested prefix, not a claim that an early-terminated run completed all four.",
+    "outcome_rule": "Do not change the fixed seven cases in response to observed success rates. Record the plan fingerprint before collection; this local file alone is not an external timestamp or proof against later editing.",
+    "seed_interpretation": "The collector checks the train range and its current seed reservations. This is not evidence that a seed was never used in previous training or that the cases are statistically independent.",
+    "scope_limit": "The earlier empty-move pair was observed before this plan, so the eight-pair set is not fully preregistered. These are planned simulation-only collections, not demonstrations, student results, physical trials or final held-out results."
+  },
+  "pairs": [
+    {
+      "id": "train_01",
+      "first_move_kind": "move_to_empty",
+      "collection_config": {
+        "schema": "public-takeover-pair.v1",
+        "physics_seed": 1007,
+        "registered_slot_xy_mm": [[160, 140], [160, 5], [-160, 140], [-160, 5]],
+        "initial_scene": [[], [], [], [3]],
+        "student_decisions": 4,
+        "teacher_limit": 60,
+        "moves": [
+          {"source_slot": 4, "destination_slot": 2, "group": "n1_s1_d1_other00"},
+          {"source_slot": 2, "destination_slot": 1, "group": "n1_s1_d1_other00"}
+        ]
+      }
+    },
+    {
+      "id": "train_02",
+      "first_move_kind": "stack",
+      "collection_config": {
+        "schema": "public-takeover-pair.v1",
+        "physics_seed": 1008,
+        "registered_slot_xy_mm": [[155, 140], [155, 5], [-155, 140], [-155, 5]],
+        "initial_scene": [[1], [2], [], []],
+        "student_decisions": 4,
+        "teacher_limit": 60,
+        "moves": [
+          {"source_slot": 1, "destination_slot": 2, "group": "n2_s1_d2_other00"},
+          {"source_slot": 2, "destination_slot": 3, "group": "n2_s2_d1_other00"}
+        ]
+      }
+    },
+    {
+      "id": "train_03",
+      "first_move_kind": "stack",
+      "collection_config": {
+        "schema": "public-takeover-pair.v1",
+        "physics_seed": 1009,
+        "registered_slot_xy_mm": [[165, 140], [165, 5], [-165, 140], [-165, 5]],
+        "initial_scene": [[], [1], [3], [2]],
+        "student_decisions": 4,
+        "teacher_limit": 60,
+        "moves": [
+          {"source_slot": 3, "destination_slot": 4, "group": "n3_s1_d2_other01"},
+          {"source_slot": 4, "destination_slot": 1, "group": "n3_s2_d1_other01"}
+        ]
+      }
+    },
+    {
+      "id": "train_04",
+      "first_move_kind": "unstack",
+      "collection_config": {
+        "schema": "public-takeover-pair.v1",
+        "physics_seed": 1010,
+        "registered_slot_xy_mm": [[160, 135], [160, 10], [-160, 135], [-160, 10]],
+        "initial_scene": [[], [1, 4], [], []],
+        "student_decisions": 4,
+        "teacher_limit": 60,
+        "moves": [
+          {"source_slot": 2, "destination_slot": 1, "group": "n2_s2_d1_other00"},
+          {"source_slot": 1, "destination_slot": 3, "group": "n2_s1_d1_other01"}
+        ]
+      }
+    },
+    {
+      "id": "train_05",
+      "first_move_kind": "unstack",
+      "collection_config": {
+        "schema": "public-takeover-pair.v1",
+        "physics_seed": 1011,
+        "registered_slot_xy_mm": [[155, 135], [155, 10], [-155, 135], [-155, 10]],
+        "initial_scene": [[], [2], [], [1, 3]],
+        "student_decisions": 4,
+        "teacher_limit": 60,
+        "moves": [
+          {"source_slot": 4, "destination_slot": 3, "group": "n3_s2_d1_other01"},
+          {"source_slot": 3, "destination_slot": 2, "group": "n3_s1_d2_other01"}
+        ]
+      }
+    },
+    {
+      "id": "train_06",
+      "first_move_kind": "transfer_between_stacks",
+      "collection_config": {
+        "schema": "public-takeover-pair.v1",
+        "physics_seed": 1012,
+        "registered_slot_xy_mm": [[165, 135], [165, 10], [-165, 135], [-165, 10]],
+        "initial_scene": [[4], [1, 2], [], [3]],
+        "student_decisions": 4,
+        "teacher_limit": 60,
+        "moves": [
+          {"source_slot": 2, "destination_slot": 4, "group": "n4_s2_d2_other01"},
+          {"source_slot": 1, "destination_slot": 3, "group": "n4_s1_d1_other12"}
+        ]
+      }
+    },
+    {
+      "id": "train_07",
+      "first_move_kind": "transfer_between_stacks",
+      "collection_config": {
+        "schema": "public-takeover-pair.v1",
+        "physics_seed": 1015,
+        "registered_slot_xy_mm": [[160, 145], [160, 10], [-160, 145], [-160, 10]],
+        "initial_scene": [[2], [4], [1, 3], []],
+        "student_decisions": 4,
+        "teacher_limit": 60,
+        "moves": [
+          {"source_slot": 3, "destination_slot": 1, "group": "n4_s2_d2_other01"},
+          {"source_slot": 2, "destination_slot": 4, "group": "n4_s1_d1_other12"}
+        ]
+      }
+    }
+  ]
+}

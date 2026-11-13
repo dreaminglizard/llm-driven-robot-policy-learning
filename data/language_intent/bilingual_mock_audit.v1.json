@@ -1,0 +1,17 @@
+{
+  "scope": "Development-label oracle fed directly as mock model output; a validator and data-consistency check, not model evaluation or accuracy. No network or held-out input.",
+  "dataset_sha256": "683946b933ba77e2b90625dedd274b755a5c537677986966e63c4fa0ee1ffd0b",
+  "counts": {
+    "ko": {
+      "ok": 40
+    },
+    "en": {
+      "ok": 20
+    },
+    "mixed": {
+      "ok": 20
+    }
+  },
+  "failures": [],
+  "evaluator_sha256": "6e55026cc71566ab22414b66ab8845aa0f6b792c647d8eaf0d28908d41d42e95"
+}

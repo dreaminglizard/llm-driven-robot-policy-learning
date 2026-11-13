@@ -1,0 +1,39 @@
+{
+  "calibration_id": "FIXED_LAYOUT_PHOTO_TRIAL_2026_10_27",
+  "verified": false,
+  "coordinate_source": "fixed_layout_photo",
+  "transport_path": "radial_yaw",
+  "waypoint_tolerance_mm": 3,
+  "simulation_only": false,
+  "slot_xy_mm": [
+    [
+      150,
+      150
+    ],
+    [
+      150,
+      0
+    ],
+    [
+      -150,
+      150
+    ],
+    [
+      -150,
+      0
+    ]
+  ],
+  "table_z_mm": 0,
+  "cylinder_height_mm": 20,
+  "grip_offset_mm": 15,
+  "travel_z_mm": 130,
+  "path_ceiling_mm": 140,
+  "clearance_mm": 10,
+  "vertical_corridor_mm": 5,
+  "max_height": 2,
+  "speed_pct": 30,
+  "tool_forward_mm": 80,
+  "tool_vertical_mm": -6,
+  "travel_speed_pct": 30,
+  "blended_max_velocity_deg_s": 14.4
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "task-program-v2-development-input.v1",
+  "basis": "manually fixed intent, ordering and reference context before any model evaluation",
+  "reused_source_path": "artifacts\\task_program\\20261030_synthetic_asr_inputs_v2\\evaluation.jsonl",
+  "reused_source_sha256": "0bb144fa8c5964ff001c90b4ad8fa15e01b908066b1e0978003b3b76ca89cad6",
+  "reused_path": "reused_v1_development72.jsonl",
+  "reused_sha256": "8abc6a637799c068edb00ec6ad3b4b218db6fcf46c14a83f49a84b3994f1bc0a",
+  "reused_counts": {
+    "source_text": 24,
+    "asr_transcript": 48,
+    "silence": 1
+  },
+  "additional_path": "additional_development.jsonl",
+  "additional_sha256": "b3e0f5a07f194ff840c35b83b7b146a45e0c11a7a5fcde76567bfb1ddec025aa",
+  "additional_count": 40,
+  "additional_by_language": {
+    "ko": 20,
+    "en": 20
+  },
+  "additional_by_family": {
+    "stop_ambiguous_return": 2,
+    "remember_before_move_reverse": 2,
+    "remember_before_move_forward": 2,
+    "move_before_remember_reverse": 2,
+    "move_before_remember_forward": 2,
+    "resume_prior": 2,
+    "continue_context": 6,
+    "repeat_total": 2,
+    "repeat_additional": 2,
+    "repeat_prior_once": 2,
+    "negated_stop_continue": 2,
+    "stop_repeat_finish": 2,
+    "negated_move": 2,
+    "question_move": 2,
+    "corrected_source": 2,
+    "return_context": 6
+  },
+  "prior_transcript_overlap": [],
+  "notes": "Development contrasts, not an independent final test. Same wording across contexts is intentional. Contexts contain only synthetic IDs and state revisions; no saved target layouts or joint paths.",
+  "model_calls_so_far": 0
+}

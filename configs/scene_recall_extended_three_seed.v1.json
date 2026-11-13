@@ -1,0 +1,62 @@
+{
+  "schema": "scene-recall-extended-three-seed.v1",
+  "model_initialization_seeds": [
+    20261030,
+    20261031,
+    20261101
+  ],
+  "runs": {
+    "20261031": {
+      "output": "artifacts/scene_recall_extended/20261030_gru128_long_seed20261031_v1"
+    },
+    "20261101": {
+      "output": "artifacts/scene_recall_extended/20261030_gru128_long_seed20261101_v1"
+    }
+  },
+  "steps": 1200,
+  "batch_size": 64,
+  "hidden_size": 128,
+  "horizons": [
+    8,
+    16,
+    32,
+    64
+  ],
+  "parent_seed": 20261030,
+  "extension_seed": 20261111,
+  "validation_parent_seed": 20271031,
+  "validation_extension_seed": 20261112,
+  "learning_rate": 0.001,
+  "threads": 1,
+  "checkpoint_selection": "worst_short_or_long_count_step_then_long_exact_short_exact_long_token_short_token",
+  "parent_fingerprint_sha256": "53e0c9408ba6b0164f4603a1f99d5403f66fb5e6f70be42fb10a01055073a285",
+  "extended_fingerprint_sha256": "06f9a2112ad21c0e79e89157847de4a16dd0e1fb1866c65d1706292209f72365",
+  "first_candidate_sha256": {
+    "config.json": "7a0b3350b39ad45316a155de47a3d78489b5d898f26dedb7bc3f7902daa138c5",
+    "training_report.json": "5bb93ed99dd3137d6a9fc2fde17f870db6e18e30cc335d7b9054de4874fb6e0d",
+    "model.pt": "2f23e47f1e4d441bb417263ef83e227f8bec43e49ae712647df1cc1ab6f25879"
+  },
+  "development_reference_sha256": {
+    "short_suite": "ec08c977ba3393ced83443c67e70ffcd04601f7d7e63bdd54b48a33ce22b5044",
+    "short_input_fingerprint": "dd8980045c586732235526ba95616567c66cf1bbcd888d782afc7be69841512a",
+    "long_input_file": "43dbd05db4619f1138297b6fa3bc96f73ceae09854e4b3abce6411e13c1d18d1",
+    "long_report": "3a7807d8570eca7cde24d1debfcca8482003b2d3b235747b5a9e90fdabf46025",
+    "long_semantic_inputs": "3d2201d020dd98ba6c45c6d7993249c5d4b927766e501033939fc3f1b36dbe4d"
+  },
+  "source_sha256": {
+    "raccoon_memory/scene_recall.py": "c09d4982c4534674df26f172735705387e4baca3ff8f5988526884d031f3a01b",
+    "scripts/train_scene_recall.py": "308dc343b6910eb14f4831afe2dac16b4ec8315e88409451bd52e32f0f10c426",
+    "docs/2026-10-30_가변원통_기억모델_계약.md": "f409b95b19b4ef64bacdcef7733fb19aac92eb08b19da223202d81cc69ad1384",
+    "scripts/evaluate_scene_recall_long.py": "c4c4f3199fd578f1a4762c6234def055570d63c5001fdc59215b84abaf4f8e1f",
+    "scripts/train_scene_recall_extended.py": "f9903a53f3a84d24ac835db2ddf9f4269d016a98908187b114ee0919e135f86d",
+    "docs/2026-10-30_가변원통_기억_긴이력_학습후보계획.md": "0a003746f526d1bcfc497f9ba06c544b6c56ff0e45007cacdd670411932e3503",
+    "scripts/train_scene_recall_extended_multiseed.py": "faa4da04ed437de1aefb41d32b77c9fea4951aaf3a2287585ed6714e6eea2424",
+    "scripts/evaluate_scene_recall_candidate.py": "e5814607d9fd9054159fecd3afc4638f688c7a6130fb5ce2bf30e548b67cf863",
+    "tests/test_scene_recall_multiseed.py": "8717ba13bd0cfb62f25e0c2ad88a1d40f132a3715db921332cc67050bfdc5aa2",
+    "docs/2026-10-30_가변원통_기억_긴이력_3시드_재현계획.md": "e5667c2f2ef34051fc36e81c30a04718fdf1436c2bfd8b4f081f9c57eb11a98a",
+    "docs/2026-10-30_가변원통_기억_긴이력_검증계획.md": "1f7b2937c66c6991dff6edb181317638416fba4f745e4cc524a40353163fa7ea"
+  },
+  "final_test_used": false,
+  "reported_concurrent_work": "common policy RL",
+  "data_rng_scope": "fixed to first candidate; model initialization seed varies"
+}

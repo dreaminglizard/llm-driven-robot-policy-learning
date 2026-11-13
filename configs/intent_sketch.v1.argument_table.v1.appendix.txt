@@ -1,0 +1,24 @@
+
+Per-operation contract: use only the args and reference kinds listed for that op. A dash means no field of that kind. The args listed are allowed, not an instruction to invent them.
+
+| op | allowed args | allowed reference.kind |
+|---|---|---|
+| move | source_slot,destination_slot,object_id,count,height | - |
+| stack | source_slot,destination_slot,object_id,count,height | - |
+| unstack | source_slot,destination_slot,object_id,count,height | - |
+| swap | source_slot,destination_slot | - |
+| remember | - | - |
+| register | layout | - |
+| arrange | layout | - |
+| repeat | repeat_mode,repeat_count | active_task,previous_task,previous_program,prior_steps,deictic,unresolved |
+| stop_motion | - | - |
+| stop_repeat | boundary | - |
+| continue | - | active_task,previous_task,deictic,unresolved |
+| return | - | arm_home,registered_initial,task_start,learned_memory,deictic,unresolved |
+| status | subject | - |
+| clarify | reason,question | - |
+| question | - | - |
+
+For a request, repeat, continue and return require reference.kind and reference.mention. For request repeat, repeat_mode is required; total or additional requires repeat_count, while continuous or unresolved forbids repeat_count. For prior_steps, step_indices are distinct, increasing indices of earlier affirmative task or return records; omit step_indices for other reference kinds. Only question uses op question with polarity query; clarify uses polarity uncertain.
+
+For lossless conversion, a requested move, stack or unstack needs destination_slot and at least one of source_slot or object_id; a requested swap needs both source_slot and destination_slot. A requested arrange needs layout; every supplied layout entry needs slot and at least one of count or object_ids. A requested stop_repeat needs boundary, a requested status needs subject, and a clarification needs reason. If a required target or value is absent, keep it absent and the request incomplete or uncertain; never invent a value or omit another requested action. Excluded and queried records remain non-executing.

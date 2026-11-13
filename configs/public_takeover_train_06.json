@@ -1,0 +1,49 @@
+{
+  "schema": "public-takeover-pair.v1",
+  "physics_seed": 1012,
+  "registered_slot_xy_mm": [
+    [
+      165,
+      135
+    ],
+    [
+      165,
+      10
+    ],
+    [
+      -165,
+      135
+    ],
+    [
+      -165,
+      10
+    ]
+  ],
+  "initial_scene": [
+    [
+      4
+    ],
+    [
+      1,
+      2
+    ],
+    [],
+    [
+      3
+    ]
+  ],
+  "student_decisions": 4,
+  "teacher_limit": 60,
+  "moves": [
+    {
+      "source_slot": 2,
+      "destination_slot": 4,
+      "group": "n4_s2_d2_other01"
+    },
+    {
+      "source_slot": 1,
+      "destination_slot": 3,
+      "group": "n4_s1_d1_other12"
+    }
+  ]
+}

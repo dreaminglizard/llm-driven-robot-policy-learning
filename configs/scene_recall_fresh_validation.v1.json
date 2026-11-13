@@ -1,0 +1,57 @@
+{
+  "schema": "scene-recall-fresh-validation.v1",
+  "seed": 20261215,
+  "suffix_seed": 20261216,
+  "per_count": 32,
+  "horizons": [
+    8,
+    16,
+    32,
+    64,
+    128
+  ],
+  "threads": 1,
+  "output": "artifacts/scene_recall_evaluations/20261030_fresh_history_seed20261215_v1",
+  "models": [
+    {
+      "name": "baseline_short",
+      "path": "artifacts/scene_recall/20261030_scene_recall_seed20261030_v1/model.pt",
+      "sha256": "05d2af8962dee1ec13f9bad45d05fd229abcd19c731655ff2d0e519f8efbbfc6"
+    },
+    {
+      "name": "extended_20261030",
+      "path": "artifacts/scene_recall_extended/20261030_gru128_long_seed20261030_v1/model.pt",
+      "sha256": "2f23e47f1e4d441bb417263ef83e227f8bec43e49ae712647df1cc1ab6f25879"
+    },
+    {
+      "name": "extended_20261031",
+      "path": "artifacts/scene_recall_extended/20261030_gru128_long_seed20261031_v1/model.pt",
+      "sha256": "2ad32282891d166a7b6374e1f13a8edc74bf3455567b813e4bb17028e8bf956c"
+    },
+    {
+      "name": "extended_20261101",
+      "path": "artifacts/scene_recall_extended/20261030_gru128_long_seed20261101_v1/model.pt",
+      "sha256": "62f2ddc182a7a8cb5a8150f60e4312386f35a534a4a320537dd126c6689c7685"
+    }
+  ],
+  "source_sha256": {
+    "scripts/evaluate_scene_recall_fresh.py": "65e12d4665d82e76f8b2c6f584b18321d99e95b529af036b4238347a8516ae5a",
+    "tests/test_scene_recall_fresh.py": "9b7b5d20247b47151473dd2a0ec98afc9bd89186b54ad1f29a0a29d77ce35090",
+    "raccoon_memory/scene_recall.py": "c09d4982c4534674df26f172735705387e4baca3ff8f5988526884d031f3a01b",
+    "scripts/evaluate_scene_recall_long.py": "c4c4f3199fd578f1a4762c6234def055570d63c5001fdc59215b84abaf4f8e1f",
+    "scripts/evaluate_scene_recall_candidate.py": "e5814607d9fd9054159fecd3afc4638f688c7a6130fb5ce2bf30e548b67cf863",
+    "scripts/train_scene_recall.py": "308dc343b6910eb14f4831afe2dac16b4ec8315e88409451bd52e32f0f10c426",
+    "scripts/train_scene_recall_extended.py": "f9903a53f3a84d24ac835db2ddf9f4269d016a98908187b114ee0919e135f86d",
+    "scripts/train_scene_recall_extended_multiseed.py": "faa4da04ed437de1aefb41d32b77c9fea4951aaf3a2287585ed6714e6eea2424",
+    "docs/2026-10-30_가변원통_기억모델_계약.md": "f409b95b19b4ef64bacdcef7733fb19aac92eb08b19da223202d81cc69ad1384",
+    "docs/2026-10-30_가변원통_기억_긴이력_검증계획.md": "1f7b2937c66c6991dff6edb181317638416fba4f745e4cc524a40353163fa7ea",
+    "docs/2026-10-30_가변원통_기억_긴이력_학습후보계획.md": "0a003746f526d1bcfc497f9ba06c544b6c56ff0e45007cacdd670411932e3503",
+    "docs/2026-10-30_가변원통_기억_새개발이력_검증계획.md": "a2120926bab4cd84d4ff5905b314b43d5b6043b5eb463fffba703d16a8f86bd8"
+  },
+  "old_short_input_sha256": "dd8980045c586732235526ba95616567c66cf1bbcd888d782afc7be69841512a",
+  "old_long_input_file_sha256": "43dbd05db4619f1138297b6fa3bc96f73ceae09854e4b3abce6411e13c1d18d1",
+  "old_long_report_sha256": "3a7807d8570eca7cde24d1debfcca8482003b2d3b235747b5a9e90fdabf46025",
+  "sampling": "validation overwrite=True present_mode=distinct; pair same active set and different goal",
+  "final_test_used": false,
+  "physical_execution": false
+}

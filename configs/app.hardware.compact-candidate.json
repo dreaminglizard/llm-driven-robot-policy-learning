@@ -1,0 +1,9 @@
+{
+  "controller_config": "hardware_photo_trial.json",
+  "calibration": "slots.photo_trial.json",
+  "runtime": "../.runtime/hardware-app",
+  "state_reference": "../.runtime/physical_state.json",
+  "enabled_slots": [1, 3],
+  "max_height": 2,
+  "compact_waypoints": true
+}

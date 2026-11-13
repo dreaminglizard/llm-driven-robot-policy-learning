@@ -1,0 +1,32 @@
+{
+  "schema": "scene-first-approach-fit-diagnostic.v1",
+  "design": "docs/architecture_research/16_첫접근_기록맞춤_최적화진단_제안.md",
+  "source_experiment": "artifacts/architecture_research/20261030_continuous_paired_bc_200_v1",
+  "output": "artifacts/architecture_research/20261030_first_approach_fit_diagnostic_v1",
+  "training_seed": 20261101,
+  "model": "original tail-average BC, MLP64, 82 features and 8-observation history",
+  "training": {
+    "updates": 1000,
+    "batch_size": 256,
+    "groups": 8,
+    "samples_per_group": 32,
+    "learning_rate": 0.00001,
+    "joint_loss_weight": 100.0,
+    "optimizer": "new Adam",
+    "observation_updates": [0, 20, 200, 500, 1000],
+    "whole_record_updates": [0, 200, 1000],
+    "checkpoint_selection": "fixed last update; no validation selection",
+    "device": "cpu",
+    "threads": 1
+  },
+  "diagnostic_near_fit": {
+    "each_joint_each_observation_error_max_deg": 5.0,
+    "each_joint_mean_absolute_error_max_deg": 2.0,
+    "correct_move_count": 24,
+    "out_of_range_move_count": 0
+  },
+  "scope": "training-set fit diagnostic only; no student rollout or deployment",
+  "physical_evaluation_allowed": false,
+  "actual_hardware": false,
+  "final_test_used": false
+}

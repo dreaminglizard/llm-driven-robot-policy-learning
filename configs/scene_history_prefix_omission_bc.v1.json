@@ -1,0 +1,45 @@
+{
+  "schema": "scene-history-prefix-omission-paired-bc.v1",
+  "previous_full_trajectory": "artifacts/architecture_research/20261031_full_direct_trajectory_bc_v1",
+  "previous_sha256": {
+    "config.json": "9114cf1c5a79dbba979237f6a41716bd9e6fffad0cedc3f4ef7490cd3c72a0e8",
+    "training_summary.json": "2eed8ffbdaa74942b0b4f61c887dfd38c945ac998318e4a8aa3f0c929b84aef9",
+    "recorded_summary.json": "a6fabfdf6a6c1033ef0e6bd8389d359b473e8be83d75c81851aca861dfffbb20",
+    "diagnostic_lock.json": "8ff126b047c30c805423f9412198bbdf15526c857d73bac10e6e424cf0fc5a91",
+    "diagnostic_summary.json": "21e0cbeedb9fdeaf89378f0b57852912088961b338dbc9a2a93de04a6bbfd864",
+    "diagnostic_rollouts.jsonl": "9e02beddf41899f6a492a88bd005a5a1f4b6d4b6f82e93ffb7566c9418c38025",
+    "audit.json": "f2eddd51b67a1b3657d2e5ddca60fdb47d8ffb410f788fc8e0e6f20a2ee8ba87",
+    "direct_schedule.pt": "077a61092f9658e0f9043bfa3deb8a9465a89d7017bf420b80cec5c90c070188",
+    "direct_tensors.pt": "b099d9e39d0bfa2debf1e6445b697d974d44321c1e8ec77db828d29609c38bbb",
+    "batch_fingerprints.json": "222ae4e8a181e54dfee85d73618c9935bd34f082a010ca11d37f1bbf01b326ce",
+    "sample_lineage.json": "621268bb0fcd2ac045bed6a2f4cb7ba5b44288423c5db486abbf7f8727686ebb"
+  },
+  "independent_diagnosis": "artifacts/architecture_research/20261031_direct_trajectory_alignment_diagnosis_v1/diagnosis.json",
+  "independent_diagnosis_sha256": "5714d1c33dd6179747fb28d9b1a451087ed41c45e6bb83d49889f238b455ba44",
+  "seeds": [20261030, 20261031, 20261101],
+  "conditions": ["unaugmented_full_trajectory", "history_prefix_omission"],
+  "architecture": "mlp", "hidden_size": 64, "features": 82, "history_length": 8,
+  "optimizer": "new Adam", "learning_rate": 0.00001, "batch_size": 256,
+  "updates_per_condition_seed": 1000, "joint_loss_weight": 100.0,
+  "common_per_batch": 192, "direct_per_batch": 64,
+  "augmentation": {
+    "kind": "independent_seeded_bernoulli_history_prefix_drop",
+    "apply_probability_for_length_at_least_4": 0.5,
+    "keep_length_distribution": "uniform integer from 3 through original_length-1 inclusive",
+    "minimum_original_observations_retained": 3,
+    "length_1_to_3": "unchanged", "padding": "left zero padding with recomputed suffix mask",
+    "applies_to": ["common_192", "direct_64"], "labels_changed": false,
+    "observation_duplication": false, "sampling_and_model_rng_unchanged": true
+  },
+  "evaluation": {
+    "use_unaugmented_recorded_windows": true, "direct_rows": 94, "teacher_rows": 389, "validation_rows": 962,
+    "direct_close_and_next_lift_rows_each": 8, "new_candidate_rollouts": 18, "reused_unaugmented_rollouts": 18,
+    "independent_start_cases": 6, "max_decisions": 24, "run_even_if_recorded_gate_fails": true,
+    "preservation_reference": "original existing-teacher control from previous experiment, not the degraded unaugmented full-trajectory candidate",
+    "physical_threshold_reference": "original existing-teacher control; also report paired unaugmented full-trajectory comparison",
+    "minimum_net_success_gain": 3, "minimum_distinct_improved_cases": 2, "minimum_each_seed_gain": 0,
+    "evaluation_errors_make_result_unknown": true
+  },
+  "promotion_decision": false, "ab_used": false, "single_transfer_60_used": false,
+  "actual_hardware": false, "final_test_used": false
+}

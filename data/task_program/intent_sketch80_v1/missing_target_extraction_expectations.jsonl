@@ -1,0 +1,2 @@
+{"id":"independent.missing_stack_source.ko","alternatives":[[{"op":"stack","args":{"destination_slot":3}}]],"optional_args":{},"basis":"쌓기와 목적지 3번은 명시됐고 출발 자리·원통 ID는 미지정이다."}
+{"id":"independent.missing_stack_source.en","alternatives":[[{"op":"stack","args":{"destination_slot":3}}]],"optional_args":{"count":[1]},"basis":"쌓기와 목적지 3번은 명시됐고 출발 자리·원통 ID는 미지정이다. 영어 단수 a cylinder는 count 1도 허용한다."}

@@ -1,0 +1,14 @@
+{
+  "schema": "korean-intent-splits.v1",
+  "selection": "Frozen before any model evaluation; holdout never used for prompt tuning.",
+  "files": {
+    "development.jsonl": {
+      "count": 20,
+      "sha256": "143d8770b89272aad8cc0f62f54a2c68b5ce160cefe8c6562e2cc0fc2d74dd45"
+    },
+    "holdout100.jsonl": {
+      "count": 100,
+      "sha256": "fdb6dcfcc45fe3049d1651cd733e6ca81781bdb316844a1ef9ebe3e3bc75e18c"
+    }
+  }
+}

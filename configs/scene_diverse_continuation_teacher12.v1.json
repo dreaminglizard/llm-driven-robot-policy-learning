@@ -1,0 +1,48 @@
+{
+  "schema": "raccoon-scene-diverse-continuation-design.v1",
+  "scope": "Read-only selection now; collect only after the fixed plan is reviewed.",
+  "split_plan": "configs/scene_split_plan.v1.json",
+  "parent_sources": [
+    "artifacts/sim_augmentation/20261030_scene_teacher_grasp15_pitchminus5_train156_seed1000_v1",
+    "artifacts/sim_augmentation/20261030_scene_teacher_train156_seeds1001_1003_v1"
+  ],
+  "existing_continuations": "configs/scene_continuous_teacher_24.v1.json",
+  "seeds": [1000, 1001],
+  "connections": 12,
+  "physical_attempts_maximum": 24,
+  "selection_rule": {
+    "parent_and_successor_groups": "both train in the pinned split plan",
+    "parent_availability": "both saved parent attempts must already have a valid successful full-scene assessment and an idle registered post-assessment state; no successor outcome is available or used",
+    "candidate_relation": "all legal successor transfers except the direct reversal of the parent and any previously collected parent-successor combination",
+    "unique_parents": true,
+    "successor_direction": "each of the twelve ordered directions 1..4 exactly once",
+    "object_count": {"1": 3, "2": 3, "3": 3, "4": 3},
+    "successor_source_destination_levels": {"1-1": 3, "1-2": 3, "2-1": 3, "2-2": 3},
+    "successor_object_relation_to_parent": {"same": 6, "different": 6},
+    "tie_break": "iterate successor directions lexicographically; within each direction iterate parent case ID, successor case ID and moved ID lexicographically; use the first complete assignment satisfying all quotas with distinct parents"
+  },
+  "teacher": {
+    "variant": "segmented_transit_grasp15_placepitch_minus5_v4",
+    "grasp_tcp_base_mm": 15.0,
+    "placement_pitch_deg": -5.0,
+    "max_rotation_per_transit_command_deg": 30.0,
+    "command_seconds": 1.0,
+    "stable_seconds": 1.0,
+    "grasp_diagnostic": "For each command endpoint, keep privileged object and TCP position and positive left/right pad contact. A lack-of-contact-and-distance loss guard is not evidence that a grasp succeeded; only the separate full-scene stability assessment determines positive episodes.",
+    "new_llm_decisions": false,
+    "source_replay": false
+  },
+  "state_handoff": "construct the compatible original simulator model, restore the entire saved parent post-assessment state and prove exact saved-state equality before the successor; no reset or homing between restored state and teacher command",
+  "failure_policy": "Record all 24 planned parent-seed entries; keep restore errors, unknowns, teacher failures and post-assessment failures. Never substitute another seed, task, clipping, or retry. Save positive episodes only for full-scene successes.",
+  "student_inputs": "existing 82 features and up to eight observations; object poses, contacts, teacher phases and targets remain privileged",
+  "later_student_comparison": {
+    "model_and_baseline": "existing 82-input MLP and its uniform 1,000-update baseline",
+    "planned_batch_composition": "reuse the original 192 base examples and 32 of the original 64 continuation examples in their original order; replace the other 32 with new teacher examples",
+    "unchanged": "starting weights, model, loss, optimizer settings, updates, batch size and total exposure",
+    "sampling_schedule": "to be fixed only after collection outcome and available teacher records are known",
+    "baseline_physical_reuse": "reuse the existing 18 baseline cases only when checkpoint, evaluator, entire start state and execution contract match",
+    "no_outcome_based_additional_collection": true
+  },
+  "actual_hardware": false,
+  "final_test_used": false
+}

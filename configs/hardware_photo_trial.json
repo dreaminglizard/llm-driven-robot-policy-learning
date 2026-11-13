@@ -1,0 +1,19 @@
+{
+  "backend": "sdk",
+  "mode": "calibration",
+  "port": "COM10",
+  "hardware_enabled": true,
+  "workspace_verified": false,
+  "workspace_source": "fixed_layout_photo",
+  "precision_validated": false,
+  "tool_forward_mm": 80.0,
+  "tool_vertical_mm": -6.0,
+  "limits": {
+    "joint_tolerance_deg": 0.52734375,
+    "tcp_tolerance_mm": 2.0,
+    "motion_timeout": 30,
+    "max_speed_pct": 35,
+    "workspace_min_mm": [-180, -5, 5],
+    "workspace_max_mm": [180, 220, 225]
+  }
+}

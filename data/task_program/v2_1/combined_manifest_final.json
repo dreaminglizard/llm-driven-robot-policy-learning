@@ -1,0 +1,23 @@
+{
+  "schema": "task-program-v2-combined-development.v2",
+  "combined_path": "combined_development120.jsonl",
+  "combined_sha256": "258c3c32bb794ac6c7c56bcf13f89ee98be71bde847ff5b4599585731f334812",
+  "prior_combined_sha256": "5bb3274bfb211ee1cd23c91012ee3689b43ee6793f6a16a45b25775b62c7e194",
+  "addendum_path": "additional_guard_contrasts.jsonl",
+  "addendum_sha256": "2c33ec8cf4acdc4eaa00286aad72abbfd7e34cf145d285042867e54ca14a9581",
+  "counts": {
+    "source_text": 24,
+    "asr_transcript": 48,
+    "silence": 1,
+    "new_development_text": 48
+  },
+  "labeled_cases": 120,
+  "silence_cases": 1,
+  "additional_development_by_language": {
+    "ko": 24,
+    "en": 24
+  },
+  "basis": "hand-specified meanings and context before model generation; reviewed guard contrasts included",
+  "scope": "development contrasts, not an independent final test; same wording across contexts is intentional",
+  "model_calls_so_far": 0
+}

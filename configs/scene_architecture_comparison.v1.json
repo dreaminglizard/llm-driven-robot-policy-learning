@@ -1,0 +1,23 @@
+{
+  "schema": "raccoon-scene-architecture-comparison.v1",
+  "purpose": "First shared-policy comparison across held-out scene/task groups",
+  "dataset_bundle": "artifacts/sim_augmentation/20261030_scene_training_bundle_v1",
+  "train_episodes": 156,
+  "validation_episodes": 60,
+  "architectures": ["mlp", "gru", "transformer"],
+  "hidden_size": 64,
+  "history_length": 8,
+  "epochs": 300,
+  "batch_size": 256,
+  "learning_rate": 0.002,
+  "joint_loss_weight": 100,
+  "seed": 20261030,
+  "training_device": "cuda",
+  "evaluation_device": "cpu",
+  "evaluation_seed": 1500,
+  "evaluation_split": "validation",
+  "evaluation_case_count": 60,
+  "checkpoint_selection": "Last fixed epoch; no automatic best-validation selection",
+  "scope_limit": "One training RNG and one physics seed per split; further seeds and ID assignments are still required",
+  "final_test_used": false
+}

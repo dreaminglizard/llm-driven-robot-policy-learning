@@ -1,0 +1,36 @@
+{
+  "schema": "raccoon-scene-split-plan.v1",
+  "scope": "Four slots, one to four active objects, maximum height two",
+  "group_rule": "Object count, source level, destination level, ascending other-slot counts; invariant to ID and slot permutation",
+  "train_groups": [
+    "n1_s1_d1_other00",
+    "n2_s1_d1_other01",
+    "n2_s1_d2_other00",
+    "n2_s2_d1_other00",
+    "n3_s1_d2_other01",
+    "n3_s2_d1_other01",
+    "n4_s1_d1_other12",
+    "n4_s2_d2_other01"
+  ],
+  "validation_groups": [
+    "n3_s1_d1_other11",
+    "n4_s1_d2_other02",
+    "n4_s2_d1_other02"
+  ],
+  "test_groups": [
+    "n3_s1_d1_other02",
+    "n3_s2_d2_other00",
+    "n4_s2_d1_other11",
+    "n4_s1_d2_other11"
+  ],
+  "seed_ranges_inclusive": {
+    "pilot": [900, 902],
+    "train": [1000, 1099],
+    "validation": [1500, 1519],
+    "test": [2000, 2019]
+  },
+  "pilot_exclusion": "Pilot episodes may guide the teacher but must not enter model train, validation or test sets",
+  "shared_teacher_sources": true,
+  "source_interpretation": "The same two direct teacher demonstrations inform the programmatic teacher across groups; held-out groups are unseen layout/task combinations, not independent original teachers",
+  "test_policy": "Do not generate or inspect final test trajectories until policy architecture and training settings are fixed"
+}

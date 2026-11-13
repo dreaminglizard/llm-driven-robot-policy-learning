@@ -1,0 +1,32 @@
+{
+  "schema": "scene-first-action-correction-selection-contract.v1",
+  "original_prepared": "artifacts/architecture_research/20261030_scene_student_corrections_prepared_v3/prepared.json",
+  "original_prepared_sha256": "44c93c6cc6990fdc8b635226f4fcdb12f59da1a045b6868e14f430d55898cac9",
+  "original_collection_summary": "artifacts/architecture_research/20261030_scene_student_corrections_prepared_v3/student_collection/summary.json",
+  "original_collection_summary_sha256": "d8d6ff77e9f25df289eec477bf11f2d3133ab09153fc46ba4fbfbe857726098d",
+  "selection_rule": "fixed_parent_order_cyclic_seed_after_one_applied_student_command.v1",
+  "decision_index": 1,
+  "applied_student_commands": 1,
+  "cases_in_order": [
+    {"group_index": 0, "parent_group": "n1_s1_d1_other00", "physics_seed": 1000, "student_run_id": "student-visit-00"},
+    {"group_index": 1, "parent_group": "n2_s1_d1_other01", "physics_seed": 1001, "student_run_id": "student-visit-04"},
+    {"group_index": 2, "parent_group": "n2_s1_d2_other00", "physics_seed": 1002, "student_run_id": "student-visit-08"},
+    {"group_index": 3, "parent_group": "n2_s2_d1_other00", "physics_seed": 1000, "student_run_id": "student-visit-09"},
+    {"group_index": 4, "parent_group": "n3_s1_d2_other01", "physics_seed": 1001, "student_run_id": "student-visit-13"},
+    {"group_index": 5, "parent_group": "n3_s2_d1_other01", "physics_seed": 1002, "student_run_id": "student-visit-17"},
+    {"group_index": 6, "parent_group": "n4_s1_d1_other12", "physics_seed": 1000, "student_run_id": "student-visit-18"},
+    {"group_index": 7, "parent_group": "n4_s2_d2_other01", "physics_seed": 1001, "student_run_id": "student-visit-22"}
+  ],
+  "output": "artifacts/architecture_research/20261031_scene_first_action_corrections_prepared_v1",
+  "split": "train",
+  "max_direct_attempts_per_group": 1,
+  "max_direct_actions": 24,
+  "physical_assessment_seconds": 1.0,
+  "success_or_object_state_used_for_selection": false,
+  "fallback_case_selection": false,
+  "new_student_execution": false,
+  "new_teacher_action_during_preparation": false,
+  "actual_hardware": false,
+  "final_test_used": false,
+  "mix_with_prior_correction_rows": false
+}

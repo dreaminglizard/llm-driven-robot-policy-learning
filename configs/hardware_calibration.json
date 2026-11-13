@@ -1,0 +1,13 @@
+{
+  "backend": "sdk",
+  "mode": "calibration",
+  "port": "COM10",
+  "hardware_enabled": true,
+  "workspace_verified": false,
+  "precision_validated": false,
+  "tool_forward_mm": 80.0,
+  "tool_vertical_mm": -6.0,
+  "limits": {
+    "joint_tolerance_deg": 0.3515625
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "raccoon-local-language-assets.v1",
+  "purpose": "Korean command interpretation; no actuator or path generation",
+  "model": {
+    "repository": "google/gemma-4-E2B-it-qat-q4_0-gguf",
+    "revision": "675cff42a74c774d6cb76f76d8eacb49b48c9b93",
+    "filename": "gemma-4-E2B_q4_0-it.gguf",
+    "size_bytes": 3349516256,
+    "sha256": "fa401b55b07ee70a54c6dae3903c783a6e65064312529ea57175cb5f8dec6634",
+    "license": "Apache-2.0",
+    "model_card": "https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf",
+    "local_directory": ".models/gemma-4-e2b-qat-q4_0",
+    "multimodal_projector_required_for_this_text_only_task": false
+  },
+  "runtime": {
+    "project": "ggml-org/llama.cpp",
+    "stable_release": "v0.8.0",
+    "build_tag": "b11960",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11960/llama-b11960-bin-win-cpu-x64.zip",
+    "filename": "llama-b11960-bin-win-cpu-x64.zip",
+    "size_bytes": 24407745,
+    "sha256": "73f962f82850d244db47eaacb9d913637027b82399124324298576d58c5f4287",
+    "license": "MIT",
+    "local_directory": ".tools/llama.cpp-b11960-cpu-x64"
+  },
+  "checked_at": "2026-10-30",
+  "selection": "User chose the smallest Gemma 4 variant; Korean command accuracy and runtime cost still require local evaluation"
+}

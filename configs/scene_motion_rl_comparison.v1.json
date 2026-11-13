@@ -1,0 +1,375 @@
+{
+  "schema": "raccoon-scene-physical-reinforce-comparison.v1",
+  "status": "prepared_no_experience_collection_or_training",
+  "prepared_at_utc": "2026-10-30T05:04:25.048076+00:00",
+  "config_path": "configs/scene_motion_rl_comparison.v1.json",
+  "design": "docs/architecture_research/09_공통정책_물리경험_RL_최소설계.md",
+  "change_to_design_start": "Each condition starts from the same seed-specific tail-average BC checkpoint; decision fixed before collecting RL experience.",
+  "dataset": {
+    "episodes_path": "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1/episodes.jsonl",
+    "train_ids_path": "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1/train.json",
+    "validation_ids_path": "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1/validation.json",
+    "manifest_path": "artifacts/sim_augmentation/20261030_scene_training_bundle_physics4_id24_v1/manifest.json",
+    "episodes_sha256": "c9b24ccef180fb47f7c23ca3bc345cbae35c21cf6226b6388a6275c5b162ead9",
+    "train_ids_sha256": "0dbfa3bb3e9325ed3352d247791ae7bbae75ad10fecd7f609677741a74ecfe18",
+    "validation_ids_sha256": "5b2e5ca8e5f2c6defece73e63e2ff0f08a51a2e6b8b158164fc36db864a3976d",
+    "manifest_sha256": "3d811df9b5a60fba7d19bb7c70c98de275e00d33ec661f17de5cbf3f96e89eba",
+    "training_decision_events": 238560,
+    "training_episode_items": 14904,
+    "physical_parent_successes": 621,
+    "physical_parent_attempts": 624,
+    "identity_relabeling_is_new_physics": false
+  },
+  "split_plan": {
+    "path": "configs/scene_split_plan.v1.json",
+    "sha256": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7"
+  },
+  "training_seeds": [
+    20261030,
+    20261031,
+    20261101
+  ],
+  "starting_checkpoints": {
+    "20261030": {
+      "path": "artifacts/motion_models/20261030_scene_mlp_tailavg_u3000_s20261030/checkpoint_avg.pt",
+      "sha256": "fb33d349496c2367446dd1d4a44a3ec7a0e0d6809fedcfa1fad06af13006cec8",
+      "weight_fingerprint": {
+        "all": "fa99a74800f3a0ce71845c6d0090cc08f92cadeefc2dca56bcfc737a3e74ab54",
+        "representation": "c0b1e2c4e1cd6e008f0bd3c0e68654116c1d8ec244d2cb27128ddaf51a01c738",
+        "action_head": "1640110adebc6f5ed1c8e26e92d44c291f4833b9a8e9e70331a0bc3c92dda872",
+        "joint_head": "b9cdd8d3170d851f1c55a8f77e61a9b6c990171def10a8e26d48ab84ea5eb0d9"
+      }
+    },
+    "20261031": {
+      "path": "artifacts/motion_models/20261030_scene_mlp_tailavg_u3000_s20261031/checkpoint_avg.pt",
+      "sha256": "0d3f2b20f04c94cfdea339f2e6de3f2fb65178506fcb0df8c5db4d3edcf6b04b",
+      "weight_fingerprint": {
+        "all": "5775272ddc741682f3714f3e55dcddc58dec9861b61c76746290614f1cb5abc9",
+        "representation": "ad0b042ed417c2c465b597408d78e5cdbada48ebceba1cad21235af67aff7961",
+        "action_head": "b3bd488d3e469e0e1222981e5a236b6eb5aff77f33c501dc3836ffc4d71a9f03",
+        "joint_head": "6e931a8889bc019e9d66b65bda9fafdcd3ff5850fe1d344e7a0bfdc8c6d5f242"
+      }
+    },
+    "20261101": {
+      "path": "artifacts/motion_models/20261030_scene_mlp_tailavg_u3000_s20261101/checkpoint_avg.pt",
+      "sha256": "41e91211b9426b1682344e46d23bafcbaf9adb15b767d4df929c228584b773fe",
+      "weight_fingerprint": {
+        "all": "480664bbc2d2d5a0a34bf72b5a4142552236dd2c78de32bb97fd5a837543f321",
+        "representation": "4fc2200649b3be3ceca1ff13ed616f5bb868516080f99349c2ec97ee64352fca",
+        "action_head": "cff58df597b6218aed53b61b884a0fb43bac7d2bc24e3458fa69ec5650f36d31",
+        "joint_head": "de81a169f3cc1d29d04fa6263c223a7f969c487fdbb37144c7213c1fab5dabb8"
+      }
+    }
+  },
+  "output_patterns": {
+    "bc_only": "artifacts/motion_models/20261030_scene_tailavg_bc_extra20_s{seed}_v1",
+    "bc_rl": "artifacts/motion_models/20261030_scene_tailavg_bc_reinforce20_s{seed}_v1"
+  },
+  "training": {
+    "updates": 20,
+    "episodes_per_update": 8,
+    "batch_size": 256,
+    "learning_rate": 1e-05,
+    "joint_loss_weight": 100.0,
+    "rl_loss_weight": 0.001,
+    "gamma": 0.99,
+    "std_deg": 0.5,
+    "max_decisions": 24,
+    "device": "cpu",
+    "optimizer": "new Adam for both conditions",
+    "bc_loss": "action cross entropy + 100 * move-only normalized absolute joint MSE",
+    "rl_loss": "-sum_episode,sum_t(gamma**t * return_to_go_t * sampled_action_log_probability_t) / 8",
+    "candidate_total_loss": "BC_loss + 0.001 * REINFORCE_loss",
+    "control_total_loss": "BC_loss",
+    "per_condition_bc_event_exposures": 5120,
+    "candidate_attempt_budget": 160,
+    "bc_only_experience_attempts": 0,
+    "fresh_bc_batch_per_update": true,
+    "shared_bc_batch_order": "same derived seed, dataset and training IDs within each pair",
+    "random_streams": "SHA-256-derived independent labels for BC minibatches, each group case order, each group target IDs, object mapping, physical-seed order, and stochastic policy sampling; never global RNG coupling",
+    "rl_provenance": "Completed RL checkpoints record declared and actual collected groups, exact physics seed set, completed episode count and episode-log SHA-256. Planned metadata alone is rejected by held-out evaluation.",
+    "cancellation_boundary": "Cancellation is checked before and after a command and after assessment; an in-progress one-second command or assessment is not interrupted mid-call."
+  },
+  "environment": {
+    "type": "SceneMotionSim",
+    "mujoco_version": "3.17.0",
+    "xml_path": "configs/sim/raccoon_pick_place.xml",
+    "train_physics_seed_range_inclusive": [
+      1000,
+      1079
+    ],
+    "train_physics_seed_usage": "each seed used twice among 160 planned attempts",
+    "per_update": "one case from each of the eight training groups",
+    "per_group_target_ids": "1,2,3,4 each appears five times over 20 attempts",
+    "unique_canonical_cases": 136,
+    "command_seconds": 1.0,
+    "terminal_assessment_seconds": 1.0,
+    "student_input": "82 registered scene, task, nominal slot and arm/gripper features; left-padded history of 8; privileged physical state excluded",
+    "teacher_assistance": false,
+    "actual_hardware": false
+  },
+  "reward": {
+    "potential": "-0.25*min(distance(TCP,object)/0.30,1) -0.25*min(distance(object,nominal destination center)/0.30,1) +0.10*I(both finger pads have positive contact)",
+    "step_cost": -0.02,
+    "gamma": 0.99,
+    "terminal_potential": 0.0,
+    "done_success": 10.0,
+    "done_failure": -1.0,
+    "decision_limit": -1.0,
+    "invalid_sampled_move": -2.0,
+    "other_object_first_boundary_displacement": -1.0,
+    "other_xy_threshold_m": 0.008,
+    "other_z_threshold_m": 0.003,
+    "error_or_cancel": "abort incomplete batch with no invented reward and preserve partial evidence",
+    "mean_range_policy": "record mean violation but only sampled movement target determines training failure; no clipping",
+    "zero_command_physics_batch": "abort before optimizer update"
+  },
+  "physical_evaluation": {
+    "execution_status": "planned_after_external_load_release",
+    "existing_bc_baseline_reuse": {
+      "20261030": {
+        "validation_1500": {
+          "path": "artifacts/motion_evaluations/20261030_scene_mlp_tailavg_validation60_u3000_s20261030",
+          "config_sha256": "91edce563b40cc49f0534332c2349eb1cae497c5c44d4b2df2f298e1d13c0694",
+          "summary_sha256": "d13a0394a5a1c6249d52476b4523e3f81ec625ce23bdd3bd2cbe5f8c2e9a64a3",
+          "episodes_sha256": "3e5ad799c52971227530f954ec0e2aa1363c2bb283065d2986fbbdabd855a449",
+          "full_case_count": 60,
+          "checkpoint_sha256": "fb33d349496c2367446dd1d4a44a3ec7a0e0d6809fedcfa1fad06af13006cec8",
+          "evaluator_sha256": "1ec42430dbe50c10b6c0db52226e20c3ac1d5d7132f3a722779f4279206cba52"
+        },
+        "train_1080": {
+          "path": "artifacts/motion_evaluations/20261030_scene_tailavg_train156_p1080_average_s20261030_v1",
+          "config_sha256": "7f718198cb619531a0c4ed7a6959a7b3dae697b424d0bc76db2e3ce8629a78a0",
+          "summary_sha256": "38df555694964317319036f7858b26bc8e1d7f914b9e4c8d70fb0976656e3f3e",
+          "episodes_sha256": "11e7af06c918ef275eaf4ce113cefe645aec88c7e899bd18c9b8c2815846faff",
+          "full_case_count": 156,
+          "checkpoint_sha256": "fb33d349496c2367446dd1d4a44a3ec7a0e0d6809fedcfa1fad06af13006cec8",
+          "evaluator_sha256": "cc3504b84e2c8cd0a7880615805df52e15817e803c830bccba206c0877a297d5"
+        }
+      },
+      "20261031": {
+        "validation_1500": {
+          "path": "artifacts/motion_evaluations/20261030_scene_mlp_tailavg_validation60_u3000_s20261031",
+          "config_sha256": "cc1cd75faa8e50f05d6efaeb3a8498071c435baf4cda7f51e37a100a2e094494",
+          "summary_sha256": "c5b15204ce021126c44b66b20ffc9a6f07899593f7192789aafb751d75be0638",
+          "episodes_sha256": "ea62a32be3e1e721f52ab4ac20cf3a8180428394eba204b506b9f144b455a0d8",
+          "full_case_count": 60,
+          "checkpoint_sha256": "0d3f2b20f04c94cfdea339f2e6de3f2fb65178506fcb0df8c5db4d3edcf6b04b",
+          "evaluator_sha256": "1ec42430dbe50c10b6c0db52226e20c3ac1d5d7132f3a722779f4279206cba52"
+        },
+        "train_1080": {
+          "path": "artifacts/motion_evaluations/20261030_scene_tailavg_train156_p1080_average_s20261031_v1",
+          "config_sha256": "6b93874ff39cefa2dffed1eaec32c3bb54f501fceef664d45d969959600a55d2",
+          "summary_sha256": "93a47cf2d3033864dfa2db2d3f1f7df64a9d26e714c6cd7399e9fe6ed943395a",
+          "episodes_sha256": "1f7b50babd54d7b20b12f5e89a0e24a6a72690b821ca5b9cd6d29bb56ab275b8",
+          "full_case_count": 156,
+          "checkpoint_sha256": "0d3f2b20f04c94cfdea339f2e6de3f2fb65178506fcb0df8c5db4d3edcf6b04b",
+          "evaluator_sha256": "cc3504b84e2c8cd0a7880615805df52e15817e803c830bccba206c0877a297d5"
+        }
+      },
+      "20261101": {
+        "validation_1500": {
+          "path": "artifacts/motion_evaluations/20261030_scene_mlp_tailavg_validation60_u3000_s20261101",
+          "config_sha256": "7afcbffec7001b2370e3600cf978c34607917687746f86855bb5eaa512cb4e4a",
+          "summary_sha256": "6f8ae189475e1869ba685591900b41e1272fdfc607a4aad37e2e8ce2144cc88f",
+          "episodes_sha256": "392efe7886b3d442477bb698f730ecfed07364dd4233ba04205a06d202e8465a",
+          "full_case_count": 60,
+          "checkpoint_sha256": "41e91211b9426b1682344e46d23bafcbaf9adb15b767d4df929c228584b773fe",
+          "evaluator_sha256": "1ec42430dbe50c10b6c0db52226e20c3ac1d5d7132f3a722779f4279206cba52"
+        },
+        "train_1080": {
+          "path": "artifacts/motion_evaluations/20261030_scene_tailavg_train156_p1080_average_s20261101_v1",
+          "config_sha256": "38205ea0796638161bfacd89fa2c437ca2a9324070581589f97645c0bbe5df41",
+          "summary_sha256": "1637be421763cb5b59624ce5e701ababc565d4fd3ce0dc4a66cb32adf87e68f1",
+          "episodes_sha256": "f7113b39209e4866ee45f5d01b7479a70f6634ae94237f8182c67b196022c9cf",
+          "full_case_count": 156,
+          "checkpoint_sha256": "41e91211b9426b1682344e46d23bafcbaf9adb15b767d4df929c228584b773fe",
+          "evaluator_sha256": "cc3504b84e2c8cd0a7880615805df52e15817e803c830bccba206c0877a297d5"
+        }
+      }
+    },
+    "validation": {
+      "split": "validation",
+      "physics_seed": 1500,
+      "case_count": 60,
+      "case_ids": [
+        "layout_0022_s3_d1",
+        "layout_0022_s3_d2",
+        "layout_0022_s4_d1",
+        "layout_0022_s4_d2",
+        "layout_0111_s2_d1",
+        "layout_0111_s3_d1",
+        "layout_0111_s4_d1",
+        "layout_0112_s2_d3",
+        "layout_0112_s3_d2",
+        "layout_0121_s2_d4",
+        "layout_0121_s4_d2",
+        "layout_0202_s2_d1",
+        "layout_0202_s2_d3",
+        "layout_0202_s4_d1",
+        "layout_0202_s4_d3",
+        "layout_0211_s3_d4",
+        "layout_0211_s4_d3",
+        "layout_0220_s2_d1",
+        "layout_0220_s2_d4",
+        "layout_0220_s3_d1",
+        "layout_0220_s3_d4",
+        "layout_1011_s1_d2",
+        "layout_1011_s3_d2",
+        "layout_1011_s4_d2",
+        "layout_1012_s1_d3",
+        "layout_1012_s3_d1",
+        "layout_1021_s1_d4",
+        "layout_1021_s4_d1",
+        "layout_1101_s1_d3",
+        "layout_1101_s2_d3",
+        "layout_1101_s4_d3",
+        "layout_1102_s1_d2",
+        "layout_1102_s2_d1",
+        "layout_1110_s1_d4",
+        "layout_1110_s2_d4",
+        "layout_1110_s3_d4",
+        "layout_1120_s1_d2",
+        "layout_1120_s2_d1",
+        "layout_1201_s1_d4",
+        "layout_1201_s4_d1",
+        "layout_1210_s1_d3",
+        "layout_1210_s3_d1",
+        "layout_2002_s1_d2",
+        "layout_2002_s1_d3",
+        "layout_2002_s4_d2",
+        "layout_2002_s4_d3",
+        "layout_2011_s3_d4",
+        "layout_2011_s4_d3",
+        "layout_2020_s1_d2",
+        "layout_2020_s1_d4",
+        "layout_2020_s3_d2",
+        "layout_2020_s3_d4",
+        "layout_2101_s2_d4",
+        "layout_2101_s4_d2",
+        "layout_2110_s2_d3",
+        "layout_2110_s3_d2",
+        "layout_2200_s1_d3",
+        "layout_2200_s1_d4",
+        "layout_2200_s2_d3",
+        "layout_2200_s2_d4"
+      ],
+      "interpretation": "held-out development task groups, previously used for development; never experience collection"
+    },
+    "train_diagnostic": {
+      "split": "train",
+      "physics_seed": 1080,
+      "case_count": 24,
+      "case_ids_by_group": {
+        "n1_s1_d1_other00": [
+          "layout_1000_s1_d2",
+          "layout_1000_s1_d3",
+          "layout_1000_s1_d4"
+        ],
+        "n2_s1_d1_other01": [
+          "layout_0101_s2_d1",
+          "layout_0101_s2_d3",
+          "layout_0110_s2_d4"
+        ],
+        "n2_s1_d2_other00": [
+          "layout_1010_s3_d1",
+          "layout_0110_s3_d2",
+          "layout_0011_s3_d4"
+        ],
+        "n2_s2_d1_other00": [
+          "layout_0002_s4_d1",
+          "layout_0002_s4_d2",
+          "layout_0002_s4_d3"
+        ],
+        "n3_s1_d2_other01": [
+          "layout_1101_s1_d2",
+          "layout_1011_s1_d3",
+          "layout_1011_s1_d4"
+        ],
+        "n3_s2_d1_other01": [
+          "layout_0201_s2_d1",
+          "layout_0201_s2_d3",
+          "layout_0210_s2_d4"
+        ],
+        "n4_s1_d1_other12": [
+          "layout_0112_s3_d1",
+          "layout_1012_s3_d2",
+          "layout_1210_s3_d4"
+        ],
+        "n4_s2_d2_other01": [
+          "layout_1012_s4_d1",
+          "layout_0112_s4_d2",
+          "layout_0112_s4_d3"
+        ]
+      },
+      "interpretation": "training task groups under an unused physics seed; not held-out task groups"
+    },
+    "reuse_condition": "Preflight verifies historical checkpoint, source/dependency evidence, exact recorded predictions and saved initial states. Reuse requires a separate actual comparison with BOTH new BC-only and BC+RL evaluation artifacts, exact case lists and full initial states including generated XML, MuJoCo and model parameters; each fine-tuned checkpoint and its actual experience log must match, and the evaluation physics seed must not appear in RL collection. Reuse remains pending until all these checks pass.",
+    "validation_gate": "candidate minus BC-only: three-seed mean at least +5/60, no seed below -3/60, zero evaluation errors",
+    "train_diagnostic_gate": "no seed decreases by more than 2/24 vs BC-only and zero evaluation errors",
+    "not_a_final_target_claim": true,
+    "historical_baseline_preflight_path": "artifacts/motion_evaluations/20261030_scene_motion_rl_reuse_evidence_v1/baseline_preflight_v2.json",
+    "comparison_tool": "scripts/audit_scene_motion_rl_reuse.py",
+    "new_results_comparison_status_at_freeze": "not_run_new_checkpoints_and_evaluations_do_not_exist",
+    "historical_dependency_evidence_note": "Evaluation logs record seven direct source hashes; other dependencies are fixed in the pre-evaluation experiment configurations and checked again, not separately logged at every historical decision.",
+    "mock_test_evidence_path": "artifacts/motion_evaluations/20261030_scene_motion_rl_reuse_evidence_v1/mock_test_evidence.json"
+  },
+  "source_sha256": {
+    "raccoon_memory/scene_motion_rl.py": "f31c8111d331f113ac2df97f6ae9a79faf3233969d92d1cfd8f680285c0c42ae",
+    "scripts/train_scene_motion_rl.py": "c270983587f637630b9690e5d99f9af43ef4d3132ad8d6ac206a0a8c643099f1",
+    "tests/test_scene_motion_rl.py": "5e7f43dca16911b661e53a6e164027968ceeeba42a1689489f04f894f55728a7",
+    "raccoon_memory/scene_policy.py": "a72eac245f3bca9c96c988e3c2ef375292b1c84b35430aba5c3a822a00efa2e0",
+    "raccoon_memory/scene_features.py": "0be50dc0aebda5d461ebfbcc23d5bf3e19a206387fd17f31e86d2338186aaf53",
+    "raccoon_memory/scene_motion_sim.py": "fb2522c40a09a8cd9b99cc42b23f46ee63fcf390df5a6bb734dd79b12a62d17d",
+    "raccoon_memory/motion_sim.py": "b9ea4bcac834d384f8f3f47985378e31dd965e375909e94be5a839fb16eae38c",
+    "raccoon_memory/sim_data.py": "dd6aa987b63e6685bab775cb055096eee538d64dcb4952fe0fc5acac20ba5be1",
+    "raccoon_memory/task_catalog.py": "230516c688ed3b914a911aa55cc0fd3f5677cabf548a947336d1740c65c320b0",
+    "raccoon_memory/motion_policy.py": "73e6897d0d9fa8d940136748714e872e73f0f41d40f23e4167bca5555410cd26",
+    "raccoon_memory/scene_fk_loss.py": "dd5ce4373bafec09198fc8ffc711787e7681dc1b05ceac60dde32bae5ae033b7",
+    "raccoon_control/kinematics.py": "33bddaf997de304754f1c4632dc33fe1283fbe25803f6b5a2e25ad912aff4e1a",
+    "raccoon_control/validation.py": "95de0abfede6bba28fc294f255703a795205c21fa823c684c31964c1f8faf8a0",
+    "raccoon_control/errors.py": "fd166573dcb4738bfbae9fd388592c4a3ae754ce44b6e57e5ebf1bcb5c4710f6",
+    "scripts/evaluate_scene_policy.py": "fd081c4ec170753e6ba70b3111d47538bdb9f9b2f9ba6ea300d5ce77b1bcef3a",
+    "scripts/train_scene_policy.py": "d71641b830758b06b2bb2be318a6cac0d6bbfd7d1ebf49b1a49288b73c88bec6",
+    "configs/sim/raccoon_pick_place.xml": "8f03de8c00cafa56fa2f00f435b126687ad8abc4946260ac3ba9d18f44b08662",
+    "configs/scene_split_plan.v1.json": "13b568c881b042bdf85c94c952db77cb02f145ba6e89056cc046c65f97a27aa7",
+    "docs/architecture_research/09_공통정책_물리경험_RL_최소설계.md": "41a381cdd10bb2b0d3f164299605b47ac1fcb7dbcf5e55448f9f286f735cbe55",
+    "scripts/audit_scene_motion_rl_reuse.py": "b6ffacc912238a83dca315fb2e4d7c0db35c46a3022254215bfa3cbf1f485cfc",
+    "tests/test_scene_rl_partition.py": "65b83f1174c3c4b810115cfc5c082f185baab62dab84a154e9a9b77119f42055",
+    "tests/test_scene_rl_reuse.py": "c2f505e906da9588073c8f2e8b1fbb92b773530f739afac4203e2ba5b40b39db",
+    "tests/test_scene_policy_evaluation.py": "0a4ae43f03250e77e482e2b58f099e33faca18a31f167d4e0760c4a6b6ed7e13",
+    "artifacts/motion_evaluations/20261030_scene_motion_rl_reuse_evidence_v1/evaluate_scene_policy_before_scope_fix.py": "1ec42430dbe50c10b6c0db52226e20c3ac1d5d7132f3a722779f4279206cba52",
+    "artifacts/motion_evaluations/20261030_scene_motion_rl_reuse_evidence_v1/evaluate_scene_policy_before_rl_partition.py": "cc3504b84e2c8cd0a7880615805df52e15817e803c830bccba206c0877a297d5"
+  },
+  "previous_evaluator_sha256": "1ec42430dbe50c10b6c0db52226e20c3ac1d5d7132f3a722779f4279206cba52",
+  "actual_experience_collected": false,
+  "actual_finetuning_run": false,
+  "actual_physical_evaluation_run": false,
+  "final_test_used": false,
+  "actual_hardware": false,
+  "microphone_used": false,
+  "historical_scope_fixed_evaluator_sha256": "cc3504b84e2c8cd0a7880615805df52e15817e803c830bccba206c0877a297d5",
+  "historical_experiment_configs": {
+    "validation_1500": {
+      "path": "configs/scene_tail_weight_average_comparison.v1.json",
+      "sha256": "ccdc7cb0bf9c32b8e498bab1fd1bfa4e8552e2180aa5923c03a59a3a43b2087b",
+      "source_hash_field": "source_sha256_at_preparation"
+    },
+    "train_1080": {
+      "path": "configs/scene_tailavg_new_physics_first_stage.v1.json",
+      "sha256": "2140c9221a0f02abe6448069bc1deb4037f9f6912b41a28820baadac7f1410cc",
+      "source_hash_field": "source_sha256"
+    }
+  },
+  "revision": {
+    "reason": "Validate actual RL-collected groups and seeds during partition checks and require actual evaluation evidence before BC baseline reuse.",
+    "previous_config_sha256": "e6c5f045f41eabaf731168ad610d226424844717fecf5ec1eb033c2be35e4d2f",
+    "revised_at_utc": "2026-10-30T05:18:09.982735+00:00",
+    "training_or_physics_executed_before_revision": false
+  },
+  "preflight_revision": {
+    "previous_config_sha256": "abd3ab242964d688dc7017d34c1c3d48245fd4a69e9a374275040831535d4cb0",
+    "revised_at_utc": "2026-10-30T05:20:13.051720+00:00",
+    "reason": "Complete actual experience provenance and require matching actual new evaluation artifacts; no experience collection performed."
+  }
+}
