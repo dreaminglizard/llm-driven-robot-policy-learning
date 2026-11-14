@@ -32,6 +32,14 @@ Start with the [technical guide](docs/TECHNICAL_GUIDE.md) or the dependency-free
 
 이 구조가 다른 모델 제작에도 확장된다면 더 많은 목적별 모델을 만들 수 있다는 것이 장기 가설입니다. 이를 입증하려면 모델 하나의 성능뿐 아니라, 서로 다른 과제에서 필요한 사람의 작업 시간·학습 비용·성공적으로 제작한 모델 수를 비교해야 합니다. 현재 자료가 그 확장성이나 생산성 향상을 이미 증명한다는 뜻은 아닙니다.
 
+### 아이디어의 출발점
+
+제가 이 아이디어를 떠올린 계기는 **LLM이 LLM의 가중치를 개선한 연구**였습니다. 거기서 “LLM이 피지컬 AI, 즉 로봇 모델의 가중치에도 개입해 성능을 개선할 수 있지 않을까?”라는 질문으로 이어졌습니다. 여기서는 출발점이 된 특정 논문을 식별하지 않았으므로 제목이나 성과를 추정해 인용하지 않습니다.
+
+이 동기는 현재 구현의 증거와 구분합니다. 공개 코드에서 확인되는 가중치 갱신은 학습 손실·역전파·옵티마이저를 통한 갱신입니다. LLM이 코드나 학습 설정을 제안하는 것, 그 설정으로 학습기가 가중치를 바꾸는 것, LLM이 가중치나 가중치 변화량 자체를 생성하는 것은 서로 다른 방식입니다. **현재 자료가 마지막 방식을 구현·검증했다고 주장하지 않습니다.**
+
+**Origin:** The idea began with research described as an LLM improving another LLM's weights, leading to the question of whether similar intervention could improve physical-AI robot models. The specific paper is not identified here. The published optimizer-based updates are distinct from an LLM directly generating weights or weight deltas.
+
 ## 두 가지 흐름
 
 ### 학습: 데이터가 가중치로
@@ -108,6 +116,8 @@ For English readers: this dependency-free example checks the symbolic task repre
 | 3. 독립 평가 | 개발 자료 밖에서도 결과가 유지되는가? | 원본 출처 단위 중복 검사, 학습·선정·최종 평가 분리, 연속 동작의 기억·종료 경계 | 최종 평가 자료를 모델 선택에 사용하지 않은 결과 기록 |
 | 4. 제작 생산성 | AI 참여가 더 많은 유효 모델 제작으로 이어지는가? | 같은 과제·예산에서 AI 참여 범위를 달리한 비교, 사람 작업 시간, 학습 자원, 실패·재작업, 기준을 충족한 모델 수 | 품질을 희생한 단순 생성 수가 아닌 비용·시간 대비 유효 모델 수 비교 |
 | 5. 다른 과제로 확장 | 첫 사례 밖에서도 같은 과정이 유효한가? | 새 과제의 데이터·평가 기준, 재사용 부분과 사람이 다시 설계한 부분 | 과제별 결과를 분리해 보고. 한 사례를 모든 모델의 가능성으로 일반화하지 않음 |
+
+후속 비교에서는 **① 사람이 정한 학습 설정, ② LLM이 제안한 코드·설정에 따른 옵티마이저 학습, ③ 모델이 직접 생성한 가중치·변화량**을 구분합니다. ③은 별도로 설계·검증해야 할 연구 후보이며, 현재 구현된 기능이나 우수한 방식으로 전제하지 않습니다.
 
 실행은 기존 코드와 저장 결과를 먼저 재사용하는 방식으로 진행합니다. 실물 시험은 별도의 안전 준비와 승인 아래 수행하며, 이 연구 계획 추가 자체로 새 학습이나 모터 작동을 시작한 것은 아닙니다.
 
