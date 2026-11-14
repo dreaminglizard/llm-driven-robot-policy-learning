@@ -878,6 +878,13 @@ class NativePhysicalSession(SceneModelSession):
                     or delivery.get('observation_verified') is not True
                     or not _has_applied_transfer_commands(partial)):
                 return
+            # A return-to-source OPEN is not delivery to this move's original
+            # destination.  The adapter finalizes source_return_expected only
+            # after DONE and confirmed stop; let the final commit below update
+            # memory once that evidence exists.  Otherwise an early commit
+            # records the old destination and can also seed incorrect recovery.
+            if 'source_return_open_pose' in last:
+                return
             with commit_lock if commit_lock is not None else nullcontext():
                 if self.cancel.is_set() or (is_current is not None and not is_current()):
                     return
@@ -1092,10 +1099,17 @@ class NativePhysicalSession(SceneModelSession):
         # Confirmed commands are necessary evidence, not proof of object motion.
         pregrasp = isinstance(result, dict) and result.get('pregrasp_return_expected') is True
         sdk_stopped_reference = self.controller.config.backend == 'sdk' and not pregrasp
+        # Preserving the student's SDK target can leave a return OPEN outside
+        # the nominal source even when DONE and stop were confirmed.  That is
+        # an unresolved return, not evidence of delivery to the old destination.
+        return_release = isinstance(result, dict) and any(
+            isinstance(row, dict) and 'source_return_open_pose' in row
+            for row in (result.get('decisions') or []))
         if (not isinstance(result, dict) or result.get('physical_success') is not None
                 or result.get('end_confirmed') is not True
                 or result.get('last_confirmed_gripper_command') != 'open'
                 or result.get('lease_state_uncertain') or result.get('stop_error')
+                or (return_release and result.get('source_return_expected') is not True)
                 or (redirect is not None and redirect.get('restarting') is True
                     and (result.get('retarget_grasp_pose_confirmed') is not True
                          or result.get('retarget_release_pose_confirmed') is not True))
