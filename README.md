@@ -6,7 +6,7 @@
 
 [논문 · 한국어/English v0.8.2](papers/PUBLISHED_VERSION.md) · [구현과 첫 실행](docs/TECHNICAL_GUIDE.md) · [선정 모델](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning) · [연구 패키지](PUBLIC_PACKAGE_README.md)
 
-GitHub의 최신 논문은 v0.8.2입니다. [Zenodo DOI](https://doi.org/10.5281/zenodo.24212741)는 아직 v0.8.1을 가리키며, v0.8.2의 Zenodo 발행은 대기 중입니다.
+GitHub와 Zenodo의 최신 한영 논문은 v0.8.2입니다. [v0.8.2 Zenodo DOI](https://doi.org/10.5281/zenodo.24217129)에서 확인할 수 있으며, v0.8.1은 이전 판본으로 보존됩니다.
 
 ## 연구 질문
 
