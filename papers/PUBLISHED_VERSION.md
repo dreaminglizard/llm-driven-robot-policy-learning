@@ -2,18 +2,24 @@
 
 ## Current release
 
-**v0.7.1 · 한국어 / English**  
-[Read or cite this version](https://doi.org/10.5281/zenodo.24212005)
+**v0.8.1 · 한국어 / English**  
+[Read or cite this version](https://doi.org/10.5281/zenodo.24212741)
 
-Zenodo provides `paper-v0.7.pdf` (Korean) and `paper_en.pdf` (English) together in this bilingual release. The Korean filename retains its earlier version label; the record version is v0.7.1. Publication on Zenodo is not itself peer review.
+Zenodo provides `paper_ko.pdf` and `paper_en.pdf`. The repository's [representative PDF](paper-draft.pdf) matches the Korean file. Publication on Zenodo is not itself peer review.
 
 최신 한영 공개판은 위 DOI를 기준으로 확인하세요. 논문 판본은 코드 커밋·가중치 버전과 별개입니다.
 
+| File | SHA-256 |
+|---|---|
+| Korean / repository representative PDF | `c4ed5a5a907f90dae0107913fda237b74d65b3a6af95c88ded4278baf281e2b8` |
+| English / Zenodo | `aa7ed8ad3c9874c6009baca8be282f361faf115f06b96753b1714f78beb64baf` |
+
 ## Earlier versions
 
-- [v0.7 · Korean](https://doi.org/10.5281/zenodo.24211882): earlier published record.
+- [v0.7.1 · Korean / English](https://doi.org/10.5281/zenodo.24212005): earlier bilingual release.
+- [v0.7 · Korean](https://doi.org/10.5281/zenodo.24211882): earlier Korean release.
 - [All versions](https://doi.org/10.5281/zenodo.24211881): version-independent record.
-- Repository drafts `paper-draft.pdf`, `paper-draft-v0.7.pdf` and `paper-materials.zip` are retained as historical materials, not the latest bilingual release.
+- Earlier representative PDFs remain in Git history. `paper-draft-v0.7.pdf` and `paper-materials.zip` remain historical materials, not the latest bilingual release.
 
 ## Rights
 
