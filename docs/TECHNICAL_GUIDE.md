@@ -1,9 +1,9 @@
 # Technical entry guide / 기술 구조와 첫 실행
 
-**LLM-assisted development of learned robot policies, not just an LLM calling robot functions.**
-The research question is how language models can help create training data and learning software so that a smaller policy acquires behavior through changes to its weights. RaccoonBot is the application case, not the scope of the idea.
+**AI-assisted model creation, with robot policy learning as the first case study.**
+The broader hypothesis is that AI participation in data preparation, training and weight improvement could help people produce more validated task-specific models. The present code provides a robot-policy case study, not evidence that this scales to all models. Optimizer-based updates, LLM-generated learning code, and direct generation of weights or weight deltas are different mechanisms; the latter is not established here. See the [research direction and planned comparisons](../README.md#후속-연구--next-research).
 
-**핵심은 LLM을 이용한 로봇 조작 모델의 개발·데이터 구성과 학습, 그리고 학습으로 바뀌는 가중치입니다.**
+**비전은 AI가 학습과 가중치 개선에 참여해 더 많은 검증된 모델을 만드는 것입니다. 로봇 조작 모델은 첫 사례입니다.**
 다만 “LLM이 개발을 돕는다”, “학습기가 가중치를 갱신한다”, “실행 중 Gemma가 명령을 해석한다”는 서로 다른 단계입니다.
 
 ## 1. Two paths, not one / 개발과 실행 구분
@@ -55,7 +55,14 @@ The optimizer changes learned policy parameters. The published code does **not**
 
 This is deliberately a small **symbolic representation smoke check**, not a learned-policy demonstration. It gives a newcomer a safe first executable entry point without installing the SDK, downloading weights, or starting training.
 
-From the repository root, with Python 3.11 or newer:
+Download this repository with Git (or GitHub's Code → Download ZIP and extract it). With Git:
+
+```sh
+git clone https://github.com/dreaminglizard/llm-driven-robot-policy-learning.git
+cd llm-driven-robot-policy-learning
+```
+
+From that repository root, with Python 3.11 or newer:
 
 ```sh
 python -m examples.offline_world_smoke
