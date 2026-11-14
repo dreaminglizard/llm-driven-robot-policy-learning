@@ -34,12 +34,12 @@ flowchart TD
 | 구분 | 현재 범위 |
 |---|---|
 | 구현 | 로봇 조작·기억 모델, 학습 코드, 선정 가중치와 기록 자료 |
-| 가중치 갱신 | 손실 계산 → 역전파 → 옵티마이저 갱신 → 체크포인트 저장 |
+| 가중치 갱신 | AdamW 학습, 닫힌식·Newton 보정. LLM이 개선 방법을 설계하고 코드를 작성·실행 |
 | 실행 | Gemma의 명령 해석 → 조작 모델 → 제어기·SDK. 경로에 따라 제한된 기호 탐색이 포함됨 |
 | 확인된 검사 | 기호 상태 검사, 선정 모델의 엄격한 로드와 합성 입력 CPU 검사. [조건과 범위](docs/TECHNICAL_GUIDE.md) |
 | 후속 검증 | LLM의 직접 가중치·변화량 생성, 전체 고리의 자율 작동, 다른 과제에서의 생산성·일반화 |
 
-LLM의 코드·설정 제안, 옵티마이저 학습, LLM의 직접 가중치 수정은 서로 다른 방식입니다. 현재 공개 구현은 두 번째 방식의 가중치 갱신을 보여줍니다. 저장된 예측 지표나 한 번의 시연을 실물 성공률로 바꾸어 주장하지 않습니다.
+논문 v0.8.2의 사례에서는 LLM이 보정 방법을 설계하고 코드를 작성·실행했으며, 실제 수치 갱신에는 AdamW 학습과 닫힌식·Newton 보정이 사용됐습니다. 이는 LLM이 가중치 수치를 직접 출력했다거나 전체 제작 고리가 자율적으로 작동했다는 뜻은 아닙니다. 저장된 예측 지표나 한 번의 시연을 실물 성공률로 바꾸어 주장하지 않습니다.
 
 ## 어디서 시작하나요?
 
@@ -66,7 +66,7 @@ LLM의 코드·설정 제안, 옵티마이저 학습, LLM의 직접 가중치 �
 
 Can AI help produce more useful models, rather than only operate one robot? The intended loop is human specification → AI-generated behavior data → training → LLM modification of the target model's weights and repeated testing → real-world use and human feedback. RaccoonBot is the first case study.
 
-The published code demonstrates optimizer-based policy updates, not direct LLM weight editing or the full autonomous loop. Current entry checks cover symbolic state handling and selected-checkpoint loading with synthetic inputs, not physical performance. The next study should compare validated-model yield, human effort and resource cost across methods and tasks.
+In the v0.8.2 case study, the LLM designed corrections and wrote and executed the code; numerical updates used AdamW training and closed-form and Newton-based corrections. This does not establish direct LLM generation of weight values or the full autonomous production loop. Current entry checks cover symbolic state handling and selected-checkpoint loading with synthetic inputs, not physical performance. The next study should compare validated-model yield, human effort and resource cost across methods and tasks.
 
 Read the [English technical guide](docs/TECHNICAL_GUIDE.md), [bilingual paper v0.8.2](papers/PUBLISHED_VERSION.md), or [model card](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning).
 
