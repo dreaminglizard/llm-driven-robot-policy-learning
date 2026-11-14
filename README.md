@@ -1,28 +1,36 @@
 # LLM-Driven Robot Policy Learning
 
-> **로봇에게 명령하는 AI에서, 로봇의 능력을 학습시키는 AI로.**
+> **AI를 사용하는 것에서, AI와 함께 더 많은 모델을 만드는 것으로.**
 >
-> 연구 질문: LLM이 설계와 데이터 준비에 참여하고, 작은 조작 모델이 가중치 갱신을 통해 행동을 배울 수 있을까?
+> 최종 비전은 로봇 한 대가 아닙니다. 다양한 모델의 제작 과정에 AI가 참여해 데이터 준비·학습 설계·평가·가중치 개선을 반복할 수 있다면, 사람이 혼자 만드는 것보다 더 많은 목적별 모델을 만들 수 있지 않을까?
 >
-> **Research question:** Can LLM-assisted design and data preparation help a small robot policy acquire behavior through learned weight updates?
+> **Vision:** If AI can participate throughout model development, including training and weight improvement, could we build more models for more tasks?
+>
+> **라쿤봇은 이 방향을 탐색하는 첫 사례입니다.** 현재 공개한 것은 로봇 조작 모델의 코드·선정 가중치·연구 자료이며, 모든 종류의 모델에 적용되는 생산 체계는 장기 비전입니다.
 
 [구조와 코드 / Architecture & code](docs/TECHNICAL_GUIDE.md) · [학습 코드 / Training](raccoon_memory/scene_trajectory_training.py) · [논문 초안 / Paper draft](papers/paper-draft.pdf) · [공개 패키지 / Downloads](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/releases/tag/v0.1.0-research)
 
-**처음 보는 분께:** 아래에서 개발·실행 구조를 보고, 로봇 없이 첫 예제를 실행한 다음, 코드와 공개 근거를 확인할 수 있습니다. 라쿤봇은 이 연구 방향을 적용한 사례입니다.
+**처음 보는 분께:** 아래에서 개발·실행 구조를 보고, 로봇 없이 첫 예제를 실행한 다음, 코드와 공개 근거를 확인할 수 있습니다. 라쿤봇은 더 넓은 모델 제작 비전을 로봇 조작에 적용해 탐색하는 첫 사례입니다.
 
 ### English overview
 
-This repository explores **LLM-assisted development of small robot manipulation policies**. LLM assistance in design and data preparation is distinct from the offline optimizer that updates policy weights. At runtime, Gemma interprets instructions; learned policies and the controller/SDK handle downstream behavior. RaccoonBot is the application case.
+The long-term aim is **AI-assisted model creation across domains**, not one robot. The hypothesis is that AI participation in data preparation, training design, evaluation and weight improvement could let people build more task-specific models. RaccoonBot is the first case study presented here.
+
+**What exists today:** published robot-policy code, selected trained weights and research artifacts. The training code computes gradients and updates policy parameters through an optimizer. **What remains a hypothesis:** higher model-production throughput, broad applicability across model types and autonomous end-to-end model creation. Those outcomes have not been established by this repository.
+
+LLM assistance and optimizer-driven weight updates are distinct. At runtime in the robot case, Gemma interprets instructions; learned policies and the controller/SDK handle downstream behavior.
 
 Start with the [technical guide](docs/TECHNICAL_GUIDE.md) or the dependency-free [symbolic smoke check](examples/offline_world_smoke.py). The public source contains several model families, including a planning path with optional symbolic search. Recorded prediction metrics, simulated behavior and physical demonstration are different evidence. This is a research snapshot, not a claim of general-purpose robotics or complete independent reproduction.
 
 **Feedback / 피드백:** [재현 결과·설치 문제 / Reproduction report](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/issues/new?template=reproduction.md) · [방법·근거 검토 / Technical review](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/issues/new?template=technical_review.md). 한국어와 영어 모두 환영합니다. 코드 위치와 실제 확인한 결과를 함께 알려 주세요.
 
-## 로봇보다, 로봇의 능력을 만드는 과정
+## 첫 사례는 로봇, 목표는 모델을 만드는 과정
 
-이 프로젝트가 다루는 핵심은 특정 로봇의 이름이 아니라 **LLM을 활용해 로봇 조작 모델을 설계하고, 학습 자료를 만들고, 학습을 통해 가중치를 수정하고, 실행 결과를 검토하는 개발 과정**입니다. 라쿤봇은 이 과정을 실제로 적용해 본 검증 사례입니다.
+이 프로젝트의 중심은 **AI가 모델을 만드는 과정에도 참여하는 구조**입니다. 모델을 한 번 호출하는 데서 끝나지 않고, 데이터를 준비하고 학습을 설계하며 결과를 평가해 가중치를 개선하는 반복 과정으로 역할을 넓히려는 것입니다.
 
-제가 도전하려는 방향은 로봇마다 모든 행동을 사람이 일일이 작성하는 대신, AI가 로봇의 능력을 만드는 과정에도 참여하는 것입니다. 여기서 중요한 것은 명령을 함수로 바꾸는 것만이 아니라 **조작 모델의 가중치가 학습으로 바뀐다는 점**입니다. 이 가능성을 더 많은 사람이 코드와 자료로 직접 검토할 수 있도록 공개합니다.
+라쿤봇에서는 이 방향을 작은 조작 모델의 개발·학습에 적용했습니다. 여기서 중요한 것은 명령을 함수로 바꾸는 것만이 아니라 **조작 모델의 가중치가 학습으로 바뀐다는 점**입니다. 공개 코드는 그 구체적인 출발점입니다.
+
+이 구조가 다른 모델 제작에도 확장된다면 더 많은 목적별 모델을 만들 수 있다는 것이 장기 가설입니다. 이를 입증하려면 모델 하나의 성능뿐 아니라, 서로 다른 과제에서 필요한 사람의 작업 시간·학습 비용·성공적으로 제작한 모델 수를 비교해야 합니다. 현재 자료가 그 확장성이나 생산성 향상을 이미 증명한다는 뜻은 아닙니다.
 
 ## 두 가지 흐름
 
