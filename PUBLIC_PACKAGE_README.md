@@ -24,6 +24,14 @@ The paths below describe the release source-and-weights ZIP, not the browsable G
 
 이 패키지는 2026-11-13 오전의 코드와 선정 가중치 모음입니다. 전체 실험 이력·대용량 데이터·모든 실험 체크포인트를 포함하는 완전 재학습 패키지는 아닙니다. 시험 결과와 수치는 각각의 개발/가상/실물 조건을 구분해 읽어야 합니다.
 
+## 스냅샷과 이후 수정 / Snapshot versus later fixes
+
+릴리스 ZIP은 **2026-11-13 고정 스냅샷**입니다. 현재 GitHub 코드에 반영된 이후 수정이 자동으로 ZIP에 들어가지는 않습니다. 특히 현재 저장소의 `native_physical_session.py`와 `terra_native_close_evidence.py`에는 이후 수정이 있습니다. ZIP과 현재 소스를 혼합해 사용할 경우 호환성을 별도로 확인해야 합니다.
+
+직접 연속 시연 변환기 `scripts/convert_terra_direct_continuous.py`와 관련 테스트도 ZIP의 당시 버전입니다. 이 테스트는 지정된 case-0007 원본 자료가 없으면 건너뛰도록 되어 있습니다. 해당 원본 사례의 result·assignment·events·public trace·private checkpoints는 이 소스 ZIP에서 확인되지 않았으므로, 테스트 명령의 정상 종료를 실제 변환 검증 통과로 해석하지 마세요. 변환기는 단독 파일이 아니라 다른 `scripts` 모듈에도 의존합니다.
+
+The release ZIP is a frozen snapshot, not a rolling copy of this repository. Later source fixes are not automatically included. The direct-demonstration converter's tests require a specific saved source case and skip when it is absent; those case files are not in this source ZIP. A successful command exit with skipped tests is not reproduction evidence.
+
 ## 설치와 외부 의존성
 
 Python 3.11 이상. `pyproject.toml`의 `hardware`, `learning`, `simulation`, `voice` 선택 의존성을 참조하세요. 원본 로컬 경로를 참조하는 일부 스크립트는 각자의 환경에 맞춰 경로 설정이 필요합니다. 이 공개 복사본을 독립 환경에서 처음부터 재현하는 검사는 수행하지 않았습니다.
