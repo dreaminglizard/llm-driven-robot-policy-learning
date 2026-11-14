@@ -89,6 +89,6 @@ This pinned check is historical evidence, not a claim that it is the newest load
 
 ## 5. Versions, downloads and reuse
 
-Use [the paper index](../papers/PUBLISHED_VERSION.md) for the latest bilingual DOI and historical versions. Use [the package guide](../PUBLIC_PACKAGE_README.md) for the frozen source ZIP, evidence archives and missing reproduction inputs. Paper version, code commit and weight hash are separate identifiers.
+Use [the paper index](../papers/PUBLISHED_VERSION.md) for the latest bilingual papers, DOI status and historical versions. Use [the package guide](../PUBLIC_PACKAGE_README.md) for the frozen source ZIP, evidence archives and missing reproduction inputs. Paper version, code commit and weight hash are separate identifiers.
 
 No code/model license is assigned here. The paper's CC BY 4.0 does not automatically cover code, weights or datasets; third-party terms remain applicable. Neither smoke command operates motors. Hardware use requires separate validation and safeguards.
