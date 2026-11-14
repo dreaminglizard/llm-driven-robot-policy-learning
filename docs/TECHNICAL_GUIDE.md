@@ -6,6 +6,10 @@ The broader hypothesis is that AI participation in data preparation, training an
 **비전은 AI가 학습과 가중치 개선에 참여해 더 많은 검증된 모델을 만드는 것입니다. 로봇 조작 모델은 첫 사례입니다.**
 다만 “LLM이 개발을 돕는다”, “학습기가 가중치를 갱신한다”, “실행 중 Gemma가 명령을 해석한다”는 서로 다른 단계입니다.
 
+**아이디어의 출발점:** LLM이 LLM의 가중치를 개선한 연구를 소개한 기사에서, “LLM이 피지컬 AI 로봇 모델의 가중치를 수정해 개선하면 어떨까?”라는 질문으로 이어졌습니다. 이는 연구 동기이며 해당 기사·원 논문은 아직 식별하지 않았으므로 추정 인용하지 않습니다.
+
+**Origin:** An article describing research on LLM-driven improvement of LLM weights prompted the question of applying weight improvement to physical-AI robot models. The article and original paper are not identified here.
+
 ## Target architecture / 목표하는 전체 고리
 
 **사람은 만들 모델과 목적을 정하고, 완성된 모델을 현실에서 사용한 뒤 피드백합니다. 중간 제작 과정은 AI가 주도하는 것이 목표입니다.**
@@ -24,7 +28,11 @@ flowchart TD
     F --> D
 ```
 
-이 그림은 **최종 비전**입니다. AI가 데이터 생성부터 학습·가중치 수정·테스트 반복을 주도하고, 사람의 실제 사용 피드백을 다음 개선으로 연결하는 구조입니다. 여기서 수정 대상은 만들고 있는 모델의 가중치이며, 로봇 사례에서는 조작 모델입니다. 사람은 반복 단계마다 수동으로 학습 코드를 수정하는 역할로 한정되지 않습니다.
+이 그림은 **최종 비전**입니다. AI가 데이터 생성부터 학습·가중치 수정·테스트 반복을 주도하고, 사람의 실제 사용 피드백을 다음 개선으로 연결하는 구조입니다. 여기서 수정 대상은 만들고 있는 모델의 가중치이며, 로봇 사례에서는 조작 모델입니다. 목표는 사람이 중간 단계마다 코드를 고치고 학습을 다시 지시하는 개입을 최소화하는 것입니다. 사람의 안전 승인·중단 권한을 없앤다는 뜻은 아닙니다.
+
+**확장 방향:** 라쿤봇은 첫 사례입니다. 같은 제작·개선 고리를 서로 다른 목적과 다른 로봇에 적용해, 각각에 맞는 모델을 더 많이 생산하는 것이 목표입니다. 동일 가중치를 모든 로봇에 그대로 옮기는 것이 아니라, 대상의 입력·출력·데이터·시험 조건에 맞춘 모델 제작을 뜻합니다. 이후 다른 종류의 모델까지 확장할 수 있는지는 별도로 검증할 가설입니다.
+
+**Expansion goal:** Minimize manual intervention inside the AI-led development loop while retaining human safety oversight. Extend the process to task-specific models for different robots, and eventually investigate other model types. This is a model-production goal, not a claim of universal weight transfer or already demonstrated scale.
 
 **현재 확인된 구현과의 차이:** 공개 코드에는 학습 손실·역전파·옵티마이저에 의한 가중치 갱신이 있습니다. LLM이 가중치 또는 변화량을 직접 생성·적용하는 단계와 위 전체 고리의 자율 작동은 아직 공개 자료로 입증되지 않았습니다. 완성 판정 기준, 사람의 승인·개입 경계, 실제 사용 피드백의 검증 방식도 후속 연구에서 정해야 합니다.
 
