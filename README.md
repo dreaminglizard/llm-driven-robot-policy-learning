@@ -4,7 +4,7 @@
 
 이 연구의 목표는 로봇 한 대가 아니라 **모델을 만드는 과정**입니다. 사람이 목적을 정하고 완성된 모델을 현실에서 사용하면, AI가 중간의 데이터 생성·학습·가중치 개선을 맡고 사용자의 피드백을 다음 개선에 연결하는 구조를 탐구합니다. 라쿤봇은 그 첫 사례입니다.
 
-[논문 · 한국어/English v0.7.1](https://doi.org/10.5281/zenodo.24212005) · [구현과 첫 실행](docs/TECHNICAL_GUIDE.md) · [선정 모델](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning) · [연구 패키지](PUBLIC_PACKAGE_README.md)
+[논문 · 한국어/English v0.8.1](https://doi.org/10.5281/zenodo.24212741) · [구현과 첫 실행](docs/TECHNICAL_GUIDE.md) · [선정 모델](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning) · [연구 패키지](PUBLIC_PACKAGE_README.md)
 
 ## 연구 질문
 
@@ -66,7 +66,7 @@ Can AI help produce more useful models, rather than only operate one robot? The 
 
 The published code demonstrates optimizer-based policy updates, not direct LLM weight editing or the full autonomous loop. Current entry checks cover symbolic state handling and selected-checkpoint loading with synthetic inputs, not physical performance. The next study should compare validated-model yield, human effort and resource cost across methods and tasks.
 
-Read the [English technical guide](docs/TECHNICAL_GUIDE.md), [bilingual paper](https://doi.org/10.5281/zenodo.24212005), or [model card](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning).
+Read the [English technical guide](docs/TECHNICAL_GUIDE.md), [bilingual paper](https://doi.org/10.5281/zenodo.24212741), or [model card](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning).
 
 ## 공개하는 이유
 
