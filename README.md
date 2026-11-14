@@ -24,6 +24,9 @@ Start with the [technical guide](docs/TECHNICAL_GUIDE.md) or the dependency-free
 
 **Feedback / 피드백:** [재현 결과·설치 문제 / Reproduction report](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/issues/new?template=reproduction.md) · [방법·근거 검토 / Technical review](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/issues/new?template=technical_review.md). 한국어와 영어 모두 환영합니다. 코드 위치와 실제 확인한 결과를 함께 알려 주세요.
 
+<details>
+<summary>연구 배경과 아이디어의 출발점 / Research motivation</summary>
+
 ## 첫 사례는 로봇, 목표는 모델을 만드는 과정
 
 이 프로젝트의 중심은 **AI가 모델을 만드는 과정에도 참여하는 구조**입니다. 모델을 한 번 호출하는 데서 끝나지 않고, 데이터를 준비하고 학습을 설계하며 결과를 평가해 가중치를 개선하는 반복 과정으로 역할을 넓히려는 것입니다.
@@ -39,6 +42,9 @@ Start with the [technical guide](docs/TECHNICAL_GUIDE.md) or the dependency-free
 이 동기는 현재 구현의 증거와 구분합니다. 공개 코드에서 확인되는 가중치 갱신은 학습 손실·역전파·옵티마이저를 통한 갱신입니다. LLM이 코드나 학습 설정을 제안하는 것, 그 설정으로 학습기가 가중치를 바꾸는 것, LLM이 가중치나 가중치 변화량 자체를 생성하는 것은 서로 다른 방식입니다. **현재 자료가 마지막 방식을 구현·검증했다고 주장하지 않습니다.**
 
 **Origin:** The idea began with research described as an LLM improving another LLM's weights, leading to the question of whether similar intervention could improve physical-AI robot models. The specific paper is not identified here. The published optimizer-based updates are distinct from an LLM directly generating weights or weight deltas.
+
+
+</details>
 
 ## 두 가지 흐름
 
@@ -73,7 +79,14 @@ LLM의 명령 해석과 조작 모델의 학습·추론은 서로 다른 단계�
 
 ## 로봇 없이 첫 실행 / First runnable check
 
-저장소를 내려받은 폴더에서 Python 3.11 이상으로 실행합니다. SDK나 모델 다운로드는 필요 없습니다.
+Python 3.11 이상이 필요합니다. Git으로 저장소를 받거나 GitHub의 **Code → Download ZIP**으로 내려받아 압축을 풉니다. Git을 사용하는 경우:
+
+```sh
+git clone https://github.com/dreaminglizard/llm-driven-robot-policy-learning.git
+cd llm-driven-robot-policy-learning
+```
+
+저장소 폴더에서 아래 명령을 실행합니다. SDK·모델 다운로드나 추가 패키지 설치는 필요 없습니다.
 
 ```sh
 python -m examples.offline_world_smoke
@@ -99,7 +112,7 @@ For English readers: this dependency-free example checks the symbolic task repre
 | 직접 시연 자료를 볼 수 있는가? | [직접 시연 자료 ZIP](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/releases/download/v0.1.0-research/LLM_direct_demonstrations_1000_20261113.zip) | 학습·개발 자료의 공개를 독립 평가 결과로 읽으면 안 됨 |
 | 어디까지 직접 확인했는가? | [실행 예제와 검증 범위](docs/TECHNICAL_GUIDE.md) | 위 예제만 실행 확인. 전체 재학습·실물 재현은 별도 |
 
-**시연 영상은 이 페이지에 제공하지 않습니다.** 영상이 있는 것처럼 표시하거나, 저장 관측의 정확도를 실물 성공률로 바꾸어 제시하지 않습니다. 코드로 평가할 때는 데이터 출처·평가 분리·종료 경계를 함께 확인해 주세요.
+현재 공개 경로는 코드·가중치·기록 자료입니다. 시연 영상은 아직 제공하지 않습니다. 기록 기반 예측 정확도와 실물 성공률은 구분하며, 평가 시 데이터 출처·평가 분리·종료 경계를 함께 확인해야 합니다.
 
 ## 현재 확인된 범위
 
@@ -135,11 +148,23 @@ For English readers: this dependency-free example checks the symbolic task repre
 - [논문 초안 PDF](papers/paper-draft.pdf) · [논문 및 근거 자료 ZIP](papers/paper-materials.zip)
 - 코드 바로 보기: [조작 모델·기억 모듈](raccoon_memory/) · [제어 모듈](raccoon_control/) · [설정](configs/) · [선정 모델 파일](models/)
 
-**실행 준비에는 릴리스의 패키지 ZIP을 사용하세요.** 저장소에서 바로 볼 수 있는 코드는 주요 모듈 발췌이며, ZIP은 원래의 스크립트·테스트·가중치 경로를 보존합니다. 설치와 장치 설정은 패키지의 안내 문서를 참고하세요. 이번 공개 과정에서 새 학습이나 실물 로봇 실행은 하지 않았습니다.
+**기호 예제는 현재 저장소만으로 실행합니다. 전체 연구 스크립트의 실행 준비에는 릴리스의 패키지 ZIP을 참고하세요.** 저장소에서 바로 볼 수 있는 코드는 주요 모듈 발췌이며, ZIP은 원래의 스크립트·테스트·가중치 경로를 보존합니다. 설치와 장치 설정은 패키지의 안내 문서를 참고하세요. 이번 공개 과정에서 새 학습이나 실물 로봇 실행은 하지 않았습니다.
 
 ZIP SHA-256: `508826d83762dc602d783bee1c0c27aed9dd919d024a827b233a0b4f8abd2d3e`
 
-현재 패키지는 **모든 실험 이력과 대용량 데이터를 포함한 완전 재학습 패키지가 아닙니다.** 원본의 수십 GB 연구 산출물·중간 체크포인트·대규모 시연 및 평가 데이터는 아직 게시하지 않았습니다. Gemma·Whisper 본체와 SDK 바이너리는 포함하지 않으며, 각 공식 배포처와 라이선스에 따라 별도로 준비해야 합니다. 인증정보, 개인 실행 로그, 비공개 대화 링크는 제외했습니다.
+현재 패키지는 **모든 실험 이력과 대용량 데이터를 포함한 완전 재학습 패키지가 아닙니다.** 선정 근거와 직접 시연 자료 일부는 위 링크로 공개되어 있습니다. 원본의 수십 GB 연구 산출물 전체와 모든 중간 체크포인트·시연·평가 데이터가 게시된 것은 아닙니다. 추가 공개는 전체 이력 복제보다 재현과 검증에 필요한 핵심 자료 선별을 우선합니다. Gemma·Whisper 본체와 SDK 바이너리는 포함하지 않으며, 각 공식 배포처와 라이선스에 따라 별도로 준비해야 합니다. 인증정보, 개인 실행 로그, 비공개 대화 링크는 제외했습니다.
+
+### 자료를 고르는 기준 / What to download
+
+| 목적 | 우선 자료 | 용도 |
+|---|---|---|
+| 개념과 코드 이해 | [기술 안내](docs/TECHNICAL_GUIDE.md), 현재 저장소 | 모델 계열·입출력·가중치 갱신 위치 확인 |
+| 가장 작은 실행 확인 | [기호 예제](examples/offline_world_smoke.py) | 학습·장치 없이 작업 표현만 검사 |
+| 선정 모델 조사 | [선정 조작 가중치](models/조작_학생_선정_20261030.pt), [기억 가중치](models/기억_GRU128.pt), 선정 근거 ZIP | 각 체크포인트에 맞는 로더·설정·근거를 함께 확인. 파일 이름만으로 모든 실행 경로와의 호환성을 보장하지 않음 |
+| 연구 스냅샷 재현 준비 | 소스·선정 가중치 패키지 | 스크립트·테스트·원래 경로 확인. 완전한 재학습 패키지는 아님 |
+| 비교·개발 이력 조사 | 다른 후보 가중치, 직접 시연 자료, 기존 릴리스 | 선정 모델과 비교 후보를 구분. 독립 최종 평가 자료로 자동 간주하지 않음 |
+
+모든 파일과 릴리스는 유지했습니다. 위 표는 읽는 순서를 정리한 것이며, 삭제·비공개 전환이나 백업 완료를 의미하지 않습니다.
 
 ## 공개하는 이유
 
