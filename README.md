@@ -2,9 +2,9 @@
 
 > **AI를 사용하는 것에서, AI와 함께 더 많은 모델을 만드는 것으로.**
 >
-> 최종 비전은 로봇 한 대가 아닙니다. 다양한 모델의 제작 과정에 AI가 참여해 데이터 준비·학습 설계·평가·가중치 개선을 반복할 수 있다면, 사람이 혼자 만드는 것보다 더 많은 목적별 모델을 만들 수 있지 않을까?
+> 최종 비전은 로봇 한 대가 아닙니다. 사람이 만들 모델을 정하면 AI가 행동 데이터 생성·학습·LLM 가중치 수정과 테스트를 반복하고, 사람은 완성 모델을 현실에서 사용하며 피드백하는 구조가 목표입니다. 이 고리가 확장되면 더 많은 목적별 모델을 만들 수 있지 않을까?
 >
-> **Vision:** If AI can participate throughout model development, including training and weight improvement, could we build more models for more tasks?
+> **Vision:** People specify and use models; AI leads data generation, training, weight modification and testing, then improves them from human feedback.
 >
 > **라쿤봇은 이 방향을 탐색하는 첫 사례입니다.** 현재 공개한 것은 로봇 조작 모델의 코드·선정 가중치·연구 자료이며, 모든 종류의 모델에 적용되는 생산 체계는 장기 비전입니다.
 
@@ -12,9 +12,33 @@
 
 **처음 보는 분께:** 아래에서 개발·실행 구조를 보고, 로봇 없이 첫 예제를 실행한 다음, 코드와 공개 근거를 확인할 수 있습니다. 라쿤봇은 더 넓은 모델 제작 비전을 로봇 조작에 적용해 탐색하는 첫 사례입니다.
 
+## 목표하는 전체 고리 / Target loop
+
+**사람은 만들 모델과 목적을 정하고, 완성된 모델을 현실에서 사용한 뒤 피드백합니다. 중간 제작 과정은 AI가 주도하는 것이 목표입니다.**
+
+```mermaid
+flowchart TD
+    H["사람: 만들 모델·목적 지정"] --> D["AI: 행동 데이터 생성"]
+    D --> T["AI: 모델 학습"]
+    T --> W["LLM: 대상 모델 가중치 수정"]
+    W --> E["AI: 테스트·결과 평가"]
+    E -->|"개선 필요"| W
+    E -->|"데이터·재학습 필요"| D
+    E -->|"완료 기준 충족"| M["완성 모델"]
+    M --> U["사람: 현실에서 사용"]
+    U --> F["사람: 결과·요구 피드백"]
+    F --> D
+```
+
+이 그림은 **최종 비전**입니다. AI가 데이터 생성부터 학습·가중치 수정·테스트 반복을 주도하고, 사람의 실제 사용 피드백을 다음 개선으로 연결하는 구조입니다. 여기서 수정 대상은 만들고 있는 모델의 가중치이며, 로봇 사례에서는 조작 모델입니다. 사람은 반복 단계마다 수동으로 학습 코드를 수정하는 역할로 한정되지 않습니다.
+
+**현재 확인된 구현과의 차이:** 공개 코드에는 학습 손실·역전파·옵티마이저에 의한 가중치 갱신이 있습니다. LLM이 가중치 또는 변화량을 직접 생성·적용하는 단계와 위 전체 고리의 자율 작동은 아직 공개 자료로 입증되지 않았습니다. 완성 판정 기준, 사람의 승인·개입 경계, 실제 사용 피드백의 검증 방식도 후속 연구에서 정해야 합니다.
+
+**English:** People specify the model and its purpose, then use the finished model in the real world and provide feedback. The intended AI-led middle loop is behavior-data generation → training → LLM modification of the target model's weights → testing and repeated improvement. Real-use feedback returns to that loop. This is the target architecture, not a claim that the published optimizer-based code already implements direct LLM weight editing or the autonomous end-to-end cycle.
+
 ### English overview
 
-The long-term aim is **AI-assisted model creation across domains**, not one robot. The hypothesis is that AI participation in data preparation, training design, evaluation and weight improvement could let people build more task-specific models. RaccoonBot is the first case study presented here.
+The long-term aim is **AI-assisted model creation across domains**, not one robot. The hypothesis is that an AI-led creation-and-improvement loop, bounded by human goal-setting and real-use feedback, could produce more task-specific models. RaccoonBot is the first case study presented here.
 
 **What exists today:** published robot-policy code, selected trained weights and research artifacts. The training code computes gradients and updates policy parameters through an optimizer. **What remains a hypothesis:** higher model-production throughput, broad applicability across model types and autonomous end-to-end model creation. Those outcomes have not been established by this repository.
 
@@ -46,7 +70,7 @@ Start with the [technical guide](docs/TECHNICAL_GUIDE.md) or the dependency-free
 
 </details>
 
-## 두 가지 흐름
+## 현재 코드의 개발·실행 흐름 / Published-code paths
 
 ### 학습: 데이터가 가중치로
 
