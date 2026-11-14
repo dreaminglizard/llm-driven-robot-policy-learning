@@ -11,6 +11,7 @@ import urllib.request
 from .errors import ControlError
 from .validation import json_loads, keys, number
 
+LOOPBACK_HOST = "127.0.0.1"
 MAX_REQUEST_BYTES = 65536
 
 
@@ -83,11 +84,11 @@ class ControllerServer(ThreadingHTTPServer):
     def __init__(self, controller, port=0):
         self.controller = controller
         self.token = secrets.token_urlsafe(32)
-        super().__init__(("127.0.0.1", port), RequestHandler)
+        super().__init__((LOOPBACK_HOST, port), RequestHandler)
 
     def write_endpoint(self, runtime):
         path = Path(runtime).resolve() / "controller.json"
-        document = {"schema_version": 1, "host": "127.0.0.1", "port": self.server_address[1], "token": self.token, "instance_id": self.controller.instance_id,
+        document = {"schema_version": 1, "host": LOOPBACK_HOST, "port": self.server_address[1], "token": self.token, "instance_id": self.controller.instance_id,
                     "owner_process": _owner_process_identity()}
         temporary = path.with_suffix(".tmp")
         temporary.write_text(json.dumps(document), encoding="utf-8")
@@ -152,7 +153,7 @@ class Client:
             endpoint = json_loads((Path(runtime) / "controller.json").read_text(encoding="utf-8"))
         except OSError as exc:
             raise ControlError("CONTROLLER_NOT_FOUND", "Start the resident controller first") from exc
-        if endpoint.get("host") != "127.0.0.1":
+        if endpoint.get("host") != LOOPBACK_HOST:
             raise ControlError("INVALID_ENDPOINT", "Only the local controller endpoint is supported")
         port = endpoint.get("port")
         if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
@@ -167,7 +168,7 @@ class Client:
         timeout = number(timeout, 'client_timeout', minimum=.001)
         body = json.dumps({"method": method, "params": params}, allow_nan=False).encode()
         request = urllib.request.Request(
-            f"http://127.0.0.1:{self.endpoint['port']}/rpc", data=body,
+            f"http://{LOOPBACK_HOST}:{self.endpoint['port']}/rpc", data=body,
             headers={"Content-Type": "application/json", "Authorization": "Bearer " + self.endpoint["token"]},
             method="POST",
         )

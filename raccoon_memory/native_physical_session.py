@@ -774,6 +774,34 @@ class NativePhysicalSession(SceneModelSession):
         # program. Require the coordinator, which owns that admission boundary.
         raise UnsupportedStep('physical preparation requires NativePhysicalCoordinator')
 
+    _UNSET_SCENE_FIELD = object()
+
+    @staticmethod
+    def _validated_stationary_reference(reference, error_message):
+        if not isinstance(reference, dict) or reference.get('source') != 'stationary_observation':
+            raise RuntimeError(error_message)
+        target = _initial_reference(reference.get('joints_deg'), 'stationary_observation',
+                                    reference.get('instance_id'), reference.get('revision'))
+        return target, reference['instance_id'], reference['revision']
+
+    def _restore_prior_scene_view_locked(self, *, target, target_source, instance_id, revision,
+                                         registered_scene, confirmed_scene,
+                                         nominal=_UNSET_SCENE_FIELD, encoded=_UNSET_SCENE_FIELD,
+                                         clear_redirect=False):
+        self._current_target = target
+        self._current_target_source = target_source
+        if nominal is not self._UNSET_SCENE_FIELD:
+            self._current_nominal_target = nominal
+        if encoded is not self._UNSET_SCENE_FIELD:
+            self._last_encoded_student_target = encoded
+        self._initial_observation_instance_id = instance_id
+        self._initial_observation_revision = revision
+        self._current_registered_scene = registered_scene
+        self._confirmed_current_scene = confirmed_scene
+        self._unresolved_transfer = None
+        if clear_redirect:
+            self._staged_redirect = None
+
     def _move(self, action, *, commit_lock=None, is_current=None, on_transfer_commit=None):
         self._ready()
         if (action.get('source_slot') not in self._active_slots
@@ -898,15 +926,16 @@ class NativePhysicalSession(SceneModelSession):
                 with self._scene_view_lock:
                     if self._staged_redirect is not None or event['committed']:
                         raise RuntimeError('transfer ownership changed before acquire refusal')
-                    self._current_target = initial_target
-                    self._current_target_source = initial_source
-                    self._current_nominal_target = initial_nominal
-                    self._last_encoded_student_target = encoded
-                    self._initial_observation_instance_id = initial_instance
-                    self._initial_observation_revision = initial_revision
-                    self._current_registered_scene = initial_registered_scene
-                    self._confirmed_current_scene = initial_confirmed_scene
-                    self._unresolved_transfer = None
+                    self._restore_prior_scene_view_locked(
+                        target=initial_target,
+                        target_source=initial_source,
+                        nominal=initial_nominal,
+                        encoded=encoded,
+                        instance_id=initial_instance,
+                        revision=initial_revision,
+                        registered_scene=initial_registered_scene,
+                        confirmed_scene=initial_confirmed_scene,
+                    )
                     event['result'] = result
                     event['not_started'] = True
                     event['not_started_reason'] = 'controller_not_ready'
@@ -954,13 +983,11 @@ class NativePhysicalSession(SceneModelSession):
                          returned.get('next_control_reference') if self.controller.config.backend == 'sdk' else None)
             restart_kwargs = {}
             if before_grasp or self.controller.config.backend == 'sdk':
-                if not isinstance(reference, dict) or reference.get('source') != 'stationary_observation':
-                    raise RuntimeError('staged redirect has no fresh stopped reference')
-                target = _initial_reference(reference.get('joints_deg'), 'stationary_observation',
-                                            reference.get('instance_id'), reference.get('revision'))
+                target, obs_instance_id, obs_revision = self._validated_stationary_reference(
+                    reference, 'staged redirect has no fresh stopped reference')
                 restart_kwargs.update(initial_target_source='stationary_observation',
-                                      initial_observation_instance_id=reference['instance_id'],
-                                      initial_observation_revision=reference['revision'])
+                                      initial_observation_instance_id=obs_instance_id,
+                                      initial_observation_revision=obs_revision)
             else:
                 if returned.get('current_target_known') is not True:
                     raise RuntimeError('staged redirect has no confirmed control target')
@@ -1033,15 +1060,16 @@ class NativePhysicalSession(SceneModelSession):
                 if self.cancel.is_set() or (is_current is not None and not is_current()):
                     raise InterruptedError('request invalidated before retaining the prior scene')
                 with self._scene_view_lock:
-                    self._current_target = _initial_reference(reference['joints_deg'], 'stationary_observation',
-                                                             reference['instance_id'], reference['revision'])
-                    self._current_target_source = 'stationary_observation'
-                    self._initial_observation_instance_id = reference['instance_id']
-                    self._initial_observation_revision = reference['revision']
-                    self._current_registered_scene = initial_registered_scene
-                    self._confirmed_current_scene = initial_confirmed_scene
-                    self._unresolved_transfer = None
-                    self._staged_redirect = None
+                    self._restore_prior_scene_view_locked(
+                        target=_initial_reference(reference['joints_deg'], 'stationary_observation',
+                                                  reference['instance_id'], reference['revision']),
+                        target_source='stationary_observation',
+                        instance_id=reference['instance_id'],
+                        revision=reference['revision'],
+                        registered_scene=initial_registered_scene,
+                        confirmed_scene=initial_confirmed_scene,
+                        clear_redirect=True,
+                    )
                     event['no_motion_confirmed'] = True
             raise NoMotionObserved('no arm movement or gripper command was observed')
         # If no CLOSE or OPEN decision was issued, an interrupted approach
@@ -1089,10 +1117,8 @@ class NativePhysicalSession(SceneModelSession):
             event.update(planned_after=before, source_return_expected=True)
         if pregrasp or sdk_stopped_reference:
             reference = result.get('pregrasp_next_reference' if pregrasp else 'next_control_reference')
-            if not isinstance(reference, dict) or reference.get('source') != 'stationary_observation':
-                raise RuntimeError('confirmed stop has no fresh reference')
-            target = _initial_reference(reference.get('joints_deg'), 'stationary_observation',
-                                        reference.get('instance_id'), reference.get('revision'))
+            target, _obs_instance_id, _obs_revision = self._validated_stationary_reference(
+                reference, 'confirmed stop has no fresh reference')
             nominal = None
             encoded = (_encoded_student_reference(result.get('last_encoded_student_target'), reference)
                        if sdk_stopped_reference and not pregrasp else None)

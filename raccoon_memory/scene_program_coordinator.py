@@ -13,6 +13,7 @@ import threading
 from contextlib import nullcontext
 
 from . import scene_recall, task_program, task_program_v2
+from .concurrency import CombinedEvent as _RetargetCancellation
 from .scene_model_session import (DuplicateRequest, RepeatBoundaryReached, StackReferenceUnavailable, UnsupportedStep,
                                   _LocalModelProgram, _ValidatedTopUnstackSource, _reject_unsupported_target_constraint,
                                   _validated_single_top_unstack, plan_task)
@@ -56,16 +57,6 @@ class StepUnavailable(UnsupportedStep):
 
 class NoMotionObserved(RuntimeError):
     """A transfer stopped before any observed motion or gripper action."""
-
-
-class _RetargetCancellation:
-    """Read cancellation without taking the coordinator or adapter lock."""
-
-    def __init__(self, *events):
-        self._events = tuple(event for event in events if event is not None)
-
-    def is_set(self):
-        return any(event.is_set() for event in self._events)
 
 
 def _finished_retarget(run, events):
@@ -732,6 +723,25 @@ class SceneProgramCoordinator:
             plan['count'] = copy.deepcopy(repeat['count'])
         return plan
 
+    def _begin_captured_request(self, *, request_id, transcript, registration_scene=None):
+        """Reserve a unique request ID and snapshot context/owner under the coordinator lock."""
+        with self._lock:
+            self._refresh_external_state()
+            with self.session._request_lock:
+                if request_id in self.session._requests:
+                    raise DuplicateRequest('request ID was already used')
+                self.session._requests.add(request_id)
+            receipt = secrets.token_urlsafe(24)
+            context = self._context()
+            self._interpretations[receipt] = {
+                'request_id': request_id, 'transcript': transcript, 'context': copy.deepcopy(context),
+                'owner': self._owner(), 'registration_scene': copy.deepcopy(registration_scene)}
+            captured = {'interpretation_id': receipt, 'request_id': request_id,
+                        'reference_context': copy.deepcopy(context)}
+            if transcript is not None:
+                captured['text'] = transcript
+            return captured
+
     def begin_interpretation(self, text, *, request_id, registration_scene=None):
         """Capture the input and owner before calling the interpreter.
 
@@ -742,19 +752,8 @@ class SceneProgramCoordinator:
         if (not task_program._valid_id(request_id) or not isinstance(text, str)
                 or not text.strip() or len(text) > task_program.MAX_TEXT_CHARS):
             raise ValueError('invalid request ID or transcript')
-        with self._lock:
-            self._refresh_external_state()
-            with self.session._request_lock:
-                if request_id in self.session._requests:
-                    raise DuplicateRequest('request ID was already used')
-                self.session._requests.add(request_id)
-            receipt = secrets.token_urlsafe(24)
-            context = self._context()
-            self._interpretations[receipt] = {
-                'request_id': request_id, 'transcript': text, 'context': copy.deepcopy(context),
-                'owner': self._owner(), 'registration_scene': copy.deepcopy(registration_scene)}
-            return {'interpretation_id': receipt, 'request_id': request_id,
-                    'text': text, 'reference_context': copy.deepcopy(context)}
+        return self._begin_captured_request(
+            request_id=request_id, transcript=text, registration_scene=registration_scene)
 
     def begin_voice_processing(self, *, request_id):
         """Reserve a request and capture its owner before processing an audio file.
@@ -765,19 +764,7 @@ class SceneProgramCoordinator:
         """
         if not task_program._valid_id(request_id):
             raise ValueError('invalid request ID')
-        with self._lock:
-            self._refresh_external_state()
-            with self.session._request_lock:
-                if request_id in self.session._requests:
-                    raise DuplicateRequest('request ID was already used')
-                self.session._requests.add(request_id)
-            receipt = secrets.token_urlsafe(24)
-            context = self._context()
-            self._interpretations[receipt] = {
-                'request_id': request_id, 'transcript': None, 'context': copy.deepcopy(context),
-                'owner': self._owner(), 'registration_scene': None}
-            return {'interpretation_id': receipt, 'request_id': request_id,
-                    'reference_context': copy.deepcopy(context)}
+        return self._begin_captured_request(request_id=request_id, transcript=None)
 
     def recapture_pending_text_plan(self, request_id, text, change, *, cancel_event=None):
         """Re-admit the same still-unstarted request after its admission changed type."""
@@ -2082,6 +2069,17 @@ class SceneProgramCoordinator:
         try:
             initial = program['steps'] if plan['repeat_index'] is None else program['steps'][:plan['repeat_index']]
             progress = 0
+            def check_step_boundary(moved, pending):
+                if pending == 'retarget_cutoff':
+                    return 'retarget_cutoff', 'after_transfer'
+                if moved is None:
+                    return 'repeat_stopped', (pending if pending in ('before_next_transfer', 'after_transfer')
+                                              else 'before_next_task')
+                if pending in ('after_task', 'after_transfer'):
+                    return 'repeat_stopped', (self._transfer_stop_boundary(run)
+                                              if pending == 'after_transfer' else pending)
+                return None
+
             for index, step in enumerate(initial):
                 try:
                     moved, pending = self._step(run, step, index, entry['registration_scene'],
@@ -2092,17 +2090,11 @@ class SceneProgramCoordinator:
                     self.session._ready()
                     status, detail = 'target_unavailable', str(exc)
                     break
-                if pending == 'retarget_cutoff':
-                    status, actual_boundary = 'retarget_cutoff', 'after_transfer'
-                    break
-                if moved is None:
-                    status, actual_boundary = 'repeat_stopped', (pending if pending in ('before_next_transfer', 'after_transfer')
-                                                                  else 'before_next_task')
-                    break
-                progress += moved
-                if pending in ('after_task', 'after_transfer'):
-                    status, actual_boundary = 'repeat_stopped', (self._transfer_stop_boundary(run)
-                                                                 if pending == 'after_transfer' else pending)
+                boundary = check_step_boundary(moved, pending)
+                if moved is not None:
+                    progress += moved
+                if boundary is not None:
+                    status, actual_boundary = boundary
                     break
             if plan['repeat_index'] is not None and status == 'completed':
                 with self._lock:
@@ -2136,17 +2128,11 @@ class SceneProgramCoordinator:
                                     self.events.append({'event': 'repeat_unavailable', 'request_id': run['request_id'],
                                                         'round': run['round'], 'step_index': index, 'detail': detail})
                                 break
-                            if pending == 'retarget_cutoff':
-                                status, actual_boundary = 'retarget_cutoff', 'after_transfer'
-                                break
-                            if moved is None:
-                                status, actual_boundary = 'repeat_stopped', (pending if pending in ('before_next_transfer', 'after_transfer')
-                                                                              else 'before_next_task')
-                                break
-                            progress += moved
-                            if pending in ('after_task', 'after_transfer'):
-                                status, actual_boundary = 'repeat_stopped', (self._transfer_stop_boundary(run)
-                                                                             if pending == 'after_transfer' else pending)
+                            boundary = check_step_boundary(moved, pending)
+                            if moved is not None:
+                                progress += moved
+                            if boundary is not None:
+                                status, actual_boundary = boundary
                                 break
                         rounds += 1
                         if status != 'completed':

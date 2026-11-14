@@ -9,11 +9,13 @@ from .errors import ControlError
 from .validation import number, vector
 
 JOINT_LIMITS = ((-120.0, 120.0), (-90.0, 30.0), (-150.0, 0.0), (-105.0, 105.0))
+JOINT_COUNT = len(JOINT_LIMITS)
 STEPS_PER_DEGREE = 4096.0 / 360.0
+ENCODER_STEP_DEG = 1.0 / STEPS_PER_DEGREE
 
 
 def check_joints(values):
-    joints = vector(values, 4, "joints_deg")
+    joints = vector(values, JOINT_COUNT, "joints_deg")
     for i, (value, (low, high)) in enumerate(zip(joints, JOINT_LIMITS)):
         if not low <= value <= high:
             raise ControlError("JOINT_LIMIT", f"Joint {i + 1} is outside its range")
@@ -40,7 +42,7 @@ class Geometry:
     tool_vertical_mm: float = -6.0
 
     def forward(self, joints):
-        q1, q2, q3, q4 = (math.radians(x) for x in vector(joints, 4, "joints_deg"))
+        q1, q2, q3, q4 = (math.radians(x) for x in vector(joints, JOINT_COUNT, "joints_deg"))
         pitch = q2 + q3 + q4 + math.pi / 2
         radius = (-self.upper_mm * math.sin(q2) - self.forearm_mm * math.sin(q2 + q3)
                   + self.tool_forward_mm * math.cos(pitch) - self.tool_vertical_mm * math.sin(pitch))

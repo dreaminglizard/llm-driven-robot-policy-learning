@@ -15,8 +15,7 @@ from copy import copy
 
 import numpy as np
 
-RATE = 16000
-BLOCK = 1600
+from .voice import AUDIO_BLOCK_SIZE as BLOCK, AUDIO_SAMPLE_RATE as RATE
 _LOG = logging.getLogger(__name__)
 
 

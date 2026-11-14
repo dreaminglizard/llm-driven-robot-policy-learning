@@ -20,7 +20,7 @@ from .blended_execution import (SDK_BLENDED_COMMAND_PERIOD_S, planned_sample_dig
 from .device import Snapshot
 from .errors import ControlError
 from .hardware_policy import check_hardware_time
-from .kinematics import Geometry, check_joints, distance, quantize_joints
+from .kinematics import ENCODER_STEP_DEG, JOINT_COUNT, Geometry, check_joints, distance, quantize_joints
 from .locking import FileLock
 from .motion_envelope import bounds as motion_bounds, check as check_envelope
 from .validation import keys, number, vector
@@ -30,7 +30,7 @@ SDK_STREAM_FRAME_TIMEOUT_S = .2
 SDK_STREAM_MAX_LATENESS_S = .15
 SDK_TRACKING_STALL_SECONDS = 2.
 SDK_FEEDBACK_GAP_GRACE_SECONDS = 1.0
-SDK_ENCODER_STEP_DEG = 360. / 4096.
+SDK_ENCODER_STEP_DEG = ENCODER_STEP_DEG
 SDK_FINISHED_AXIS_CORRECTION_LIMIT_DEG = 1.
 
 
@@ -40,7 +40,7 @@ class _TrackingDiagnostics:
         self._lock = threading.Lock()
         self._events = deque(maxlen=256)
         self._dropped = 0
-        self._axes = [None] * 4
+        self._axes = [None] * JOINT_COUNT
         self._delay_by_mask = {}
         self._wait_active = False
 

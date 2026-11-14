@@ -20,14 +20,19 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
+from raccoon_control.transport import LOOPBACK_HOST
+
 from . import product_instance
 from .demo_controller import PhysicalProfileValidationError
 from .demo_service import (BEST_CLOSE_SHA256, BEST_CLOSE_STUDENT, CLOSE_SHA256, CLOSE_STUDENT,
                            CLOSED_MOVE_PROFILES, CONTROL_TIMING_PROFILES, DEFAULT_STUDENT, FINGER_OPEN_PROFILES,
                            RL_SHA256, RL_STUDENT, DemoService, _AuxiliaryOperation,
                            _execution_failure_message, _is_direct_stop_text, _is_text_stop_candidate, _request_id)
+from .world import SLOTS
 
 ASSETS = Path(__file__).with_name('demo_web_assets')
+_SLOT_COUNT = len(SLOTS)
+_MAX_POST_BODY_BYTES = 8192
 MODELS = {
     'default': ('기존 접근거리 학생', DEFAULT_STUDENT, None),
     'close': ('집게·거리 결합 학생 · 기본', BEST_CLOSE_STUDENT, BEST_CLOSE_SHA256),
@@ -41,19 +46,20 @@ class RegistrationStateChanged(ValueError):
 
 
 def parse_layout(values):
-    if not isinstance(values, list) or len(values) != 4:
+    if not isinstance(values, list) or len(values) != _SLOT_COUNT:
         raise ValueError('네 자리의 배치를 확인해 주세요.')
     stacks = []
+    valid_tokens = tuple(str(i) for i in range(1, _SLOT_COUNT + 1))
     for value in values:
         if not isinstance(value, str):
             raise ValueError('원통 번호는 쉼표로 구분해 입력해 주세요.')
         parts = [part.strip() for part in value.split(',')] if value.strip() else []
-        if any(part not in ('1', '2', '3', '4') for part in parts):
-            raise ValueError('원통 번호는 1~4이며, 쉼표로 아래층부터 입력해 주세요.')
+        if any(part not in valid_tokens for part in parts):
+            raise ValueError(f'원통 번호는 1~{_SLOT_COUNT}이며, 쉼표로 아래층부터 입력해 주세요.')
         stacks.append([int(part) for part in parts])
     ids = [item for stack in stacks for item in stack]
-    if any(len(stack) > 2 for stack in stacks) or not 1 <= len(ids) <= 4 or len(set(ids)) != len(ids):
-        raise ValueError('원통은 1~4개, 번호는 중복 없이, 각 자리는 최대 2층이어야 합니다.')
+    if any(len(stack) > 2 for stack in stacks) or not 1 <= len(ids) <= _SLOT_COUNT or len(set(ids)) != len(ids):
+        raise ValueError(f'원통은 1~{_SLOT_COUNT}개, 번호는 중복 없이, 각 자리는 최대 2층이어야 합니다.')
     return stacks
 
 
@@ -1293,12 +1299,16 @@ class DemoController:
             self.state['status'] = self._mode_name() + ' 제어기에 연결했습니다. 시작 배치를 등록해 주세요.'
             self._log(self.state['status'])
 
+    def _require_control_idle_locked(self):
+        """Ensure no execution, text control, or voice turn blocks controller operations."""
+        if (self.closing or self.state['busy'] or (self.chat is not None and not self.state['chat_setup_only'])
+                or self.state['text_control_pending']
+                or self.state['stop_requested'] or self.state['chat_stopping']):
+            raise ValueError('진행 중인 작업이나 음성 대화를 먼저 종료해 주세요.')
+
     def disconnect_controller(self, data):
         with self.lock:
-            if (self.closing or self.state['busy'] or (self.chat is not None and not self.state['chat_setup_only'])
-                    or self.state['text_control_pending']
-                    or self.state['stop_requested'] or self.state['chat_stopping']):
-                raise ValueError('진행 중인 작업이나 음성 대화를 먼저 종료해 주세요.')
+            self._require_control_idle_locked()
             self._require_current_mode(data)
             if self.state['mode'] == 'virtual':
                 raise ValueError('가상 모드는 제어기 연결이 필요하지 않습니다.')
@@ -1321,10 +1331,7 @@ class DemoController:
 
     def prepare_gripper(self, data):
         with self.lock:
-            if (self.closing or self.state['busy'] or (self.chat is not None and not self.state['chat_setup_only'])
-                    or self.state['text_control_pending']
-                    or self.state['stop_requested'] or self.state['chat_stopping']):
-                raise ValueError('진행 중인 작업이나 음성 대화를 먼저 종료해 주세요.')
+            self._require_control_idle_locked()
             self._require_current_mode(data)
             if self.state['mode'] == 'virtual':
                 raise ValueError('가상 모드는 별도의 집게 준비가 필요하지 않습니다.')
@@ -1343,10 +1350,7 @@ class DemoController:
 
     def recover_controller(self, data):
         with self.lock:
-            if (self.closing or self.state['busy'] or (self.chat is not None and not self.state['chat_setup_only'])
-                    or self.state['text_control_pending']
-                    or self.state['stop_requested'] or self.state['chat_stopping']):
-                raise ValueError('진행 중인 작업이나 음성 대화를 먼저 종료해 주세요.')
+            self._require_control_idle_locked()
             self._require_current_mode(data)
             if self.state['mode'] != 'physical':
                 raise ValueError('실물 제어기 모드에서 복구를 요청해 주세요.')
@@ -1942,7 +1946,7 @@ class DemoServer(ThreadingHTTPServer):
         self._serving = False
         self._product_owner = product_owner
         self._open_initial_screen = open_initial_screen
-        super().__init__(('127.0.0.1', port), DemoHandler)
+        super().__init__((LOOPBACK_HOST, port), DemoHandler)
 
     def server_bind(self):
         # On Windows, another process must not be able to bind over this
@@ -2038,7 +2042,7 @@ class DemoHandler(BaseHTTPRequestHandler):
 
     def _authorized(self):
         origin = self.headers.get('Origin')
-        expected_origin = f'http://127.0.0.1:{self.server.server_port}'
+        expected_origin = f'http://{LOOPBACK_HOST}:{self.server.server_port}'
         return (self.headers.get('X-Demo-Token') == self.server.token
                 and (origin is None or origin == expected_origin))
 
@@ -2065,41 +2069,38 @@ class DemoHandler(BaseHTTPRequestHandler):
             return
         try:
             length = int(self.headers.get('Content-Length', '0'))
-            if length > 8192:
+            if length > _MAX_POST_BODY_BYTES:
                 raise ValueError('요청이 너무 깁니다.')
             data = json.loads(self.rfile.read(length) or b'{}')
             if not isinstance(data, dict):
                 raise ValueError('요청 형식을 확인해 주세요.')
             action = urlsplit(self.path).path
-            controller = self.server.controller
-            result = {'ok': True}
-            if action == '/api/register':
-                result['registration_revision'] = controller.register(data)
-            elif action == '/api/mode':
-                result['registration_revision'] = controller.set_mode(data)
-            elif action == '/api/connect':
-                controller.connect_controller(data)
-            elif action == '/api/disconnect':
-                result['registration_revision'] = controller.disconnect_controller(data)
-            elif action == '/api/prepare-gripper':
-                controller.prepare_gripper(data)
-            elif action == '/api/recover-controller':
-                result['registration_revision'] = controller.recover_controller(data)
-            elif action == '/api/submit':
-                controller.submit(data)
-            elif action == '/api/chat/start':
-                controller.start_chat(data)
-            elif action == '/api/chat/end':
-                controller.end_chat()
-            elif action == '/api/stop':
-                controller.stop(target_request_id=data.get('stop_target'))
-            elif action == '/api/close':
+            if action == '/api/close':
                 self.server.request_shutdown()
                 self._send(200, {'ok': True})
                 return
-            else:
+            controller = self.server.controller
+            post_routes = {
+                '/api/register': (lambda d: controller.register(d), True),
+                '/api/mode': (lambda d: controller.set_mode(d), True),
+                '/api/connect': (lambda d: controller.connect_controller(d), False),
+                '/api/disconnect': (lambda d: controller.disconnect_controller(d), True),
+                '/api/prepare-gripper': (lambda d: controller.prepare_gripper(d), False),
+                '/api/recover-controller': (lambda d: controller.recover_controller(d), True),
+                '/api/submit': (lambda d: controller.submit(d), False),
+                '/api/chat/start': (lambda d: controller.start_chat(d), False),
+                '/api/chat/end': (lambda _d: controller.end_chat(), False),
+                '/api/stop': (lambda d: controller.stop(target_request_id=d.get('stop_target')), False),
+            }
+            route = post_routes.get(action)
+            if route is None:
                 self._send(404, {'error': '찾을 수 없습니다.'})
                 return
+            handler, returns_revision = route
+            outcome = handler(data)
+            result = {'ok': True}
+            if returns_revision:
+                result['registration_revision'] = outcome
             self._send(200, result)
         except RegistrationStateChanged as exc:
             self._send(400, {'error': str(exc), 'code': 'registration_state_changed'})
@@ -2148,7 +2149,7 @@ def main():
         controller = DemoController(prepare_model=not args.no_prepare, development=args.development)
         server = DemoServer(controller, args.port, product_owner=owner,
                             open_initial_screen=owner is not None and not args.no_browser)
-        url = f'http://127.0.0.1:{server.server_port}/?token={server.token}'
+        url = f'http://{LOOPBACK_HOST}:{server.server_port}/?token={server.token}'
         print(('개발용 웹앱' if args.development else '실물 로봇 시연')
               + '이 실행 중입니다. 브라우저의 시연 종료 버튼으로 정리할 수 있습니다.', flush=True)
         print(url, flush=True)

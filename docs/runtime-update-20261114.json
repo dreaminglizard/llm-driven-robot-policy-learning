@@ -1,0 +1,134 @@
+{
+  "scope": "15 active runtime modules changed since public snapshot, ignoring newline-only differences. Original files untouched, no tests or experiments run. Overlay on 20261113 source package. Docs/scripts/test sanitation-only changes are not part of this delta.",
+  "files": [
+    {
+      "path": "raccoon_control/controller.py",
+      "status": "updated",
+      "source_sha256": "70733d16ccdd084a6bb3235bedc4af17f8919ad78610ce892656c512c70fb119",
+      "published_sha256": "70733d16ccdd084a6bb3235bedc4af17f8919ad78610ce892656c512c70fb119",
+      "bytes": 201443,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_control/kinematics.py",
+      "status": "updated",
+      "source_sha256": "69b66ccbf78a813284c7d50d600bb041019b4af98fb33e8d5cd576aee1ac4026",
+      "published_sha256": "69b66ccbf78a813284c7d50d600bb041019b4af98fb33e8d5cd576aee1ac4026",
+      "bytes": 4258,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_control/sdk_adapter.py",
+      "status": "updated",
+      "source_sha256": "9865d8ae5d56c7e9810afd0d724ed44532c94297caaa2865a88995e428bc0f36",
+      "published_sha256": "9865d8ae5d56c7e9810afd0d724ed44532c94297caaa2865a88995e428bc0f36",
+      "bytes": 94045,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_control/transport.py",
+      "status": "updated",
+      "source_sha256": "f8e84fe381ba12db17308bde6adac392a04228e4f11cb4ac897c31e6f5aaadfe",
+      "published_sha256": "f8e84fe381ba12db17308bde6adac392a04228e4f11cb4ac897c31e6f5aaadfe",
+      "bytes": 9845,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/concurrency.py",
+      "status": "added",
+      "source_sha256": "5996b8adcd7fde0b00ccae9b6dca03bb6ab8fc56ebb4742b02a14d892b9ad5db",
+      "published_sha256": "5996b8adcd7fde0b00ccae9b6dca03bb6ab8fc56ebb4742b02a14d892b9ad5db",
+      "bytes": 1207,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/demo_service.py",
+      "status": "updated",
+      "source_sha256": "8fa65b817a99abdb54f4b3436e629a2efd3f1789688637e8585e3c1b911803d6",
+      "published_sha256": "8fa65b817a99abdb54f4b3436e629a2efd3f1789688637e8585e3c1b911803d6",
+      "bytes": 255240,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/demo_voice.py",
+      "status": "updated",
+      "source_sha256": "b1e1df3b4a1bf4aa06b06ee6de1d046bf54dd5524f4f02a42781d85d666b68b1",
+      "published_sha256": "b1e1df3b4a1bf4aa06b06ee6de1d046bf54dd5524f4f02a42781d85d666b68b1",
+      "bytes": 14294,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/demo_voice_chat.py",
+      "status": "updated",
+      "source_sha256": "08cd158049f7587e89bafe8877c53b511a4d7a73d614796bc217f08ab093b27d",
+      "published_sha256": "08cd158049f7587e89bafe8877c53b511a4d7a73d614796bc217f08ab093b27d",
+      "bytes": 111654,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/demo_voice_duplex.py",
+      "status": "updated",
+      "source_sha256": "1d34ef03dbb223b43e43e48499b0bc7c4581e9035340a1cf0dc18ddb0598ed28",
+      "published_sha256": "1d34ef03dbb223b43e43e48499b0bc7c4581e9035340a1cf0dc18ddb0598ed28",
+      "bytes": 12007,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/demo_web.py",
+      "status": "updated",
+      "source_sha256": "bd6a4af59d0cb26340c82bdc09b652c9404e22c4c73fa7f144b1cf245980a47a",
+      "published_sha256": "bd6a4af59d0cb26340c82bdc09b652c9404e22c4c73fa7f144b1cf245980a47a",
+      "bytes": 136046,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/native_physical_session.py",
+      "status": "updated",
+      "source_sha256": "935144d0842bc983031f61d9f59f86184b623beb44651e97514a98451fed4ace",
+      "published_sha256": "935144d0842bc983031f61d9f59f86184b623beb44651e97514a98451fed4ace",
+      "bytes": 97736,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/native_physical_student.py",
+      "status": "updated",
+      "source_sha256": "4b7b934a71b1f748946b2276cbc91e0e59aaeed9dafeaf7dadcabdafff89ce52",
+      "published_sha256": "4b7b934a71b1f748946b2276cbc91e0e59aaeed9dafeaf7dadcabdafff89ce52",
+      "bytes": 334743,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/robot_bridge.py",
+      "status": "updated",
+      "source_sha256": "2bc3d1b1aaa3902b1a12b723a050ec56a2001744f0de6b8a812a76af459ab11f",
+      "published_sha256": "2bc3d1b1aaa3902b1a12b723a050ec56a2001744f0de6b8a812a76af459ab11f",
+      "bytes": 29659,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/scene_program_coordinator.py",
+      "status": "updated",
+      "source_sha256": "452876c2614441449696eabc783b7ad88d0f3ff045598671db1c0a7ecee2a68a",
+      "published_sha256": "452876c2614441449696eabc783b7ad88d0f3ff045598671db1c0a7ecee2a68a",
+      "bytes": 143485,
+      "sanitized": false
+    },
+    {
+      "path": "raccoon_memory/voice.py",
+      "status": "updated",
+      "source_sha256": "61327e3c3aece5aea4c124b20b36994dc1cc3e45e73293ba4ba45bcf29d5f89d",
+      "published_sha256": "61327e3c3aece5aea4c124b20b36994dc1cc3e45e73293ba4ba45bcf29d5f89d",
+      "bytes": 5749,
+      "sanitized": false
+    }
+  ],
+  "test_evidence": {
+    "source": "Existing maintainer report dated 2026-11-13 18:58 KST; not rerun for this publication",
+    "core": "176/176 passed",
+    "control": "189/189 passed",
+    "voice": "320/325 passed; 4 FAIL and 1 ERROR reported as pre-existing test/mock incompatibilities",
+    "hardware_and_full_suite": "not run"
+  },
+  "weights": "Unchanged; selected model remains the existing checkpoint.",
+  "release_note": "The v0.1.0-research source ZIP remains the earlier snapshot. This main-branch commit updates 15 runtime modules; no historical release asset was replaced."
+}

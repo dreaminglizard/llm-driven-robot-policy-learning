@@ -15,10 +15,10 @@ import time
 
 import numpy as np
 
+from .concurrency import CombinedEvent as _EitherEvent
 from .demo_service import (_DIRECT_SPOKEN_STOP, _is_polite_immediate_halt,
                            _execution_failure_message, _request_id, _validated_pending_stop_prefix)
-RATE = 16000
-BLOCK = 1600  # 100 ms
+from .voice import AUDIO_BLOCK_SIZE as BLOCK, AUDIO_SAMPLE_RATE as RATE
 _LOCAL_KOREAN_VOICE = (r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens'
                        r'\TTS_MS_KO-KR_HEAMI_11.0')
 _STOP = _DIRECT_SPOKEN_STOP
@@ -333,24 +333,6 @@ def capture_voice_pcm(*, seconds=7, cancel=None, device=None, stream_factory=Non
     return audio
 
 
-class _EitherEvent:
-    """Event-like stop token for session shutdown or cancellation of one request."""
-    def __init__(self, first, second):
-        self.first, self.second = first, second
-
-    def is_set(self):
-        return self.first.is_set() or self.second.is_set()
-
-    def wait(self, timeout=None):
-        deadline = None if timeout is None else time.monotonic() + timeout
-        while not self.is_set():
-            remaining = None if deadline is None else deadline - time.monotonic()
-            if remaining is not None and remaining <= 0:
-                return False
-            self.first.wait(.05 if remaining is None else min(.05, remaining))
-        return True
-
-
 class _SpeechTurns:
     """Invalidate old audio on speech onset without cancelling robot work."""
     def __init__(self):
@@ -452,11 +434,7 @@ class LocalConversation:
         self._duplex_fallback = False
         self.audio_fallback_reason = None
         self.audio_fallback_stage = None
-        self._pending_id = None
-        self._pending_cancel = None
-        self._pending_phase = None
-        self._pending_plan = None
-        self._pending_speech_generation = None
+        self._clear_pending_state_locked()
         self._queue = queue.Queue(maxsize=2)
         self._task_thread = None
         self._retarget_thread = None
@@ -1069,11 +1047,7 @@ class LocalConversation:
                         if item['primary'] and not (self._pending_id == capture['request_id']
                                                     and self._pending_phase == 'nonactionable_waiting'):
                             if self._pending_id == capture['request_id']:
-                                self._pending_id = None
-                                self._pending_cancel = None
-                                self._pending_phase = None
-                                self._pending_plan = None
-                                self._pending_speech_generation = None
+                                self._clear_pending_state_locked()
                             forget = getattr(self.coordinator, 'forget_pending_voice', None)
                             if callable(forget):
                                 forget(capture['request_id'])
@@ -1141,8 +1115,7 @@ class LocalConversation:
             item['hold'] = None
             if not hold['tokens']:
                 if self._pending_id == old and self._pending_phase == 'nonactionable_waiting':
-                    self._pending_id = self._pending_cancel = self._pending_phase = self._pending_plan = None
-                    self._pending_speech_generation = None
+                    self._clear_pending_state_locked()
                 self.coordinator.forget_pending_voice(old)
             return True
 
@@ -1159,8 +1132,7 @@ class LocalConversation:
                     self.coordinator.resolve_pending_voice(hold, ident)
                     if not hold['tokens']:
                         if self._pending_id == old and self._pending_phase == 'nonactionable_waiting':
-                            self._pending_id = self._pending_cancel = self._pending_phase = self._pending_plan = None
-                            self._pending_speech_generation = None
+                            self._clear_pending_state_locked()
                         self.coordinator.forget_pending_voice(old)
                     item['hold_resolved'] = True
                     return
@@ -1400,23 +1372,10 @@ class LocalConversation:
                         or self._pending_id != target or hold['cancelled']
                         or self._pending_cancel is None or self._pending_cancel.is_set()):
                     raise RuntimeError('정지 이후 요청을 확인하지 못했습니다.')
-                completed = self.coordinator.complete_voice_transcription(ident, text)
-                previous = self._task_thread
-                self._pending_cancel.set()
-                self.coordinator.resolve_pending_voice(hold, ident, replacement=capture['request_id'])
-                item['hold_resolved'] = True
-                self._pending_id = capture['request_id']
-                self._pending_cancel = threading.Event()
-                self._pending_phase = 'processing'
-                self._pending_speech_generation = item['generation']
-                self._pending_plan = {'transcript': pending['transcript'] + '\n' + text,
-                                      'program': copy.deepcopy(speech['program'])}
-                cancellation = _EitherEvent(self.stop_event, self._pending_cancel)
-                worker = threading.Thread(target=self._run_pending_compound,
-                    args=(previous, completed, text, capture['request_id'], cancellation, item['generation'], hold),
-                    daemon=True, name='demo-voice-pending-stop-home')
-                self._retarget_thread = self._task_thread = worker
-                worker.start()
+                self._promote_pending_followup_locked(
+                    ident, text, capture, item, hold, pending, speech,
+                    self._run_pending_compound, 'demo-voice-pending-stop-home',
+                    use_stop_event=True, set_retarget=True)
             if stop_output is not None:
                 self._set_voice_output(stop_output == 'unmute', generation=item['generation'])
             return True
@@ -1435,22 +1394,9 @@ class LocalConversation:
             if (self.stop_event.is_set() or hold['cancelled'] or self._pending_id != hold['current']
                     or self._pending_cancel is None or self._pending_cancel.is_set()):
                 raise InterruptedError('이전 요청이 취소되었습니다.')
-            completed = self.coordinator.complete_voice_transcription(ident, text)
-            previous = self._task_thread
-            self._pending_cancel.set()
-            self.coordinator.resolve_pending_voice(hold, ident, replacement=capture['request_id'])
-            item['hold_resolved'] = True
-            self._pending_id = capture['request_id']
-            self._pending_cancel = threading.Event()
-            self._pending_phase = 'processing'
-            self._pending_speech_generation = item['generation']
-            self._pending_plan = {'transcript': pending['transcript'] + '\n' + text,
-                                  'program': copy.deepcopy(speech['program'])}
-            cancellation = self._pending_cancel
-            self._task_thread = threading.Thread(target=self._run_pending_replacement,
-                args=(previous, completed, text, capture['request_id'], cancellation, item['generation'], hold),
-                daemon=True, name='demo-voice-correction')
-            self._task_thread.start()
+            self._promote_pending_followup_locked(
+                ident, text, capture, item, hold, pending, speech,
+                self._run_pending_replacement, 'demo-voice-correction')
         return True
 
     def _run_pending_replacement(self, previous, capture, text, request, cancellation, generation, hold):
@@ -1478,6 +1424,38 @@ class LocalConversation:
                 if self._retarget_thread is threading.current_thread():
                     self._retarget_thread = None
                 self.coordinator.forget_pending_voice(request)
+
+    def _clear_pending_state_locked(self):
+        self._pending_id = None
+        self._pending_cancel = None
+        self._pending_phase = None
+        self._pending_plan = None
+        self._pending_speech_generation = None
+
+    def _promote_pending_followup_locked(self, ident, text, capture, item, hold, pending, speech,
+                                         runner, thread_name, *, use_stop_event=False, set_retarget=False):
+        completed = self.coordinator.complete_voice_transcription(ident, text)
+        previous = self._task_thread
+        self._pending_cancel.set()
+        self.coordinator.resolve_pending_voice(hold, ident, replacement=capture['request_id'])
+        item['hold_resolved'] = True
+        self._pending_id = capture['request_id']
+        self._pending_cancel = threading.Event()
+        self._pending_phase = 'processing'
+        self._pending_speech_generation = item['generation']
+        self._pending_plan = {'transcript': pending['transcript'] + '\n' + text,
+                              'program': copy.deepcopy(speech['program'])}
+        cancellation = (_EitherEvent(self.stop_event, self._pending_cancel)
+                        if use_stop_event else self._pending_cancel)
+        worker = threading.Thread(
+            target=runner,
+            args=(previous, completed, text, capture['request_id'], cancellation, item['generation'], hold),
+            daemon=True, name=thread_name)
+        if set_retarget:
+            self._retarget_thread = self._task_thread = worker
+        else:
+            self._task_thread = worker
+        worker.start()
 
     def _prepare_pending_compound(self, capture, text, target):
         """Cancel exactly the pending turn, or bind it if it became active."""
@@ -1713,11 +1691,7 @@ class LocalConversation:
             self.coordinator.discard_interpretation(capture['interpretation_id'])
             with self._state_lock:
                 if self._pending_id == request:
-                    self._pending_id = None
-                    self._pending_cancel = None
-                    self._pending_phase = None
-                    self._pending_plan = None
-                    self._pending_speech_generation = None
+                    self._clear_pending_state_locked()
                 forget = getattr(self.coordinator, 'forget_pending_voice', None)
                 if callable(forget):
                     forget(request)

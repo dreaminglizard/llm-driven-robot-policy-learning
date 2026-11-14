@@ -14,7 +14,7 @@ from .calibration_moves import prepare_step
 from . import __version__
 from .errors import ControlError
 from .journal import Journal
-from .kinematics import Geometry, check_joints, distance, quantize_joints
+from .kinematics import ENCODER_STEP_DEG, JOINT_COUNT, Geometry, check_joints, distance, quantize_joints
 from .motion_envelope import bounds as motion_bounds, check as check_envelope
 from .locking import FileLock
 from .supervisor import DeviceProcess
@@ -32,6 +32,51 @@ MAX_MOCK_NOMINAL_RETRY_TCP_MM = 5.0
 # The SDK transport tolerates a brief receive gap. Samples older than the
 # normal sensor-age limit are still invalid for dispatch and completion.
 SDK_FEEDBACK_GAP_GRACE_SECONDS = 1.0
+OBSERVATION_HISTORY_LIMIT = 64
+MAX_BLENDED_WAYPOINTS = 64
+STALL_PROGRESS_TIMEOUT_SECONDS = 2.0
+GRIPPER_TIMEOUT_CAP_SECONDS = 1.0
+RECOVERABLE_FAULT_CODES = frozenset({
+    'TARGET_NOT_REACHED', 'MOTION_TIMEOUT', 'NO_MOTION_CONFIRMATION',
+    'DEVICE_WARNING', 'DISCONNECTED', 'SENSOR_STALE', 'STOP_UNCONFIRMED',
+    'DAMPED_COMPENSATION_DIVERGED',
+    # Only the measured tracking outcomes use the same
+    # stopped/confirmed-layout recovery as target failure.
+    # Unknown send, path, and infrastructure faults still
+    # require the existing separate review.
+    'SDK_TRACKING_DIVERGED', 'SDK_TRACKING_STALLED',
+})
+MOTION_KINDS = frozenset({
+    'move_joints', 'correct_xy', 'jog_joint', 'jog_tcp', 'mock_joint_trajectory', 'blended_joint_path',
+})
+RETAINED_POSITION_SUCCESS_STATUSES = frozenset({'completed', 'settled', 'settled_no_motion'})
+NOMINAL_CORRECTION_STATUSES = frozenset({
+    'settled_needs_nominal_correction', 'gripper_reported_arm_needs_nominal_correction',
+})
+SUCCESS_LIKE_STATUSES = frozenset({
+    'completed', 'settled_no_motion', 'settled_needs_observation', 'settled_needs_nominal_retry',
+    'settled_needs_nominal_correction', 'settled_needs_target_follow_up', 'already_at_target',
+    'settled', 'position_target_unchanged',
+    'gripper_reported', 'gripper_reported_arm_needs_nominal_correction',
+    'gripper_commanded_unverified', 'observed',
+})
+ACTION_FIELDS = {
+    "move_joints": {"kind", "joints_deg", "nominal_arrival_joints_deg", "allow_mock_nominal_retry",
+                    "allow_nominal_correction", "correction_of_command_id", "speed_pct", "allow_visual_settle",
+                    "path_constraints", "arrival_tolerance_mm", "completion_mode", "allow_damped_compensation",
+                    "allow_target_follow_up", "direct_student_target"},
+    "mock_joint_trajectory": {"kind", "targets_deg", "period_seconds"},
+    "blended_joint_path": {"kind", "waypoints_deg", "segment_durations_s", "max_velocity_deg_s",
+                           "max_acceleration_deg_s2", "max_jerk_deg_s3", "sample_period_seconds",
+                           "speed_pct", "nominal_arrival_joints_deg", "allow_nominal_correction",
+                           "path_constraints", "arrival_tolerance_mm", "completion_mode", "allow_damped_compensation",
+                           "allow_target_follow_up"},
+    "correct_xy": {"kind", "delta_xy_mm", "reference_id", "speed_pct"},
+    "set_gripper": {"kind", "state", "retain_position_from_command_id"},
+    "reobserve": {"kind"},
+    "jog_joint": {"kind", "joint", "delta_deg", "speed_pct"},
+    "jog_tcp": {"kind", "delta_mm", "speed_pct"},
+}
 
 
 class _DispatchCancelled(Exception):
@@ -277,7 +322,7 @@ class Controller:
         if not 0 <= time.monotonic() - snapshot.sensor_time <= self.limits.sensor_max_age:
             return False
         try:
-            vector(snapshot.joints_deg, 4, "encoder")
+            vector(snapshot.joints_deg, JOINT_COUNT, "encoder")
         except ControlError:
             return False
         return True
@@ -289,7 +334,7 @@ class Controller:
             return False
         age = time.monotonic() - snapshot.sensor_time
         try:
-            vector(snapshot.joints_deg, 4, 'encoder')
+            vector(snapshot.joints_deg, JOINT_COUNT, 'encoder')
         except ControlError:
             return False
         return 0 <= age <= max(self.limits.sensor_max_age, SDK_FEEDBACK_GAP_GRACE_SECONDS)
@@ -565,15 +610,7 @@ class Controller:
                 raise ControlError('NOT_READY','새 정지 관측과 살아 있는 제어기가 필요합니다.')
             if self._fault is None:
                 return {'recovered':False,'reason':'no_latched_fault','instance_id':self.instance_id}
-            recoverable={'TARGET_NOT_REACHED','MOTION_TIMEOUT','NO_MOTION_CONFIRMATION',
-                         'DEVICE_WARNING','DISCONNECTED','SENSOR_STALE','STOP_UNCONFIRMED',
-                         'DAMPED_COMPENSATION_DIVERGED',
-                         # Only the measured tracking outcomes use the same
-                         # stopped/confirmed-layout recovery as target failure.
-                         # Unknown send, path, and infrastructure faults still
-                         # require the existing separate review.
-                         'SDK_TRACKING_DIVERGED','SDK_TRACKING_STALLED'}
-            if self._fault.code not in recoverable or self.journal.pending:
+            if self._fault.code not in RECOVERABLE_FAULT_CODES or self.journal.pending:
                 raise ControlError('RECOVERY_REVIEW_REQUIRED',
                     '명령 기록 또는 제어기 내부 오류를 먼저 점검해야 합니다. 자동 초기화하지 않습니다.',
                     fault=self._fault.as_dict(),pending_commands=self.journal.pending)
@@ -678,7 +715,7 @@ class Controller:
                 "stop_count": snapshot.stop_count if snapshot else 0,
             }
             self._observations[observation_id] = value
-            while len(self._observations) > 64:
+            while len(self._observations) > OBSERVATION_HISTORY_LIMIT:
                 self._observations.popitem(last=False)
             return deepcopy(value)
 
@@ -757,6 +794,15 @@ class Controller:
                 "reason": "RETARGET_BEFORE_SEND", "simulated": self.config.backend == 'mock',
                 "task_success": None, "replayed": False}
 
+    def _trip_damped_correction_fault(self, request, error):
+        """Trip controller fault when a bound damped nominal correction becomes invalid."""
+        action = request.get('action')
+        pending = self._pending_nominal_correction
+        if (isinstance(action, dict) and pending is not None
+                and action.get('correction_of_command_id') == pending.get('parent_command_id')
+                and pending.get('basis', {}).get('kind') == 'damped_nominal_half'):
+            self._trip_fault(error)
+
     @measured('controller')
     def apply_action(self, request):
         keys(request, allowed={"lease_id", "command_id", "observation_id", "action"}, required={"lease_id", "command_id", "observation_id", "action"})
@@ -791,12 +837,7 @@ class Controller:
             try:
                 self._validate_observation(request["observation_id"])
             except ControlError as exc:
-                action = request.get('action')
-                pending = self._pending_nominal_correction
-                if (isinstance(action, dict) and pending is not None
-                        and action.get('correction_of_command_id') == pending.get('parent_command_id')
-                        and pending.get('basis', {}).get('kind') == 'damped_nominal_half'):
-                    self._trip_fault(exc)
+                self._trip_damped_correction_fault(request, exc)
                 raise
             preparing = None
             if isinstance(request['action'], dict) and request['action'].get('kind') == 'blended_joint_path':
@@ -811,12 +852,7 @@ class Controller:
                     preempted = self._retarget_preempted_commands.get(command_id) == request['lease_id']
                 if self._cancel.is_set() and preempted:
                     return self._unsent_retarget_result(command_id)
-                action = request.get('action')
-                pending = self._pending_nominal_correction
-                if (isinstance(action, dict) and pending is not None
-                        and action.get('correction_of_command_id') == pending.get('parent_command_id')
-                        and pending.get('basis', {}).get('kind') == 'damped_nominal_half'):
-                    self._trip_fault(exc)
+                self._trip_damped_correction_fault(request, exc)
                 raise
             finally:
                 if preparing is not None:
@@ -854,7 +890,7 @@ class Controller:
                 if prepared['kind'] == 'blended_joint_path':
                     command_budget = prepared['blended_spec']['motion_timeout_seconds']
                 elif prepared['kind'] == 'set_gripper':
-                    command_budget = min(1., self.limits.motion_timeout)
+                    command_budget = min(GRIPPER_TIMEOUT_CAP_SECONDS, self.limits.motion_timeout)
                 else:
                     command_budget = self.limits.motion_timeout
                 self._lease['deadline'] = max(self._lease['deadline'],
@@ -895,12 +931,7 @@ class Controller:
             # Never hold this lock during the observation or journal I/O below:
             # stop intent must not wait for those operations.
             with self._stop_intent_lock:
-                success_like = {'completed', 'settled_no_motion', 'settled_needs_observation', 'settled_needs_nominal_retry',
-                                'settled_needs_nominal_correction', 'settled_needs_target_follow_up', 'already_at_target',
-                                'settled', 'position_target_unchanged',
-                                'gripper_reported', 'gripper_reported_arm_needs_nominal_correction',
-                                'gripper_commanded_unverified', 'observed'}
-                if self._cancel.is_set() and value.get('status') in success_like:
+                if self._cancel.is_set() and value.get('status') in SUCCESS_LIKE_STATUSES:
                     if prepared.get('direct_student_target') is True:
                         completion = value.get('completion')
                         if isinstance(completion, dict) and isinstance(completion.get('host_frame'), dict):
@@ -927,9 +958,9 @@ class Controller:
                     value['earlier_stop_evidence'] = deepcopy(value['stop'])
                     value['stop'] = {'requested':None, 'confirmed':False, 'scope':'arm_joints',
                                      'reason':'stop_evidence_not_bound_to_current_request'}
-                if prepared['kind'] in {'move_joints', 'correct_xy', 'jog_joint', 'jog_tcp', 'mock_joint_trajectory', 'blended_joint_path'}:
+                if prepared['kind'] in MOTION_KINDS:
                     completion = value.get('completion')
-                    if (value.get('status') in {'completed', 'settled', 'settled_no_motion'} and value.get('applied') is True
+                    if (value.get('status') in RETAINED_POSITION_SUCCESS_STATUSES and value.get('applied') is True
                             and isinstance(completion, dict)
                             and completion.get('mode') == 'position_target_retained'):
                         self._retained_position_target = {
@@ -971,7 +1002,7 @@ class Controller:
                 value["observation"] = self.observe()
                 with span('journal_result'):
                     self.journal.finish(command_id, value)
-                if value.get('status') in {'settled_needs_nominal_correction', 'gripper_reported_arm_needs_nominal_correction'}:
+                if value.get('status') in NOMINAL_CORRECTION_STATUSES:
                     self._pending_nominal_correction = {
                         'lease_id': request['lease_id'],
                         'parent_command_id': value['correction_basis'].get('parent_command_id', command_id),
@@ -1008,17 +1039,20 @@ class Controller:
         return deepcopy(value)
 
     @staticmethod
+    def _valid_collision_counts(value):
+        return (isinstance(value, (tuple, list)) and len(value) == JOINT_COUNT
+                and all(type(item) is int and item >= 0 for item in value))
+
+    @staticmethod
     def _require_quiet_motion_diagnostics(baseline_warning, baseline_counts, snapshot):
         """Evidence for a bounded correction; missing/reset data are not quiet."""
-        def valid_counts(value):
-            return (isinstance(value, (tuple, list)) and len(value) == 4
-                    and all(type(item) is int and item >= 0 for item in value))
         warning, counts = snapshot.firmware_warning_raw, snapshot.collision_event_counts
         if baseline_warning == 1 or warning == 1:
             raise ControlError('DEVICE_WARNING', 'Device warning blocks nominal correction')
         if (type(baseline_warning) is not int or baseline_warning != 0
                 or type(warning) is not int or warning != 0
-                or not valid_counts(baseline_counts) or not valid_counts(counts)):
+                or not Controller._valid_collision_counts(baseline_counts)
+                or not Controller._valid_collision_counts(counts)):
             raise ControlError('DEVICE_DIAGNOSTICS_UNAVAILABLE',
                                'Valid warning and collision counters are required before and after motion')
         if any(new < old for old, new in zip(baseline_counts, counts)):
@@ -1161,37 +1195,27 @@ class Controller:
         observed_steps, _ = quantize_joints(observed_joints)
         return sum(abs(target-observed) for target, observed in zip(target_steps, observed_steps))
 
-    def _prepare(self, action):
-        keys(action, allowed={"kind", "joints_deg", "nominal_arrival_joints_deg", "allow_mock_nominal_retry",
-                              "allow_nominal_correction", "correction_of_command_id", "speed_pct", "delta_xy_mm",
-                              "reference_id", "state", "allow_visual_settle", "joint", "delta_deg", "delta_mm",
-                              "path_constraints", "arrival_tolerance_mm", "targets_deg", "period_seconds",
-                              "waypoints_deg", "segment_durations_s", "max_velocity_deg_s",
-                              "max_acceleration_deg_s2", "max_jerk_deg_s3", "sample_period_seconds",
-                              "completion_mode", "retain_position_from_command_id",
-                              "allow_damped_compensation", "allow_target_follow_up",
-                              "direct_student_target"}, required={"kind"})
-        kind = action["kind"]
-        fields = {
-            "move_joints": {"kind", "joints_deg", "nominal_arrival_joints_deg", "allow_mock_nominal_retry",
-                            "allow_nominal_correction", "correction_of_command_id", "speed_pct", "allow_visual_settle",
-                            "path_constraints", "arrival_tolerance_mm", "completion_mode", "allow_damped_compensation",
-                            "allow_target_follow_up", "direct_student_target"},
-            "mock_joint_trajectory": {"kind", "targets_deg", "period_seconds"},
-            "blended_joint_path": {"kind", "waypoints_deg", "segment_durations_s", "max_velocity_deg_s",
-                                   "max_acceleration_deg_s2", "max_jerk_deg_s3", "sample_period_seconds",
-                                   "speed_pct", "nominal_arrival_joints_deg", "allow_nominal_correction",
-                                   "path_constraints", "arrival_tolerance_mm", "completion_mode", "allow_damped_compensation",
-                                   "allow_target_follow_up"},
-            "correct_xy": {"kind", "delta_xy_mm", "reference_id", "speed_pct"},
-            "set_gripper": {"kind", "state", "retain_position_from_command_id"},
-            "reobserve": {"kind"},
-            "jog_joint": {"kind", "joint", "delta_deg", "speed_pct"},
-            "jog_tcp": {"kind", "delta_mm", "speed_pct"},
-        }
-        if not isinstance(kind, str) or kind not in fields:
-            raise ControlError("UNSUPPORTED_ACTION", "This phase implements calibration, mock XY correction, gripper and reobserve only")
-        keys(action, allowed=fields[kind])
+    def _check_motion_envelope(self, start, end, constraints, *, start_tolerance_deg=0):
+        """Evaluate the independent-joint envelope between start and end under task constraints."""
+        envelope = motion_bounds(
+            self.geometry, start, end, self.limits.joint_tolerance_deg,
+            start_tolerance_deg=start_tolerance_deg)
+        return check_envelope(
+            envelope, self.limits,
+            vertical_xy=constraints.get('vertical_xy_mm'),
+            corridor_mm=constraints.get('corridor_mm'),
+            minimum_z_mm=constraints.get('minimum_z_mm'),
+            maximum_z_mm=constraints.get('maximum_z_mm'))
+
+    def _target_error_metrics(self, observed_joints, target_joints, target_tcp, arrival_tolerance):
+        """Return (joint_error_deg, tcp_error_mm, reached) for observed joints against a target."""
+        joint_error = max(abs(a - b) for a, b in zip(observed_joints, target_joints))
+        tcp_error = distance(self.geometry.forward(observed_joints), target_tcp)
+        reached = (joint_error <= self.limits.joint_tolerance_deg and tcp_error <= arrival_tolerance)
+        return joint_error, tcp_error, reached
+
+    def _validate_retained_and_correction_flags(self, action, kind):
+        """Validate retained-position, follow-up, direct-student, and nominal-correction flags."""
         completion_mode = action.get('completion_mode')
         if 'completion_mode' in action:
             if completion_mode != 'retain_position_target':
@@ -1220,6 +1244,7 @@ class Controller:
                     or action.get('correction_of_command_id') is not None))):
             raise ControlError('INVALID_REQUEST', 'Direct student targets require an unmodified retained SDK move')
         correction_parent = action.get('correction_of_command_id')
+        pending = None
         if correction_parent is not None:
             identifier(correction_parent, 'correction_of_command_id')
             pending = self._pending_nominal_correction
@@ -1248,10 +1273,304 @@ class Controller:
                 if completion_mode != 'retain_position_target':
                     raise ControlError('DAMPED_COMPENSATION_UNAVAILABLE', 'The compensated motion must retain its encoded target')
                 self._require_damped_parent_frame(basis, self._snapshot)
+        return completion_mode, damped_opt_in, follow_up, direct_student_target, correction_parent, pending
+
+    def _parse_path_constraints(self, action):
+        """Validate optional vertical corridor and clearance height constraints."""
+        constraints = action.get("path_constraints", {})
+        keys(constraints, allowed={"vertical_xy_mm", "corridor_mm", "minimum_z_mm", "maximum_z_mm"})
+        constraints = dict(constraints)
+        if constraints.get("vertical_xy_mm") is not None:
+            constraints["vertical_xy_mm"] = vector(constraints["vertical_xy_mm"], 2, "vertical_xy_mm")
+            constraints["corridor_mm"] = number(constraints.get("corridor_mm"), "corridor_mm", minimum=0.01)
+        elif constraints.get("corridor_mm") is not None:
+            raise ControlError("INVALID_REQUEST", "A corridor radius requires an XY center")
+        if constraints.get("minimum_z_mm") is not None:
+            constraints["minimum_z_mm"] = number(constraints["minimum_z_mm"], "minimum_z_mm")
+        if constraints.get("maximum_z_mm") is not None:
+            constraints["maximum_z_mm"] = number(constraints["maximum_z_mm"], "maximum_z_mm",
+                                                   maximum=self.limits.workspace_max_mm[2])
+            if constraints.get("minimum_z_mm") is not None and constraints['maximum_z_mm'] < constraints['minimum_z_mm']:
+                raise ControlError("INVALID_REQUEST", "Path ceiling must not be below its clearance floor")
+        return constraints
+
+    def _prepare_mock_joint_trajectory(self, action):
+        """Validate a 1000-step mock-only timed trajectory."""
+        if self.config.backend != "mock" or self.config.hardware_enabled is not False:
+            raise ControlError("UNSUPPORTED_ACTION", "Timed trajectory execution is mock-only")
+        if self.config.mode != "calibration" or not self.config.workspace_ready:
+            raise ControlError("WORKSPACE_UNVERIFIED", "Mock trajectory requires a ready calibration workspace")
+        if self._snapshot.moving is not False:
+            raise ControlError("NOT_STATIONARY", "The arm must be stationary before accepting a trajectory")
+        targets = action.get("targets_deg")
+        period = action.get("period_seconds")
+        if not isinstance(targets, list) or len(targets) != 1000 or type(period) not in (int, float) or period != .002:
+            raise ControlError("INVALID_REQUEST", "Mock trajectory requires exactly 1000 targets at a 2 ms period")
+        targets = [check_joints(row) for row in targets]
+        previous = self._snapshot.joints_deg
+        minimum_z = float('inf')
+        for target in targets:
+            if self._cancel.is_set():
+                raise ControlError("STOP_REQUESTED", "Stop was requested while the trajectory was being checked")
+            path = self.geometry.check_path(previous, target, self.limits)
+            minimum_z = min(minimum_z, path['minimum_tcp_z_mm'])
+            previous = target
+        return {"kind": "mock_joint_trajectory", "targets_deg": targets, "period_seconds": .002,
+                "requested_joints_deg": targets[-1], "effective_target_deg": targets[-1],
+                "target_tcp_mm": self.geometry.forward(targets[-1]),
+                "arrival_tolerance_mm": self.limits.tcp_tolerance_mm,
+                "path": {"waypoints": len(targets), "minimum_tcp_z_mm": minimum_z,
+                         "full_collision_check": False}, "path_constraints": {}}
+
+    def _prepare_blended_path(self, action, waypoints, effective, speed, constraints):
+        """Plan, subdivide, hash, and refresh-verify a blended multi-waypoint path."""
+        blend_scope = self.blended_path_scope
+        admission_snapshot = self._snapshot
+        blend_waypoints = [list(check_joints(row)) for row in waypoints]
+        blend_waypoints[-1] = list(effective)
+        blend_budget = virtual_blend_time_budget(self.limits.motion_timeout, len(blend_waypoints))
+        observed_start = list(check_joints(self._snapshot.joints_deg))
+        reference = self.worker.call('blended_start_reference')
+        expected_source = ('virtual_servo_target' if blend_scope == 'virtual_worker_only'
+                           else 'sdk_stopped_encoder')
+        if (not isinstance(reference, dict) or reference.get('available') is not True
+                or reference.get('source') != expected_source):
+            raise ControlError('BLENDED_REFERENCE_UNAVAILABLE', 'The path start reference is not known')
+        control_start = check_joints(reference.get('joints_deg'))
+        # The current encoder position and current servo command need not
+        # coincide under load. Validate the complete bridge separately;
+        # neither is treated as evidence about an object.
+        bridge = self.geometry.check_path(observed_start, control_start, self.limits)
+        bridge['independent_joint_envelope'] = self._check_motion_envelope(
+            observed_start, control_start, constraints,
+            start_tolerance_deg=self.limits.joint_tolerance_deg)
+        original_count = len(blend_waypoints)
+        durations = action.get('segment_durations_s')
+        if not isinstance(durations, list) or len(durations) != original_count:
+            raise ControlError('INVALID_REQUEST', 'A blended path needs one duration per waypoint')
+        period = number(action.get('sample_period_seconds'), 'sample_period_seconds', minimum=.002, maximum=.2)
+        durations = [number(value, 'segment_durations_s', minimum=period, maximum=self.limits.motion_timeout)
+                     for value in durations]
+        # Long path checking and hashing occur outside the state lock.
+        # The admission reservation keeps all other actions out while
+        # sensor publication and a stop remain available.
+        lock_owned = self._condition._is_owned()
+        if lock_owned:
+            self._condition.release()
+        try:
+            def checked_section(left, right, is_first):
+                if self._cancel.is_set():
+                    raise ControlError('STOP_REQUESTED', 'Stop was requested during path checking')
+                section = self.geometry.check_path(left, right, self.limits)
+                start_tol = self.limits.joint_tolerance_deg if is_first else 0
+                section['independent_joint_envelope'] = self._check_motion_envelope(
+                    left, right, constraints, start_tolerance_deg=start_tol)
+                return section
+
+            def split_initial(left, right, *, is_first, depth):
+                try:
+                    return [(list(right), checked_section(left, right, is_first))]
+                except ControlError as exc:
+                    if (exc.code != 'ASYNC_ENVELOPE' or depth >= 3
+                            or max(abs(a-b) for a, b in zip(left, right)) < 1e-6):
+                        raise
+                    midpoint = [(a+b)/2. for a, b in zip(left, right)]
+                    return (split_initial(left, midpoint, is_first=is_first, depth=depth+1)
+                            + split_initial(midpoint, right, is_first=False, depth=depth+1))
+
+            pieces = split_initial(control_start, blend_waypoints[0], is_first=True, depth=0)
+            if len(pieces) + original_count - 1 > MAX_BLENDED_WAYPOINTS:
+                raise ControlError('INVALID_REQUEST', 'Initial subdivision exceeds the waypoint budget')
+            point_groups = [[point for point, _ in pieces]] + [[point] for point in blend_waypoints[1:]]
+            # At most eight time-driven midpoint insertions are attempted.
+            # They keep all original waypoints and do not add budget.
+            for split_count in range(9):
+                effective_waypoints = [point for group in point_groups for point in group]
+                if len(effective_waypoints) > MAX_BLENDED_WAYPOINTS:
+                    raise ControlError('INVALID_REQUEST', 'Subdivision exceeds the waypoint budget')
+                groups = [len(group) for group in point_groups]
+                path_sections, all_durations = [], []
+                previous = list(control_start)
+                for group_index, group in enumerate(point_groups):
+                    group_start = previous
+                    group_end = group[-1]
+                    group_size = max(abs(a-b) for a, b in zip(group_start, group_end))
+                    if len(group) > 1 and group_size <= 0:
+                        raise ControlError('INVALID_BLENDED_PATH', 'A zero-length segment cannot be subdivided')
+                    for point in group:
+                        path_sections.append(checked_section(previous, point, not path_sections))
+                        part_size = max(abs(a-b) for a, b in zip(previous, point))
+                        all_durations.append(durations[group_index] * (part_size / group_size if group_size else 1.))
+                        previous = point
+                blend_spec = {
+                    'start_joints_deg': list(control_start),
+                    'admission_observed_joints_deg': observed_start,
+                    'segment_timeout_seconds': self.limits.motion_timeout,
+                    'motion_timeout_seconds': blend_budget,
+                    'original_waypoint_count': original_count,
+                    'segment_groups': groups,
+                    'waypoints_deg': effective_waypoints,
+                    'segment_durations_s': all_durations,
+                    'max_velocity_deg_s': action.get('max_velocity_deg_s'),
+                    'max_acceleration_deg_s2': action.get('max_acceleration_deg_s2'),
+                    'max_jerk_deg_s3': action.get('max_jerk_deg_s3'),
+                    'sample_period_seconds': period,
+                    'speed_pct': speed,
+                    # The SDK must recheck each next target from the
+                    # current encoder observation, not just from the
+                    # previously planned target. Preserve exactly the
+                    # same task constraints used by this admission.
+                    'path_constraints': deepcopy(constraints),
+                }
+                try:
+                    virtual_plan = prepare_virtual_blend(
+                        blend_spec, motion_timeout=max(.001, blend_budget - self.limits.stable_seconds - .1))
+                    break
+                except ControlError as exc:
+                    group_index = exc.details.get('group_index')
+                    if (exc.code != 'MOTION_TIMEOUT' or type(group_index) is not int
+                            or not 0 <= group_index < original_count or split_count == 8
+                            or len(point_groups[group_index]) >= 8 or len(effective_waypoints) >= MAX_BLENDED_WAYPOINTS):
+                        raise
+                    group = point_groups[group_index]
+                    start = control_start if group_index == 0 else point_groups[group_index-1][-1]
+                    bounds = [start, *group]
+                    sizes = [max(abs(a-b) for a, b in zip(left, right))
+                             for left, right in zip(bounds, bounds[1:])]
+                    index = max(range(len(sizes)), key=sizes.__getitem__)
+                    if sizes[index] < 1e-6:
+                        raise
+                    midpoint = [(a+b)/2. for a, b in zip(bounds[index], bounds[index+1])]
+                    group.insert(index, midpoint)
+            digest = planned_sample_digest(virtual_plan)
+            sdk_plan = None
+            if blend_scope == 'sdk_host_stream_unverified':
+                sdk_commands = sdk_blended_commands(virtual_plan)
+                sdk_sha = sdk_blended_command_digest(sdk_commands)
+                if tuple(sdk_commands[-1][1]) != tuple(effective):
+                    raise ControlError('BLENDED_PLAN_MISMATCH', 'The last SDK target differs from the endpoint')
+                # A joint box spanning a run of quantized SDK targets,
+                # expanded by the existing tolerance on *both* ends,
+                # encloses every independently progressing transition in
+                # that run. If this stronger box fails, split down to the
+                # unchanged individual transition check; never admit a
+                # transition solely because a batch was too conservative.
+                points = [tuple(control_start), *(check_joints(target) for _, target in sdk_commands)]
+                minimum_z, box_checks = float('inf'), 0
+
+                def check_sdk_box(first, last):
+                    nonlocal minimum_z, box_checks
+                    if self._cancel.is_set():
+                        raise ControlError('STOP_REQUESTED', 'Stop was requested during SDK path checking')
+                    box_checks += 1
+                    left = [min(point[axis] for point in points[first:last+1]) for axis in range(JOINT_COUNT)]
+                    right = [max(point[axis] for point in points[first:last+1]) for axis in range(JOINT_COUNT)]
+                    try:
+                        checked = self._check_motion_envelope(
+                            left, right, constraints,
+                            start_tolerance_deg=self.limits.joint_tolerance_deg)
+                        minimum_z = min(minimum_z, checked['minimum_mm'][2])
+                    except ControlError as exc:
+                        if exc.code != 'ASYNC_ENVELOPE':
+                            raise
+                        if last - first == 1:
+                            section = checked_section(points[first], points[last], first == 0)
+                            minimum_z = min(minimum_z, section['minimum_tcp_z_mm'])
+                        else:
+                            middle = (first + last) // 2
+                            check_sdk_box(first, middle)
+                            check_sdk_box(middle, last)
+
+                for first in range(0, len(sdk_commands), 32):
+                    check_sdk_box(first, min(first + 32, len(sdk_commands)))
+                sdk_plan = {'scope': 'sdk_host_stream_unverified',
+                            'command_period_seconds': SDK_BLENDED_COMMAND_PERIOD_S,
+                            'command_count': len(sdk_commands), 'planned_commands_sha256': sdk_sha,
+                            'digest_encoding': 'be-u64-tick-and-5-f64-v1',
+                            'minimum_tcp_z_mm': minimum_z, 'envelope_box_checks': box_checks,
+                            'envelope_covers_all_command_transitions': True, 'full_collision_check': False}
+                blend_spec['sdk_command_plan'] = sdk_plan
+            if self._cancel.is_set():
+                raise ControlError('STOP_REQUESTED', 'Stop was requested during path hashing')
+            # Do not promote an old cached sample merely because planning
+            # finished. Obtain a device snapshot outside the state lock,
+            # retain its real sensor timestamp, and then publish it.
+            direct_snapshot = Snapshot.from_dict(self.worker.call('snapshot'))
+            if (not self._fresh(direct_snapshot)
+                    or direct_snapshot.sensor_sequence < admission_snapshot.sensor_sequence):
+                raise ControlError('SENSOR_STALE', 'Fresh sensor feedback is required after path hashing')
+            self._publish(direct_snapshot)
+        finally:
+            if lock_owned:
+                self._condition.acquire()
+        if self._cancel.is_set():
+            raise ControlError('STOP_REQUESTED', 'Stop was requested during path hashing')
+        if self._fault is not None:
+            raise self._fault
+        latest = self._snapshot
+        if not self._fresh(latest) or latest.moving is not False:
+            raise ControlError('SENSOR_STALE', 'Fresh stationary feedback is required after path hashing')
+        if max(abs(a-b) for a, b in zip(latest.joints_deg, admission_snapshot.joints_deg)) > self.limits.joint_tolerance_deg:
+            raise ControlError('STATE_CHANGED', 'The observed joints changed while checking the path')
+        self._validate_motion_feedback({'path_constraints': constraints}, admission_snapshot, latest)
+        path = {'segments': path_sections, 'duration_s': virtual_plan.duration_s,
+                'time_scale': virtual_plan.scale, 'sample_count': digest['sample_count'],
+                'planned_sha256': digest['sha256'], 'digest_encoding': digest['encoding'],
+                'original_waypoint_count': original_count, 'segment_groups': groups,
+                'observation_to_control_start': bridge,
+                'full_collision_check': False}
+        if sdk_plan is not None:
+            path['sdk_command_plan'] = sdk_plan
+        return path, blend_spec, blend_scope, reference, observed_start, control_start
+
+    def _prepare_nominal_arrival(self, action, kind, steps, target, effective, path, constraints,
+                                 blended, direct_student_target, completion_mode, bounded_correction,
+                                 correction_parent):
+        """Validate nominal_arrival_joints_deg and return its checked arrival descriptor."""
+        if kind not in ('move_joints', 'blended_joint_path') or 'nominal_arrival_joints_deg' not in action:
+            return None
+        nominal_requested = check_joints(action['nominal_arrival_joints_deg'])
+        nominal_steps, nominal_effective = quantize_joints(nominal_requested)
+        if (completion_mode == 'retain_position_target' and tuple(steps) != tuple(nominal_steps)
+                and correction_parent is None):
+            raise ControlError('INVALID_REQUEST', 'A retained non-correction move must send its nominal target')
+        if (bounded_correction or blended) and tuple(steps) != tuple(nominal_steps):
+            raise ControlError('INVALID_REQUEST', 'The first correction-enabled move must send its nominal target')
+        raw_trim = [a - b for a, b in zip(target, nominal_requested)]
+        quantized_trim = [a - b for a, b in zip(effective, nominal_effective)]
+        if (max(map(abs, raw_trim)) > MAX_NOMINAL_TRIM_DEG
+                or max(map(abs, quantized_trim)) > MAX_NOMINAL_TRIM_DEG):
+            raise ControlError('NOMINAL_TRIM_LIMIT', 'Nominal and sent targets differ by more than one degree')
+        nominal_path = (path if (blended or direct_student_target)
+                        else self.geometry.check_path(self._snapshot.joints_deg, nominal_effective, self.limits))
+        if not blended and not direct_student_target and (self.config.backend == 'sdk' or self.config.workspace_source == 'fixed_layout_photo'):
+            nominal_path['independent_joint_envelope'] = self._check_motion_envelope(
+                self._snapshot.joints_deg, nominal_effective, constraints)
+        return {'requested_joints_deg': nominal_requested, 'effective_target_deg': nominal_effective,
+                'steps': nominal_steps, 'target_tcp_mm': self.geometry.forward(nominal_effective),
+                'quantized_trim_deg': quantized_trim, 'maximum_trim_deg': MAX_NOMINAL_TRIM_DEG,
+                'path': nominal_path}
+
+    def _prepare(self, action):
+        keys(action, allowed={"kind", "joints_deg", "nominal_arrival_joints_deg", "allow_mock_nominal_retry",
+                              "allow_nominal_correction", "correction_of_command_id", "speed_pct", "delta_xy_mm",
+                              "reference_id", "state", "allow_visual_settle", "joint", "delta_deg", "delta_mm",
+                              "path_constraints", "arrival_tolerance_mm", "targets_deg", "period_seconds",
+                              "waypoints_deg", "segment_durations_s", "max_velocity_deg_s",
+                              "max_acceleration_deg_s2", "max_jerk_deg_s3", "sample_period_seconds",
+                              "completion_mode", "retain_position_from_command_id",
+                              "allow_damped_compensation", "allow_target_follow_up",
+                              "direct_student_target"}, required={"kind"})
+        kind = action["kind"]
+        if not isinstance(kind, str) or kind not in ACTION_FIELDS:
+            raise ControlError("UNSUPPORTED_ACTION", "This phase implements calibration, mock XY correction, gripper and reobserve only")
+        keys(action, allowed=ACTION_FIELDS[kind])
+        completion_mode, damped_opt_in, follow_up, direct_student_target, correction_parent, pending = (
+            self._validate_retained_and_correction_flags(action, kind))
         if kind == "reobserve":
             return {"kind": kind}
-        if self._snapshot.firmware_warning_raw==1:
-            raise ControlError('DEVICE_WARNING','Device warning blocks new arm and gripper commands')
+        if self._snapshot.firmware_warning_raw == 1:
+            raise ControlError('DEVICE_WARNING', 'Device warning blocks new arm and gripper commands')
         if kind == "set_gripper":
             if self.config.mode != "calibration":
                 raise ControlError("MODE_RESTRICTED", "Raw gripper control is restricted to calibration")
@@ -1274,55 +1593,19 @@ class Controller:
                 raise ControlError("NOT_STATIONARY", "The arm must be stationary before a calibration step")
             return prepare_step(self.geometry, self._snapshot.joints_deg, action, self.limits)
         if kind == "mock_joint_trajectory":
-            if self.config.backend != "mock" or self.config.hardware_enabled is not False:
-                raise ControlError("UNSUPPORTED_ACTION", "Timed trajectory execution is mock-only")
-            if self.config.mode != "calibration" or not self.config.workspace_ready:
-                raise ControlError("WORKSPACE_UNVERIFIED", "Mock trajectory requires a ready calibration workspace")
-            if self._snapshot.moving is not False:
-                raise ControlError("NOT_STATIONARY", "The arm must be stationary before accepting a trajectory")
-            targets = action.get("targets_deg")
-            period = action.get("period_seconds")
-            if not isinstance(targets, list) or len(targets) != 1000 or type(period) not in (int, float) or period != .002:
-                raise ControlError("INVALID_REQUEST", "Mock trajectory requires exactly 1000 targets at a 2 ms period")
-            targets = [check_joints(row) for row in targets]
-            previous = self._snapshot.joints_deg
-            minimum_z = float('inf')
-            for target in targets:
-                if self._cancel.is_set():
-                    raise ControlError("STOP_REQUESTED", "Stop was requested while the trajectory was being checked")
-                path = self.geometry.check_path(previous, target, self.limits)
-                minimum_z = min(minimum_z, path['minimum_tcp_z_mm'])
-                previous = target
-            return {"kind": kind, "targets_deg": targets, "period_seconds": .002,
-                    "requested_joints_deg": targets[-1], "effective_target_deg": targets[-1],
-                    "target_tcp_mm": self.geometry.forward(targets[-1]),
-                    "arrival_tolerance_mm": self.limits.tcp_tolerance_mm,
-                    "path": {"waypoints": len(targets), "minimum_tcp_z_mm": minimum_z,
-                             "full_collision_check": False}, "path_constraints": {}}
+            return self._prepare_mock_joint_trajectory(action)
         if not self.config.workspace_ready:
             raise ControlError("WORKSPACE_UNVERIFIED", "Provide measured coordinates or an explicit fixed-layout trial reference before absolute moves", workspace=self.config.workspace_status())
         speed = number(action.get("speed_pct", 12), "speed_pct", minimum=1, maximum=self.limits.max_speed_pct)
         arrival_tolerance = number(action.get("arrival_tolerance_mm", self.limits.tcp_tolerance_mm),
                                    "arrival_tolerance_mm", minimum=.01,
-                                   maximum=max(3.0,self.limits.tcp_tolerance_mm))
-        constraints = action.get("path_constraints", {})
-        keys(constraints, allowed={"vertical_xy_mm", "corridor_mm", "minimum_z_mm", "maximum_z_mm"})
-        constraints = dict(constraints)
-        if constraints.get("vertical_xy_mm") is not None:
-            constraints["vertical_xy_mm"] = vector(constraints["vertical_xy_mm"], 2, "vertical_xy_mm")
-            constraints["corridor_mm"] = number(constraints.get("corridor_mm"), "corridor_mm", minimum=0.01)
-        elif constraints.get("corridor_mm") is not None:
-            raise ControlError("INVALID_REQUEST", "A corridor radius requires an XY center")
-        if constraints.get("minimum_z_mm") is not None:
-            constraints["minimum_z_mm"] = number(constraints["minimum_z_mm"], "minimum_z_mm")
-        if constraints.get("maximum_z_mm") is not None:
-            constraints["maximum_z_mm"] = number(constraints["maximum_z_mm"], "maximum_z_mm",
-                                                   maximum=self.limits.workspace_max_mm[2])
-            if constraints.get("minimum_z_mm") is not None and constraints['maximum_z_mm']<constraints['minimum_z_mm']:
-                raise ControlError("INVALID_REQUEST", "Path ceiling must not be below its clearance floor")
+                                   maximum=max(3.0, self.limits.tcp_tolerance_mm))
+        constraints = self._parse_path_constraints(action)
         if self._snapshot.moving is not False:
             raise ControlError("NOT_STATIONARY", "The arm must be stationary before accepting another target")
         blended = kind == 'blended_joint_path'
+        mock_retry = bounded_correction = False
+        waypoints = None
         if kind in ("move_joints", "blended_joint_path"):
             if self.config.mode != "calibration":
                 raise ControlError("MODE_RESTRICTED", "Joint commands are not exposed in collection mode")
@@ -1368,214 +1651,10 @@ class Controller:
             target = self.geometry.inverse((tcp[0] + delta[0], tcp[1] + delta[1], tcp[2]), pitch_deg=0)
             allow_coarse = False
         steps, effective = quantize_joints(target)
-        blend_spec = None
+        blend_spec = blend_scope = reference = observed_start = control_start = None
         if blended:
-            blend_scope = self.blended_path_scope
-            admission_snapshot = self._snapshot
-            blend_waypoints = [list(check_joints(row)) for row in waypoints]
-            blend_waypoints[-1] = list(effective)
-            blend_budget = virtual_blend_time_budget(self.limits.motion_timeout, len(blend_waypoints))
-            observed_start = list(check_joints(self._snapshot.joints_deg))
-            reference = self.worker.call('blended_start_reference')
-            expected_source = ('virtual_servo_target' if blend_scope == 'virtual_worker_only'
-                               else 'sdk_stopped_encoder')
-            if (not isinstance(reference, dict) or reference.get('available') is not True
-                    or reference.get('source') != expected_source):
-                raise ControlError('BLENDED_REFERENCE_UNAVAILABLE', 'The path start reference is not known')
-            control_start = check_joints(reference.get('joints_deg'))
-            # The current encoder position and current servo command need not
-            # coincide under load. Validate the complete bridge separately;
-            # neither is treated as evidence about an object.
-            bridge = self.geometry.check_path(observed_start, control_start, self.limits)
-            bridge_bounds = motion_bounds(self.geometry, observed_start, control_start,
-                                          self.limits.joint_tolerance_deg,
-                                          start_tolerance_deg=self.limits.joint_tolerance_deg)
-            bridge['independent_joint_envelope'] = check_envelope(
-                bridge_bounds, self.limits, vertical_xy=constraints.get('vertical_xy_mm'),
-                corridor_mm=constraints.get('corridor_mm'), minimum_z_mm=constraints.get('minimum_z_mm'),
-                maximum_z_mm=constraints.get('maximum_z_mm'))
-            original_count = len(blend_waypoints)
-            durations = action.get('segment_durations_s')
-            if not isinstance(durations, list) or len(durations) != original_count:
-                raise ControlError('INVALID_REQUEST', 'A blended path needs one duration per waypoint')
-            period = number(action.get('sample_period_seconds'), 'sample_period_seconds', minimum=.002, maximum=.2)
-            durations = [number(value, 'segment_durations_s', minimum=period, maximum=self.limits.motion_timeout)
-                         for value in durations]
-            # Long path checking and hashing occur outside the state lock.
-            # The admission reservation keeps all other actions out while
-            # sensor publication and a stop remain available.
-            lock_owned = self._condition._is_owned()
-            if lock_owned:
-                self._condition.release()
-            try:
-                def checked_section(left, right, is_first):
-                    if self._cancel.is_set():
-                        raise ControlError('STOP_REQUESTED', 'Stop was requested during path checking')
-                    section = self.geometry.check_path(left, right, self.limits)
-                    start_tol = self.limits.joint_tolerance_deg if is_first else 0
-                    envelope = motion_bounds(self.geometry, left, right, self.limits.joint_tolerance_deg,
-                                             start_tolerance_deg=start_tol)
-                    section['independent_joint_envelope'] = check_envelope(
-                        envelope, self.limits, vertical_xy=constraints.get('vertical_xy_mm'),
-                        corridor_mm=constraints.get('corridor_mm'), minimum_z_mm=constraints.get('minimum_z_mm'),
-                        maximum_z_mm=constraints.get('maximum_z_mm'))
-                    return section
-
-                def split_initial(left, right, *, is_first, depth):
-                    try:
-                        return [(list(right), checked_section(left, right, is_first))]
-                    except ControlError as exc:
-                        if (exc.code != 'ASYNC_ENVELOPE' or depth >= 3
-                                or max(abs(a-b) for a, b in zip(left, right)) < 1e-6):
-                            raise
-                        midpoint = [(a+b)/2. for a, b in zip(left, right)]
-                        return (split_initial(left, midpoint, is_first=is_first, depth=depth+1)
-                                + split_initial(midpoint, right, is_first=False, depth=depth+1))
-
-                pieces = split_initial(control_start, blend_waypoints[0], is_first=True, depth=0)
-                if len(pieces) + original_count - 1 > 64:
-                    raise ControlError('INVALID_REQUEST', 'Initial subdivision exceeds the waypoint budget')
-                point_groups = [[point for point, _ in pieces]] + [[point] for point in blend_waypoints[1:]]
-                # At most eight time-driven midpoint insertions are attempted.
-                # They keep all original waypoints and do not add budget.
-                for split_count in range(9):
-                    effective_waypoints = [point for group in point_groups for point in group]
-                    if len(effective_waypoints) > 64:
-                        raise ControlError('INVALID_REQUEST', 'Subdivision exceeds the waypoint budget')
-                    groups = [len(group) for group in point_groups]
-                    path_sections, all_durations = [], []
-                    previous = list(control_start)
-                    for group_index, group in enumerate(point_groups):
-                        group_start = previous
-                        group_end = group[-1]
-                        group_size = max(abs(a-b) for a, b in zip(group_start, group_end))
-                        if len(group) > 1 and group_size <= 0:
-                            raise ControlError('INVALID_BLENDED_PATH', 'A zero-length segment cannot be subdivided')
-                        for point in group:
-                            path_sections.append(checked_section(previous, point, not path_sections))
-                            part_size = max(abs(a-b) for a, b in zip(previous, point))
-                            all_durations.append(durations[group_index] * (part_size / group_size if group_size else 1.))
-                            previous = point
-                    blend_spec = {
-                        'start_joints_deg': list(control_start),
-                        'admission_observed_joints_deg': observed_start,
-                        'segment_timeout_seconds': self.limits.motion_timeout,
-                        'motion_timeout_seconds': blend_budget,
-                        'original_waypoint_count': original_count,
-                        'segment_groups': groups,
-                        'waypoints_deg': effective_waypoints,
-                        'segment_durations_s': all_durations,
-                        'max_velocity_deg_s': action.get('max_velocity_deg_s'),
-                        'max_acceleration_deg_s2': action.get('max_acceleration_deg_s2'),
-                        'max_jerk_deg_s3': action.get('max_jerk_deg_s3'),
-                        'sample_period_seconds': period,
-                        'speed_pct': speed,
-                        # The SDK must recheck each next target from the
-                        # current encoder observation, not just from the
-                        # previously planned target. Preserve exactly the
-                        # same task constraints used by this admission.
-                        'path_constraints': deepcopy(constraints),
-                    }
-                    try:
-                        virtual_plan = prepare_virtual_blend(
-                            blend_spec, motion_timeout=max(.001, blend_budget - self.limits.stable_seconds - .1))
-                        break
-                    except ControlError as exc:
-                        group_index = exc.details.get('group_index')
-                        if (exc.code != 'MOTION_TIMEOUT' or type(group_index) is not int
-                                or not 0 <= group_index < original_count or split_count == 8
-                                or len(point_groups[group_index]) >= 8 or len(effective_waypoints) >= 64):
-                            raise
-                        group = point_groups[group_index]
-                        start = control_start if group_index == 0 else point_groups[group_index-1][-1]
-                        bounds = [start, *group]
-                        sizes = [max(abs(a-b) for a, b in zip(left, right))
-                                 for left, right in zip(bounds, bounds[1:])]
-                        index = max(range(len(sizes)), key=sizes.__getitem__)
-                        if sizes[index] < 1e-6:
-                            raise
-                        midpoint = [(a+b)/2. for a, b in zip(bounds[index], bounds[index+1])]
-                        group.insert(index, midpoint)
-                digest = planned_sample_digest(virtual_plan)
-                sdk_plan = None
-                if blend_scope == 'sdk_host_stream_unverified':
-                    sdk_commands = sdk_blended_commands(virtual_plan)
-                    sdk_sha = sdk_blended_command_digest(sdk_commands)
-                    if tuple(sdk_commands[-1][1]) != tuple(effective):
-                        raise ControlError('BLENDED_PLAN_MISMATCH', 'The last SDK target differs from the endpoint')
-                    # A joint box spanning a run of quantized SDK targets,
-                    # expanded by the existing tolerance on *both* ends,
-                    # encloses every independently progressing transition in
-                    # that run. If this stronger box fails, split down to the
-                    # unchanged individual transition check; never admit a
-                    # transition solely because a batch was too conservative.
-                    points = [tuple(control_start), *(check_joints(target) for _, target in sdk_commands)]
-                    minimum_z, box_checks = float('inf'), 0
-                    def check_sdk_box(first, last):
-                        nonlocal minimum_z, box_checks
-                        if self._cancel.is_set():
-                            raise ControlError('STOP_REQUESTED', 'Stop was requested during SDK path checking')
-                        box_checks += 1
-                        left = [min(point[axis] for point in points[first:last+1]) for axis in range(4)]
-                        right = [max(point[axis] for point in points[first:last+1]) for axis in range(4)]
-                        try:
-                            envelope = motion_bounds(self.geometry, left, right, self.limits.joint_tolerance_deg,
-                                                     start_tolerance_deg=self.limits.joint_tolerance_deg)
-                            checked = check_envelope(
-                                envelope, self.limits, vertical_xy=constraints.get('vertical_xy_mm'),
-                                corridor_mm=constraints.get('corridor_mm'), minimum_z_mm=constraints.get('minimum_z_mm'),
-                                maximum_z_mm=constraints.get('maximum_z_mm'))
-                            minimum_z = min(minimum_z, checked['minimum_mm'][2])
-                        except ControlError as exc:
-                            if exc.code != 'ASYNC_ENVELOPE':
-                                raise
-                            if last-first == 1:
-                                section = checked_section(points[first], points[last], first == 0)
-                                minimum_z = min(minimum_z, section['minimum_tcp_z_mm'])
-                            else:
-                                middle = (first + last) // 2
-                                check_sdk_box(first, middle)
-                                check_sdk_box(middle, last)
-                    for first in range(0, len(sdk_commands), 32):
-                        check_sdk_box(first, min(first + 32, len(sdk_commands)))
-                    sdk_plan = {'scope': 'sdk_host_stream_unverified',
-                                'command_period_seconds': SDK_BLENDED_COMMAND_PERIOD_S,
-                                'command_count': len(sdk_commands), 'planned_commands_sha256': sdk_sha,
-                                'digest_encoding': 'be-u64-tick-and-5-f64-v1',
-                                'minimum_tcp_z_mm': minimum_z, 'envelope_box_checks': box_checks,
-                                'envelope_covers_all_command_transitions': True, 'full_collision_check': False}
-                    blend_spec['sdk_command_plan'] = sdk_plan
-                if self._cancel.is_set():
-                    raise ControlError('STOP_REQUESTED', 'Stop was requested during path hashing')
-                # Do not promote an old cached sample merely because planning
-                # finished. Obtain a device snapshot outside the state lock,
-                # retain its real sensor timestamp, and then publish it.
-                direct_snapshot = Snapshot.from_dict(self.worker.call('snapshot'))
-                if (not self._fresh(direct_snapshot)
-                        or direct_snapshot.sensor_sequence < admission_snapshot.sensor_sequence):
-                    raise ControlError('SENSOR_STALE', 'Fresh sensor feedback is required after path hashing')
-                self._publish(direct_snapshot)
-            finally:
-                if lock_owned:
-                    self._condition.acquire()
-            if self._cancel.is_set():
-                raise ControlError('STOP_REQUESTED', 'Stop was requested during path hashing')
-            if self._fault is not None:
-                raise self._fault
-            latest = self._snapshot
-            if not self._fresh(latest) or latest.moving is not False:
-                raise ControlError('SENSOR_STALE', 'Fresh stationary feedback is required after path hashing')
-            if max(abs(a-b) for a, b in zip(latest.joints_deg, admission_snapshot.joints_deg)) > self.limits.joint_tolerance_deg:
-                raise ControlError('STATE_CHANGED', 'The observed joints changed while checking the path')
-            self._validate_motion_feedback({'path_constraints': constraints}, admission_snapshot, latest)
-            path = {'segments': path_sections, 'duration_s': virtual_plan.duration_s,
-                    'time_scale': virtual_plan.scale, 'sample_count': digest['sample_count'],
-                    'planned_sha256': digest['sha256'], 'digest_encoding': digest['encoding'],
-                    'original_waypoint_count': original_count, 'segment_groups': groups,
-                    'observation_to_control_start': bridge,
-                    'full_collision_check': False}
-            if sdk_plan is not None:
-                path['sdk_command_plan'] = sdk_plan
+            path, blend_spec, blend_scope, reference, observed_start, control_start = self._prepare_blended_path(
+                action, waypoints, effective, speed, constraints)
         elif direct_student_target:
             # The SDK's independent axis motion is not the sampled joint
             # interpolation or its hypothetical independent-axis envelope.
@@ -1587,36 +1666,11 @@ class Controller:
         else:
             path = self.geometry.check_path(self._snapshot.joints_deg, effective, self.limits)
         if not blended and not direct_student_target and (self.config.backend == "sdk" or self.config.workspace_source == "fixed_layout_photo"):
-            envelope = motion_bounds(self.geometry, self._snapshot.joints_deg, effective, self.limits.joint_tolerance_deg, start_tolerance_deg=0)
-            path["independent_joint_envelope"] = check_envelope(envelope, self.limits,
-                vertical_xy=constraints.get("vertical_xy_mm"), corridor_mm=constraints.get("corridor_mm"),
-                minimum_z_mm=constraints.get("minimum_z_mm"),maximum_z_mm=constraints.get("maximum_z_mm"))
-        nominal = None
-        if kind in ('move_joints', 'blended_joint_path') and 'nominal_arrival_joints_deg' in action:
-            nominal_requested = check_joints(action['nominal_arrival_joints_deg'])
-            nominal_steps, nominal_effective = quantize_joints(nominal_requested)
-            if (completion_mode == 'retain_position_target' and tuple(steps) != tuple(nominal_steps)
-                    and correction_parent is None):
-                raise ControlError('INVALID_REQUEST', 'A retained non-correction move must send its nominal target')
-            if (bounded_correction or blended) and tuple(steps) != tuple(nominal_steps):
-                raise ControlError('INVALID_REQUEST', 'The first correction-enabled move must send its nominal target')
-            raw_trim = [a - b for a, b in zip(target, nominal_requested)]
-            quantized_trim = [a - b for a, b in zip(effective, nominal_effective)]
-            if (max(map(abs, raw_trim)) > MAX_NOMINAL_TRIM_DEG
-                    or max(map(abs, quantized_trim)) > MAX_NOMINAL_TRIM_DEG):
-                raise ControlError('NOMINAL_TRIM_LIMIT', 'Nominal and sent targets differ by more than one degree')
-            nominal_path = path if (blended or direct_student_target) else self.geometry.check_path(self._snapshot.joints_deg, nominal_effective, self.limits)
-            if not blended and not direct_student_target and (self.config.backend == 'sdk' or self.config.workspace_source == 'fixed_layout_photo'):
-                nominal_envelope = motion_bounds(self.geometry, self._snapshot.joints_deg, nominal_effective,
-                                                 self.limits.joint_tolerance_deg, start_tolerance_deg=0)
-                nominal_path['independent_joint_envelope'] = check_envelope(
-                    nominal_envelope, self.limits, vertical_xy=constraints.get('vertical_xy_mm'),
-                    corridor_mm=constraints.get('corridor_mm'), minimum_z_mm=constraints.get('minimum_z_mm'),
-                    maximum_z_mm=constraints.get('maximum_z_mm'))
-            nominal = {'requested_joints_deg': nominal_requested, 'effective_target_deg': nominal_effective,
-                       'steps': nominal_steps, 'target_tcp_mm': self.geometry.forward(nominal_effective),
-                       'quantized_trim_deg': quantized_trim, 'maximum_trim_deg': MAX_NOMINAL_TRIM_DEG,
-                       'path': nominal_path}
+            path["independent_joint_envelope"] = self._check_motion_envelope(
+                self._snapshot.joints_deg, effective, constraints)
+        nominal = self._prepare_nominal_arrival(
+            action, kind, steps, target, effective, path, constraints, blended,
+            direct_student_target, completion_mode, bounded_correction, correction_parent)
         if kind == "correct_xy":
             start_tcp, end_tcp = self.geometry.forward(self._snapshot.joints_deg), self.geometry.forward(effective)
             if distance(start_tcp[:2], end_tcp[:2]) > self.limits.max_xy_correction_mm or abs(start_tcp[2] - end_tcp[2]) > self.limits.tcp_tolerance_mm:
@@ -1878,20 +1932,127 @@ class Controller:
                          minimum_z_mm=action['path_constraints'].get('minimum_z_mm'))
         return candidate, basis
 
+    def _reuse_retained_position(self, action, before, effective, target_tcp, arrival_joints, arrival_tcp, arrival_tolerance):
+        """Confirm unchanged retained SDK position target against a fresh stationary sample."""
+        deadline = time.monotonic() + self.limits.stop_timeout
+        with self._condition:
+            while (not self._cancel.is_set() and time.monotonic() < deadline
+                   and self._snapshot.sensor_sequence <= before.sensor_sequence):
+                self._condition.wait(min(self.limits.sample_period, max(0., deadline - time.monotonic())))
+            settled = self._snapshot
+        if self._cancel.is_set():
+            return {'status': 'cancelled', 'applied': False, 'reason': self._cancel_reason}
+        if settled.sensor_sequence <= before.sensor_sequence:
+            raise ControlError('SENSOR_STALE', 'A new encoder sample is required to reuse a position target')
+        retained, _ = self._checked_retained_position(self._retained_position_target['command_id'], settled,
+                                                      require_arrival=False)
+        self._validate_motion_feedback(action, before, settled)
+        nominal_error, nominal_tcp_error, nominal_reached = self._target_error_metrics(
+            settled.joints_deg, arrival_joints, arrival_tcp, arrival_tolerance)
+        sent_error, sent_tcp_error, sent_reached = self._target_error_metrics(
+            settled.joints_deg, effective, target_tcp, arrival_tolerance)
+        return {'status': 'position_target_unchanged', 'applied': False, 'reason': 'retained_target_unchanged',
+                'target': action, 'arrival_reference': 'nominal', 'nominal_arrival_reached': nominal_reached,
+                'sent_target_reached': sent_reached, 'arrival_joint_error_deg': nominal_error,
+                'arrival_tcp_error_mm': nominal_tcp_error, 'joint_error_deg': sent_error,
+                'tcp_error_mm': sent_tcp_error,
+                'retained_position_from_command_id': retained['command_id'],
+                'retained_position_observation': {'sensor_sequence': settled.sensor_sequence,
+                                                  'sensor_monotonic': settled.sensor_time}}
+
+    def _verify_post_stop_arrival(self, action, before, effective, target_tcp, arrival_joints, arrival_tcp,
+                                  arrival_tolerance, nominal, sdk_motion, status, pre_stop_joint_error,
+                                  pre_stop_tcp_error, retained_host_frame):
+        """Stop the device after motion settles and verify arrival residuals against post-stop feedback."""
+        stop = self._stop_device()
+        if not stop["confirmed"]:
+            raise ControlError("STOP_UNCONFIRMED", "A fresh stationary state was not confirmed after stop")
+        # Completion and returned residuals must refer to the
+        # fresh stationary observation bound to this stop, not
+        # the earlier in-flight sample. The device's physical
+        # behaviour after its stop command is not assumed here.
+        with self._condition:
+            settled = self._snapshot
+            fault = self._fault
+        if fault is not None:
+            raise fault
+        if (not self._fresh(settled) or settled.moving is not False
+                or settled.sensor_sequence < stop['confirmed_sensor_sequence']
+                or settled.sensor_time < stop['confirmed_sensor_monotonic']):
+            raise ControlError('STOP_UNCONFIRMED', 'Fresh stationary feedback after stop is required')
+        self._validate_motion_feedback(action, before, settled)
+        joint_error, tcp_error, sent_reached = self._target_error_metrics(
+            settled.joints_deg, effective, target_tcp, arrival_tolerance)
+        arrival_joint_error, arrival_tcp_error, nominal_reached = self._target_error_metrics(
+            settled.joints_deg, arrival_joints, arrival_tcp, arrival_tolerance)
+        if sdk_motion and 'damped_compensation' not in action:
+            status = 'completed' if nominal_reached and sent_reached else 'settled'
+        elif nominal is not None:
+            retryable = (status == 'settled_needs_nominal_retry'
+                         and arrival_joint_error <= MAX_NOMINAL_TRIM_DEG
+                         and arrival_tcp_error <= MAX_MOCK_NOMINAL_RETRY_TCP_MM)
+            correction_eligible = (action.get('allow_nominal_correction') is True
+                                   and arrival_joint_error <= MAX_NOMINAL_TRIM_DEG
+                                   and arrival_tcp_error <= MAX_MOCK_NOMINAL_RETRY_TCP_MM)
+            if nominal_reached:
+                status = 'completed'
+            elif correction_eligible:
+                self._require_quiet_motion_diagnostics(before.firmware_warning_raw,
+                                                       before.collision_event_counts, settled)
+                correction_action, correction_basis = self._make_nominal_correction(
+                    action, settled, original_host_frame=retained_host_frame)
+                status = 'settled_needs_nominal_correction'
+            elif not retryable:
+                raise ControlError('TARGET_NOT_REACHED', 'The nominal waypoint changed after stop',
+                                   phase='after_stop', arrival_reference='nominal',
+                                   joint_error_deg=joint_error, tcp_error_mm=tcp_error,
+                                   arrival_joint_error_deg=arrival_joint_error,
+                                   arrival_tcp_error_mm=arrival_tcp_error)
+        else:
+            coarse_allowed = (action.get('allow_visual_settle', False)
+                              and tcp_error <= self.limits.coarse_residual_mm)
+            if status == 'completed' and not sent_reached and coarse_allowed:
+                status = 'settled_needs_observation'
+            elif (status == 'completed' and not sent_reached
+                  or status == 'settled_needs_observation' and not coarse_allowed):
+                raise ControlError('TARGET_NOT_REACHED', 'The target waypoint changed after stop',
+                                   phase='after_stop', joint_error_deg=joint_error,
+                                   tcp_error_mm=tcp_error,
+                                   pre_stop_joint_error_deg=pre_stop_joint_error,
+                                   pre_stop_tcp_error_mm=pre_stop_tcp_error,
+                                   confirmed_sensor_sequence=stop['confirmed_sensor_sequence'],
+                                   confirmed_sensor_monotonic=stop['confirmed_sensor_monotonic'])
+        result = {"status": status, "applied": True, "target": action, "receipt": None,
+                  "joint_error_deg": joint_error, "tcp_error_mm": tcp_error, "stop": stop}
+        if sdk_motion:
+            result['sent_target_reached'] = sent_reached
+        if nominal is not None:
+            result.update(arrival_reference='nominal',
+                          nominal_arrival_reached=nominal_reached,
+                          arrival_joint_error_deg=arrival_joint_error, arrival_tcp_error_mm=arrival_tcp_error,
+                          sent_target_reached=sent_reached,
+                          sent_target_source='worker_dispatch_receipt')
+            if status == 'settled_needs_nominal_retry':
+                result['mock_retry_permitted'] = True
+            if status == 'settled_needs_nominal_correction':
+                result.update(nominal_correction_permitted=True,
+                              correction_action=correction_action,
+                              correction_basis=correction_basis)
+        return result
+
     def _execute_motion_impl(self, action, before):
         effective = action["effective_target_deg"]
         target_tcp = action["target_tcp_mm"]
         nominal = action.get('nominal_arrival')
         arrival_joints = nominal['effective_target_deg'] if nominal is not None else effective
         arrival_tcp = nominal['target_tcp_mm'] if nominal is not None else target_tcp
-        arrival_tolerance = action.get("arrival_tolerance_mm",self.limits.tcp_tolerance_mm)
-        initial_joint_error = max(abs(a - b) for a, b in zip(before.joints_deg, arrival_joints))
-        initial_tcp_error = distance(self.geometry.forward(before.joints_deg), arrival_tcp)
+        arrival_tolerance = action.get("arrival_tolerance_mm", self.limits.tcp_tolerance_mm)
+        initial_joint_error, initial_tcp_error, initial_nominal_reached = self._target_error_metrics(
+            before.joints_deg, arrival_joints, arrival_tcp, arrival_tolerance)
+        _, _, initial_sent_reached = self._target_error_metrics(
+            before.joints_deg, effective, target_tcp, arrival_tolerance)
         retain = action.get('completion_mode') == 'retain_position_target'
-        initially_at_target = (initial_joint_error <= self.limits.joint_tolerance_deg
-                               and initial_tcp_error <= arrival_tolerance
-                               and max(abs(a-b) for a, b in zip(before.joints_deg, effective)) <= self.limits.joint_tolerance_deg
-                               and distance(self.geometry.forward(before.joints_deg), target_tcp) <= arrival_tolerance)
+        initially_at_target = initial_nominal_reached and initial_sent_reached
         previous_same_target = None
         if (retain and action.get('direct_student_target') is True
                 and action.get('allow_target_follow_up') is True):
@@ -1923,45 +2084,18 @@ class Controller:
                 and self._retained_position_target['action']['speed_pct'] == action['speed_pct']):
             # Reuse is not a new command. Bind it to a subsequent distinct
             # sensor sample and the still-current original host position frame.
-            deadline = time.monotonic() + self.limits.stop_timeout
-            with self._condition:
-                while (not self._cancel.is_set() and time.monotonic() < deadline
-                       and self._snapshot.sensor_sequence <= before.sensor_sequence):
-                    self._condition.wait(min(self.limits.sample_period, max(0., deadline-time.monotonic())))
-                settled = self._snapshot
-            if self._cancel.is_set():
-                return {'status': 'cancelled', 'applied': False, 'reason': self._cancel_reason}
-            if settled.sensor_sequence <= before.sensor_sequence:
-                raise ControlError('SENSOR_STALE', 'A new encoder sample is required to reuse a position target')
-            retained, _ = self._checked_retained_position(self._retained_position_target['command_id'], settled,
-                                                          require_arrival=False)
-            self._validate_motion_feedback(action, before, settled)
-            nominal_error = max(abs(a-b) for a, b in zip(settled.joints_deg, arrival_joints))
-            nominal_tcp_error = distance(self.geometry.forward(settled.joints_deg), arrival_tcp)
-            sent_error = max(abs(a-b) for a, b in zip(settled.joints_deg, effective))
-            sent_tcp_error = distance(self.geometry.forward(settled.joints_deg), target_tcp)
-            nominal_reached = (nominal_error <= self.limits.joint_tolerance_deg
-                               and nominal_tcp_error <= arrival_tolerance)
-            sent_reached = (sent_error <= self.limits.joint_tolerance_deg and sent_tcp_error <= arrival_tolerance)
-            return {'status': 'position_target_unchanged', 'applied': False, 'reason': 'retained_target_unchanged',
-                    'target': action, 'arrival_reference': 'nominal', 'nominal_arrival_reached': nominal_reached,
-                    'sent_target_reached': sent_reached, 'arrival_joint_error_deg': nominal_error,
-                    'arrival_tcp_error_mm': nominal_tcp_error, 'joint_error_deg': sent_error,
-                    'tcp_error_mm': sent_tcp_error,
-                    'retained_position_from_command_id': retained['command_id'],
-                    'retained_position_observation': {'sensor_sequence': settled.sensor_sequence,
-                                                      'sensor_monotonic': settled.sensor_time}}
+            return self._reuse_retained_position(
+                action, before, effective, target_tcp, arrival_joints, arrival_tcp, arrival_tolerance)
         if (not retain and action["kind"] not in ("mock_joint_trajectory", "blended_joint_path")
-                and initial_joint_error <= self.limits.joint_tolerance_deg and initial_tcp_error <= arrival_tolerance):
+                and initial_nominal_reached):
             if nominal is not None:
-                sent_joint_error = max(abs(a - b) for a, b in zip(before.joints_deg, effective))
-                sent_tcp_error = distance(self.geometry.forward(before.joints_deg), target_tcp)
+                sent_joint_error, sent_tcp_error, sent_reached = self._target_error_metrics(
+                    before.joints_deg, effective, target_tcp, arrival_tolerance)
                 return {"status": "already_at_target", "applied": False,
                         "reason": "already_at_nominal_target", "target": action,
                         "arrival_reference": "nominal", "nominal_arrival_reached": True,
                         "arrival_joint_error_deg": initial_joint_error, "arrival_tcp_error_mm": initial_tcp_error,
-                        "sent_target_reached": (sent_joint_error <= self.limits.joint_tolerance_deg
-                                                and sent_tcp_error <= arrival_tolerance),
+                        "sent_target_reached": sent_reached,
                         "joint_error_deg": sent_joint_error, "tcp_error_mm": sent_tcp_error}
             same_steps = quantize_joints(before.joints_deg)[0] == action["steps"]
             return {"status": "already_at_target", "applied": False, "reason": "encoded_target_unchanged" if same_steps else "already_within_tolerance", "target": action}
@@ -1977,12 +2111,7 @@ class Controller:
                 self._require_quiet_motion_diagnostics(before.firmware_warning_raw, before.collision_event_counts, checked)
                 self._check_damped_compensation_error(action, checked)
                 self.geometry.check_path(checked.joints_deg, effective, self.limits)
-                envelope = motion_bounds(self.geometry, checked.joints_deg, effective,
-                                         self.limits.joint_tolerance_deg, start_tolerance_deg=0)
-                constraints = action['path_constraints']
-                check_envelope(envelope, self.limits, vertical_xy=constraints.get('vertical_xy_mm'),
-                               corridor_mm=constraints.get('corridor_mm'), minimum_z_mm=constraints.get('minimum_z_mm'),
-                               maximum_z_mm=constraints.get('maximum_z_mm'))
+                self._check_motion_envelope(checked.joints_deg, effective, action['path_constraints'])
             sent_at = time.monotonic()
             with self._condition:
                 # A newly dispatched arm command invalidates the old target,
@@ -2030,7 +2159,7 @@ class Controller:
             try:
                 receipt_steps = receipt['steps']
                 receipt_effective = check_joints(receipt['effective_target_deg'])
-                if (not isinstance(receipt_steps, (list, tuple)) or len(receipt_steps) != 4
+                if (not isinstance(receipt_steps, (list, tuple)) or len(receipt_steps) != JOINT_COUNT
                         or any(type(value) is not int for value in receipt_steps)
                         or tuple(receipt_steps) != tuple(action['steps'])
                         or any(abs(a - b) > 1e-7 for a, b in zip(receipt_effective, effective))):
@@ -2052,7 +2181,7 @@ class Controller:
         previous_observed = before.joints_deg
         progress_best = list(before.joints_deg)
         progress_reference = list(before.joints_deg if sdk_stream else effective)
-        progress_direction = ([0] * 4 if sdk_stream else
+        progress_direction = ([0] * JOINT_COUNT if sdk_stream else
                               [(b > a) - (b < a) for a, b in zip(before.joints_deg, effective)])
         stable_since, stable_pose, stable_sequence, stable_in_bounds = None, None, None, None
         retained_host_frame, retained_latest_host_frame = None, None
@@ -2160,7 +2289,7 @@ class Controller:
                 else:
                     for axis, actual in enumerate(snapshot.joints_deg):
                         direction = progress_direction[axis]
-                        if direction and (actual - progress_best[axis]) * direction >= 360 / 4096 / 2:
+                        if direction and (actual - progress_best[axis]) * direction >= ENCODER_STEP_DEG / 2:
                             progress_best[axis] = actual
                             advanced = True
                 previous_observed = snapshot.joints_deg
@@ -2175,9 +2304,9 @@ class Controller:
                         with self._stop_intent_lock:
                             if self._lease is not None and self._active is not None and not self._cancel.is_set():
                                 self._lease['deadline'] = max(self._lease['deadline'], now + self.limits.lease_seconds)
-            elif max(abs(a-b) for a,b in zip(snapshot.joints_deg,progress_pose))>=360/4096/2:
+            elif max(abs(a-b) for a,b in zip(snapshot.joints_deg,progress_pose))>=ENCODER_STEP_DEG / 2:
                 last_progress, progress_pose = now, snapshot.joints_deg
-            elif now-last_progress>2:
+            elif now-last_progress>STALL_PROGRESS_TIMEOUT_SECONDS:
                 raise ControlError("MOTION_STALLED", "No encoder progress for two seconds during an active command")
             last_sequence = snapshot.sensor_sequence
             seen_motion = seen_motion or snapshot.moving is True
@@ -2238,18 +2367,15 @@ class Controller:
                                     and snapshot.sensor_time > retained_host_frame['monotonic']
                                     and (completed_signal or (stationary_same_target
                                          and (not sdk_stream or sdk_trace.get('completed') is True))))
-            joint_error = max(abs(a - b) for a, b in zip(snapshot.joints_deg, effective))
-            tcp_error = distance(self.geometry.forward(snapshot.joints_deg), target_tcp)
-            arrival_joint_error = max(abs(a - b) for a, b in zip(snapshot.joints_deg, arrival_joints))
-            arrival_tcp_error = distance(self.geometry.forward(snapshot.joints_deg), arrival_tcp)
+            joint_error, tcp_error, sent_reached = self._target_error_metrics(
+                snapshot.joints_deg, effective, target_tcp, arrival_tolerance)
+            arrival_joint_error, arrival_tcp_error, nominal_reached = self._target_error_metrics(
+                snapshot.joints_deg, arrival_joints, arrival_tcp, arrival_tolerance)
             if completed_signal and snapshot.moving is False:
                 if retain:
                     self._require_quiet_motion_diagnostics(before.firmware_warning_raw,
                                                            before.collision_event_counts, snapshot)
-                    in_bounds = (arrival_joint_error <= self.limits.joint_tolerance_deg
-                                 and arrival_tcp_error <= arrival_tolerance
-                                 and ('damped_compensation' in action
-                                      or (joint_error <= self.limits.joint_tolerance_deg and tcp_error <= arrival_tolerance)))
+                    in_bounds = nominal_reached and ('damped_compensation' in action or sent_reached)
                     if stable_in_bounds is not None and in_bounds != stable_in_bounds:
                         stable_pose, stable_since, stable_sequence = None, None, None
                     stable_in_bounds = in_bounds
@@ -2266,10 +2392,6 @@ class Controller:
                 if elapsed >= self.limits.stable_seconds and (not retain or snapshot.sensor_sequence > stable_sequence):
                     if 'damped_compensation' in action:
                         self._check_damped_compensation_error(action, snapshot)
-                    nominal_reached = (arrival_joint_error <= self.limits.joint_tolerance_deg
-                                       and arrival_tcp_error <= arrival_tolerance)
-                    sent_reached = (joint_error <= self.limits.joint_tolerance_deg
-                                    and tcp_error <= arrival_tolerance)
                     if sdk_motion and 'damped_compensation' not in action:
                         # SDK completion and encoder residual are separate facts.
                         status = ('settled_no_motion' if direct_no_motion else
@@ -2302,7 +2424,7 @@ class Controller:
                             details.update(arrival_reference='nominal', arrival_joint_error_deg=arrival_joint_error,
                                            arrival_tcp_error_mm=arrival_tcp_error)
                         raise ControlError("TARGET_NOT_REACHED", "Motion ended outside the permitted residual", **details)
-                    if retain and status in {'completed', 'settled', 'settled_no_motion'}:
+                    if retain and status in RETAINED_POSITION_SUCCESS_STATUSES:
                         if not sent_reached and not sdk_motion and 'damped_compensation' not in action:
                             raise ControlError('TARGET_NOT_REACHED', 'The sent position target was not reached')
                         self._require_quiet_motion_diagnostics(before.firmware_warning_raw,
@@ -2378,91 +2500,11 @@ class Controller:
                                 'nominal_correction_permitted': True,
                                 'correction_action': correction_action, 'correction_basis': correction_basis,
                                 'retained_parent': parent, 'stop': {'requested': False, 'confirmed': False}}
-                    stop = self._stop_device()
-                    if not stop["confirmed"]:
-                        raise ControlError("STOP_UNCONFIRMED", "A fresh stationary state was not confirmed after stop")
-                    # Completion and returned residuals must refer to the
-                    # fresh stationary observation bound to this stop, not
-                    # the earlier in-flight sample. The device's physical
-                    # behaviour after its stop command is not assumed here.
-                    with self._condition:
-                        settled = self._snapshot
-                        fault = self._fault
-                    if fault is not None:
-                        raise fault
-                    if (not self._fresh(settled) or settled.moving is not False
-                            or settled.sensor_sequence < stop['confirmed_sensor_sequence']
-                            or settled.sensor_time < stop['confirmed_sensor_monotonic']):
-                        raise ControlError('STOP_UNCONFIRMED', 'Fresh stationary feedback after stop is required')
-                    self._validate_motion_feedback(action, before, settled)
-                    pre_stop_joint_error, pre_stop_tcp_error = joint_error, tcp_error
-                    joint_error = max(abs(a - b) for a, b in zip(settled.joints_deg, effective))
-                    tcp_error = distance(self.geometry.forward(settled.joints_deg), target_tcp)
-                    arrival_joint_error = max(abs(a - b) for a, b in zip(settled.joints_deg, arrival_joints))
-                    arrival_tcp_error = distance(self.geometry.forward(settled.joints_deg), arrival_tcp)
-                    if sdk_motion and 'damped_compensation' not in action:
-                        nominal_reached = (arrival_joint_error <= self.limits.joint_tolerance_deg
-                                           and arrival_tcp_error <= arrival_tolerance)
-                        sent_reached = (joint_error <= self.limits.joint_tolerance_deg
-                                        and tcp_error <= arrival_tolerance)
-                        status = 'completed' if nominal_reached and sent_reached else 'settled'
-                    elif nominal is not None:
-                        reached = (arrival_joint_error <= self.limits.joint_tolerance_deg
-                                   and arrival_tcp_error <= arrival_tolerance)
-                        retryable = (status == 'settled_needs_nominal_retry'
-                                     and arrival_joint_error <= MAX_NOMINAL_TRIM_DEG
-                                     and arrival_tcp_error <= MAX_MOCK_NOMINAL_RETRY_TCP_MM)
-                        correction_eligible = (action.get('allow_nominal_correction') is True
-                                               and arrival_joint_error <= MAX_NOMINAL_TRIM_DEG
-                                               and arrival_tcp_error <= MAX_MOCK_NOMINAL_RETRY_TCP_MM)
-                        if reached:
-                            status = 'completed'
-                        elif correction_eligible:
-                            self._require_quiet_motion_diagnostics(before.firmware_warning_raw,
-                                                                   before.collision_event_counts, settled)
-                            correction_action, correction_basis = self._make_nominal_correction(
-                                action, settled, original_host_frame=retained_host_frame)
-                            status = 'settled_needs_nominal_correction'
-                        elif not retryable:
-                            raise ControlError('TARGET_NOT_REACHED', 'The nominal waypoint changed after stop',
-                                               phase='after_stop', arrival_reference='nominal',
-                                               joint_error_deg=joint_error, tcp_error_mm=tcp_error,
-                                               arrival_joint_error_deg=arrival_joint_error,
-                                               arrival_tcp_error_mm=arrival_tcp_error)
-                    else:
-                        reached = (joint_error <= self.limits.joint_tolerance_deg
-                                   and tcp_error <= arrival_tolerance)
-                        coarse_allowed = (action.get('allow_visual_settle', False)
-                                          and tcp_error <= self.limits.coarse_residual_mm)
-                        if status == 'completed' and not reached and coarse_allowed:
-                            status = 'settled_needs_observation'
-                        elif (status == 'completed' and not reached
-                              or status == 'settled_needs_observation' and not coarse_allowed):
-                            raise ControlError('TARGET_NOT_REACHED', 'The target waypoint changed after stop',
-                                               phase='after_stop', joint_error_deg=joint_error,
-                                               tcp_error_mm=tcp_error,
-                                               pre_stop_joint_error_deg=pre_stop_joint_error,
-                                               pre_stop_tcp_error_mm=pre_stop_tcp_error,
-                                               confirmed_sensor_sequence=stop['confirmed_sensor_sequence'],
-                                               confirmed_sensor_monotonic=stop['confirmed_sensor_monotonic'])
-                    result = {"status": status, "applied": True, "target": action, "receipt": receipt, "joint_error_deg": joint_error, "tcp_error_mm": tcp_error, "stop": stop}
-                    if sdk_motion:
-                        result['sent_target_reached'] = (joint_error <= self.limits.joint_tolerance_deg
-                                                         and tcp_error <= arrival_tolerance)
-                    if nominal is not None:
-                        result.update(arrival_reference='nominal',
-                                      nominal_arrival_reached=(arrival_joint_error <= self.limits.joint_tolerance_deg
-                                                               and arrival_tcp_error <= arrival_tolerance),
-                                      arrival_joint_error_deg=arrival_joint_error, arrival_tcp_error_mm=arrival_tcp_error,
-                                      sent_target_reached=(joint_error <= self.limits.joint_tolerance_deg
-                                                           and tcp_error <= arrival_tolerance),
-                                      sent_target_source='worker_dispatch_receipt')
-                        if status == 'settled_needs_nominal_retry':
-                            result['mock_retry_permitted'] = True
-                        if status == 'settled_needs_nominal_correction':
-                            result.update(nominal_correction_permitted=True,
-                                          correction_action=correction_action,
-                                          correction_basis=correction_basis)
+                    result = self._verify_post_stop_arrival(
+                        action, before, effective, target_tcp, arrival_joints, arrival_tcp,
+                        arrival_tolerance, nominal, sdk_motion, status, joint_error, tcp_error,
+                        retained_host_frame)
+                    result['receipt'] = receipt
                     return result
             else:
                 stable_pose, stable_since, stable_sequence, stable_in_bounds = None, None, None, None
@@ -2525,7 +2567,7 @@ class Controller:
         arm_hold, post_gripper_frame = None, None
         stable_pose, stable_since, stable_sequence = None, None, None
         first_gripper_report = None
-        deadline = sent_at + min(1.0, self.limits.motion_timeout)
+        deadline = sent_at + min(GRIPPER_TIMEOUT_CAP_SECONDS, self.limits.motion_timeout)
         while time.monotonic() < deadline and not self._cancel.is_set():
             with self._condition:
                 snapshot = self._snapshot
@@ -2791,12 +2833,10 @@ class Controller:
             baseline, current = record['collision_baseline'], self._snapshot.collision_event_counts
             if self.config.backend == 'sdk':
                 warning_before, warning_now = record['warning_baseline'], self._snapshot.firmware_warning_raw
-                def valid_counts(value):
-                    return (isinstance(value, (tuple, list)) and len(value) == 4
-                            and all(type(item) is int and item >= 0 for item in value))
                 if (type(warning_before) is not int or type(warning_now) is not int
                         or warning_before != 0 or warning_now != 0
-                        or not valid_counts(baseline) or not valid_counts(current)):
+                        or not self._valid_collision_counts(baseline)
+                        or not self._valid_collision_counts(current)):
                     error = ControlError('DEVICE_DIAGNOSTICS_UNAVAILABLE',
                         'Warning and collision-event feedback must be present before and after interruption')
                     self._latch_fault(error)

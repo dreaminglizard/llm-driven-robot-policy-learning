@@ -24,10 +24,23 @@ import time
 from urllib.parse import urlsplit
 import uuid
 
+from raccoon_control.transport import LOOPBACK_HOST
+
+from .concurrency import CombinedEvent as _EitherCancellation
 from .voice_request_clarification import recovery_question
 from .voice_settings import voice_model_path
 
 ROOT = Path(__file__).resolve().parents[1]
+_LOOPBACK_HOST = LOOPBACK_HOST
+_LOCAL_MODEL_ALIAS = 'demo-local-e4b'
+_LOCAL_LLM_DEVICE = 'CUDA0'
+_LOCAL_LLM_CTX_SIZE = 4096
+_LOCAL_LLM_THREADS = 4
+_LOCAL_LLM_CACHE_RAM_MB = 256
+_LOCAL_LLM_FIT_TARGET_MB = 1536
+_MAX_LOCAL_LLM_RESPONSE_BYTES = 1024 * 1024
+_MAX_STUDENT_CHECKPOINT_MB = 32
+_MAX_STUDENT_CHECKPOINT_BYTES = _MAX_STUDENT_CHECKPOINT_MB * _MAX_LOCAL_LLM_RESPONSE_BYTES
 DEFAULT_STUDENT = ROOT / 'artifacts/architecture_research/astra_native_geometry_source_approach_v1/mixed/candidate.pt'
 RL_STUDENT = ROOT / 'artifacts/architecture_research/native_approach_adaptive_rl_v1/train/geometry_mixed/checkpoint-1000/bc_plus_rl.pt'
 RL_SHA256 = 'e5b82442e4218d55ca6ad4368157deff5bcda3aa19732df7be849679adff3589'
@@ -247,24 +260,6 @@ def _validated_pending_stop_prefix(text, context):
     return False
 
 
-class _EitherCancellation:
-    """Observe global shutdown and one request's cancellation separately."""
-    def __init__(self, first, second):
-        self.first, self.second = first, second
-
-    def is_set(self):
-        return self.first.is_set() or self.second.is_set()
-
-    def wait(self, timeout=None):
-        deadline = None if timeout is None else time.monotonic() + timeout
-        while not self.is_set():
-            remaining = None if deadline is None else deadline - time.monotonic()
-            if remaining is not None and remaining <= 0:
-                return False
-            self.first.wait(.05 if remaining is None else min(.05, remaining))
-        return True
-
-
 class _RetargetServiceCancellation:
     """Keep a follow-up tied to its session without holding service locks."""
     def __init__(self, service, coordinator, request_cancel):
@@ -470,17 +465,56 @@ def _request_id():
     return 'demo-' + uuid.uuid4().hex
 
 
+def _read_bounded_response(response, *, too_large_message, limit=_MAX_LOCAL_LLM_RESPONSE_BYTES):
+    data = response.read(limit + 1)
+    if len(data) > limit:
+        raise ValueError(too_large_message)
+    return data
+
+
+def _controller_status_idle(status, expected_instance_id):
+    return (isinstance(status, dict)
+            and status.get('instance_id') == expected_instance_id
+            and status.get('fault') is None
+            and status.get('worker_alive') is True
+            and status.get('fresh_feedback') is True
+            and status.get('active_command_id') is None
+            and status.get('lease_owner') is None)
+
+
+def _controller_observation_stationary(observation, expected_instance_id):
+    return (isinstance(observation, dict)
+            and observation.get('instance_id') == expected_instance_id
+            and observation.get('sensor_valid') is True
+            and observation.get('moving') is False)
+
+
+def _fresh_stationary_observation_valid(observation, instance_id, limits, *, now=None):
+    if now is None:
+        now = time.monotonic()
+    if not _controller_observation_stationary(observation, instance_id):
+        return False
+    observed = observation.get('observed_monotonic')
+    age = observation.get('sensor_age_seconds')
+    return (type(observation.get('revision')) is int and observation['revision'] >= 0
+            and type(observation.get('sensor_sequence')) is int and observation['sensor_sequence'] >= 1
+            and type(observed) in (int, float) and math.isfinite(observed)
+            and type(age) in (int, float) and math.isfinite(age)
+            and 0 <= now - observed <= limits.observation_max_age
+            and age >= 0 and age + now - observed <= limits.sensor_max_age
+            and observation.get('gripper_reported_valid') is True
+            and observation.get('gripper_feedback_fresh') is True)
+
+
 def _loopback_json(port, path):
     """Read this app's local server directly, with no proxy or redirects."""
-    connection = http.client.HTTPConnection('127.0.0.1', port, timeout=2)
+    connection = http.client.HTTPConnection(_LOOPBACK_HOST, port, timeout=2)
     try:
         connection.request('GET', path)
         response = connection.getresponse()
         if response.status != 200:
             raise OSError('로컬 언어 모델 서버가 준비되지 않았습니다.')
-        data = response.read(1024 * 1024 + 1)
-        if len(data) > 1024 * 1024:
-            raise ValueError('로컬 언어 모델 응답이 너무 큽니다.')
+        data = _read_bounded_response(response, too_large_message='로컬 언어 모델 응답이 너무 큽니다.')
         return json.loads(data)
     finally:
         connection.close()
@@ -489,23 +523,21 @@ def _loopback_json(port, path):
 def _local_dialogue(url, text):
     """Ask the owned local server for text only; there is no action channel."""
     parsed = urlsplit(url)
-    if parsed.scheme != 'http' or parsed.hostname != '127.0.0.1' or not parsed.port:
+    if parsed.scheme != 'http' or parsed.hostname != _LOOPBACK_HOST or not parsed.port:
         raise ValueError('일반 대화는 이 컴퓨터의 로컬 모델만 사용할 수 있습니다.')
-    body = json.dumps({'model': 'demo-local-e4b', 'messages': [
+    body = json.dumps({'model': _LOCAL_MODEL_ALIAS, 'messages': [
         {'role': 'system', 'content': '일반 대화에 짧고 자연스럽게 답하세요. 도구나 실행 권한이 없습니다. '
          '로봇을 움직이거나 배치를 기억하거나 실제 상태를 확인했다고 말하지 마세요.'},
         {'role': 'user', 'content': text}], 'temperature': .3, 'max_tokens': 128, 'stream': False},
         ensure_ascii=False, allow_nan=False).encode('utf-8')
-    connection = http.client.HTTPConnection('127.0.0.1', parsed.port, timeout=180)
+    connection = http.client.HTTPConnection(_LOOPBACK_HOST, parsed.port, timeout=180)
     try:
         connection.request('POST', '/v1/chat/completions', body=body,
                            headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
         response = connection.getresponse()
         if response.status != 200:
             raise RuntimeError('로컬 대화 모델에서 응답을 받지 못했습니다.')
-        data = response.read(1024 * 1024 + 1)
-        if len(data) > 1024 * 1024:
-            raise ValueError('로컬 대화 응답이 너무 큽니다.')
+        data = _read_bounded_response(response, too_large_message='로컬 대화 응답이 너무 큽니다.')
         envelope = json.loads(data)
         choice = envelope['choices'][0]
         if choice.get('finish_reason') not in (None, 'stop'):
@@ -531,7 +563,7 @@ def _require_owned_connection(child, connection, port):
     peer = connection.getsockname()
     connections = psutil.Process(child.pid).net_connections(kind='tcp')
     owned = any(c.status == 'ESTABLISHED' and c.laddr and c.raddr
-                and c.laddr.ip == '127.0.0.1' and c.laddr.port == port
+                and c.laddr.ip == _LOOPBACK_HOST and c.laddr.port == port
                 and c.raddr.ip == peer[0] and c.raddr.port == peer[1] for c in connections)
     if not owned:
         raise RuntimeError('로컬 모델 연결의 소유자를 확인하지 못했습니다.')
@@ -622,18 +654,18 @@ class _ModelSlot:
 def _warm_local_model(url, child, cancelled):
     """Prime the task prompt/schema on our local model without a ticket or action."""
     parsed = urlsplit(url)
-    if parsed.scheme != 'http' or parsed.hostname != '127.0.0.1' or not parsed.port:
+    if parsed.scheme != 'http' or parsed.hostname != _LOOPBACK_HOST or not parsed.port:
         raise ValueError('언어 모델 예열은 이 컴퓨터에서만 할 수 있습니다.')
     from .task_program_v2 import TaskProgramChatClient, build_messages
 
     def owned_transport(request_url, body, timeout_seconds):
         destination = urlsplit(request_url)
-        if (destination.scheme != 'http' or destination.hostname != '127.0.0.1'
+        if (destination.scheme != 'http' or destination.hostname != _LOOPBACK_HOST
                 or destination.port != parsed.port or destination.path != '/v1/chat/completions'):
             raise ValueError('언어 모델 예열 주소가 올바르지 않습니다.')
         if cancelled.is_set():
             raise InterruptedError('로컬 모델 준비를 종료했습니다.')
-        connection = http.client.HTTPConnection('127.0.0.1', parsed.port, timeout=timeout_seconds)
+        connection = http.client.HTTPConnection(_LOOPBACK_HOST, parsed.port, timeout=timeout_seconds)
         try:
             connection.connect()
             _require_owned_connection(child, connection.sock, parsed.port)
@@ -642,14 +674,11 @@ def _warm_local_model(url, child, cancelled):
             response = connection.getresponse()
             if response.status != 200:
                 raise RuntimeError('로컬 언어 모델 예열 응답이 올바르지 않습니다.')
-            data = response.read(1024 * 1024 + 1)
-            if len(data) > 1024 * 1024:
-                raise ValueError('로컬 언어 모델 예열 응답이 너무 큽니다.')
-            return data
+            return _read_bounded_response(response, too_large_message='로컬 언어 모델 예열 응답이 너무 큽니다.')
         finally:
             connection.close()
 
-    client = TaskProgramChatClient(f'http://127.0.0.1:{parsed.port}/v1', 'demo-local-e4b',
+    client = TaskProgramChatClient(f'http://{_LOOPBACK_HOST}:{parsed.port}/v1', _LOCAL_MODEL_ALIAS,
                                    transport=owned_transport)
     text = client.complete(build_messages('현재 배치를 기억해 줘.', None), timeout_seconds=180)
     if not text.strip():
@@ -752,13 +781,15 @@ class LocalInterpreter:
             if not all(path.is_file() for path in (LLAMA_SERVER, LLM, LLM_PROJECTOR)):
                 raise FileNotFoundError('Gemma 모델, 음성 인코더 또는 CUDA 실행 파일을 찾지 못했습니다.')
             with socket.socket() as probe:
-                probe.bind(('127.0.0.1', 0))
+                probe.bind((_LOOPBACK_HOST, 0))
                 port = probe.getsockname()[1]
-            args = [str(LLAMA_SERVER), '-m', str(LLM), '--host', '127.0.0.1', '--port', str(port),
-                    '--alias', 'demo-local-e4b', '--ctx-size', '4096', '--parallel', '1',
-                    '--threads', '4', '--threads-batch', '4', '--reasoning', 'off', '--verbosity', '4',
-                    '--no-webui', '--offline', '--cache-ram', '256', '--device', 'CUDA0',
-                    '--gpu-layers', 'auto', '--fit', 'on', '--fit-target', '1536',
+            args = [str(LLAMA_SERVER), '-m', str(LLM), '--host', _LOOPBACK_HOST, '--port', str(port),
+                    '--alias', _LOCAL_MODEL_ALIAS, '--ctx-size', str(_LOCAL_LLM_CTX_SIZE), '--parallel', '1',
+                    '--threads', str(_LOCAL_LLM_THREADS), '--threads-batch', str(_LOCAL_LLM_THREADS),
+                    '--reasoning', 'off', '--verbosity', '4',
+                    '--no-webui', '--offline', '--cache-ram', str(_LOCAL_LLM_CACHE_RAM_MB),
+                    '--device', _LOCAL_LLM_DEVICE,
+                    '--gpu-layers', 'auto', '--fit', 'on', '--fit-target', str(_LOCAL_LLM_FIT_TARGET_MB),
                     '--mmproj', str(LLM_PROJECTOR), '--no-mmproj-offload']
             # Register the child atomically with respect to close(), so closing
             # during Popen cannot leave an unowned process running.
@@ -778,7 +809,7 @@ class LocalInterpreter:
                 try:
                     ready = _loopback_json(port, '/health').get('status') == 'ok'
                     if ready:
-                        with socket.create_connection(('127.0.0.1', port), timeout=2) as conn:
+                        with socket.create_connection((_LOOPBACK_HOST, port), timeout=2) as conn:
                             _require_owned_connection(child, conn, port)
                         props = _loopback_json(port, '/props')
                         if Path(props['model_path']).resolve() != LLM.resolve():
@@ -788,7 +819,7 @@ class LocalInterpreter:
                         self._slot.confirm_gpu()
                         from .task_program_v2 import TaskProgramChatClient, TaskProgramInterpreter
                         interpreter = TaskProgramInterpreter(TaskProgramChatClient(
-                            f'http://127.0.0.1:{port}/v1', 'demo-local-e4b'))
+                            f'http://{_LOOPBACK_HOST}:{port}/v1', _LOCAL_MODEL_ALIAS))
                         with self._cv:
                             if cancelled.is_set() or self._closed.is_set() or self.process is not child:
                                 raise InterruptedError('요청을 취소했습니다.')
@@ -1239,11 +1270,8 @@ class DemoService:
                 if reconnected:
                     # A replacement never repeats a previous home or move.
                     status, observation = controller.status(), controller.observe()
-                    if (status.get('instance_id') != controller.instance_id or status.get('fault') is not None
-                            or status.get('worker_alive') is not True or status.get('fresh_feedback') is not True
-                            or status.get('active_command_id') is not None or status.get('lease_owner') is not None
-                            or observation.get('instance_id') != controller.instance_id
-                            or observation.get('sensor_valid') is not True or observation.get('moving') is not False):
+                    if not (_controller_status_idle(status, controller.instance_id)
+                            and _controller_observation_stationary(observation, controller.instance_id)):
                         raise RuntimeError('새 제어기의 정지된 수신을 확인하지 못했습니다.')
                 else:
                     # The first connection still performs the requested initial pose.
@@ -1992,11 +2020,8 @@ class DemoService:
                                                                           previous_controller=controller)
                 status = replacement.status()
                 observation = replacement.observe()
-                if (status.get('instance_id') != replacement.instance_id or status.get('fault') is not None
-                        or status.get('worker_alive') is not True or status.get('fresh_feedback') is not True
-                        or status.get('active_command_id') is not None or status.get('lease_owner') is not None
-                        or observation.get('instance_id') != replacement.instance_id
-                        or observation.get('sensor_valid') is not True or observation.get('moving') is not False):
+                if not (_controller_status_idle(status, replacement.instance_id)
+                        and _controller_observation_stationary(observation, replacement.instance_id)):
                     return
                 with self._text_request_lock:
                     if (operation.is_set() or self.cancelled.is_set() or self._shutting_down
@@ -2084,12 +2109,8 @@ class DemoService:
                                                                           previous_controller=controller)
                 current = replacement.status()
                 observation = replacement.observe()
-                if (not isinstance(current, dict) or current.get('instance_id') != replacement.instance_id
-                        or current.get('fault') is not None or current.get('worker_alive') is not True
-                        or current.get('fresh_feedback') is not True or current.get('active_command_id') is not None
-                        or current.get('lease_owner') is not None or not isinstance(observation, dict)
-                        or observation.get('instance_id') != replacement.instance_id
-                        or observation.get('sensor_valid') is not True or observation.get('moving') is not False):
+                if not (_controller_status_idle(current, replacement.instance_id)
+                        and _controller_observation_stationary(observation, replacement.instance_id)):
                     return
                 with self._text_request_lock, coordinator._lock:
                     if (operation.is_set() or self.cancelled.is_set() or self._shutting_down
@@ -2334,10 +2355,7 @@ class DemoService:
                         self._automatic_recovered = (controller, coordinator)
                 fresh = controller.observe()
                 current_status = controller.status()
-                if (not isinstance(current_status, dict) or current_status.get('instance_id') != status.get('instance_id')
-                        or current_status.get('fault') is not None or current_status.get('worker_alive') is not True
-                        or current_status.get('fresh_feedback') is not True
-                        or current_status.get('active_command_id') is not None or current_status.get('lease_owner') is not None
+                if (not _controller_status_idle(current_status, status.get('instance_id'))
                         or ((current_status.get('last_stop') or {}).get('confirmed') is not True
                             and not replacement_pending)):
                     return
@@ -2438,29 +2456,19 @@ class DemoService:
         limits = controller.config.limits
         values = []
         for observation in (first, second):
-            now = time.monotonic()
             if not isinstance(observation, dict):
                 raise RuntimeError('관절 관측을 확인할 수 없습니다.')
-            observed, age = observation.get('observed_monotonic'), observation.get('sensor_age_seconds')
             diagnostics = observation.get('device_diagnostics')
             warning = diagnostics.get('firmware_warning_raw') if isinstance(diagnostics, dict) else None
             warning_clear = (type(warning) is int and warning == 0) or (
                 warning is None and isinstance(diagnostics, dict)
                 and controller.config.backend == 'mock' and observation.get('simulated') is True)
-            if (observation.get('schema_version') != 'PolicyObservation.phase1'
-                    or observation.get('instance_id') != instance or observation.get('state') not in ('idle', 'stopped')
-                    or observation.get('sensor_valid') is not True or observation.get('moving') is not False
-                    or type(observation.get('revision')) is not int or observation['revision'] < 0
-                    or type(observation.get('sensor_sequence')) is not int or observation['sensor_sequence'] < 1
-                    or type(observed) not in (int, float) or not math.isfinite(observed)
-                    or type(age) not in (int, float) or not math.isfinite(age)
-                    or not 0 <= now - observed <= limits.observation_max_age
-                    or age < 0 or age + now - observed > limits.sensor_max_age
+            if (not _fresh_stationary_observation_valid(observation, instance, limits)
+                    or observation.get('schema_version') != 'PolicyObservation.phase1'
+                    or observation.get('state') not in ('idle', 'stopped')
                     or not warning_clear
                     or observation.get('gripper_command') != 'open'
-                    or observation.get('gripper_reported_state') != 'open'
-                    or observation.get('gripper_reported_valid') is not True
-                    or observation.get('gripper_feedback_fresh') is not True):
+                    or observation.get('gripper_reported_state') != 'open'):
                 raise RuntimeError('관절·정지·집게 또는 장치 경고의 최신 확인이 필요합니다.')
             try:
                 joints = _applied_target(observation.get('joints_deg'), require_quantized=False)
@@ -2529,7 +2537,7 @@ class DemoService:
         from raccoon_control.kinematics import quantize_joints
 
         path = Path(model_path).resolve()
-        if not path.is_file() or path.stat().st_size > 32 * 1024 * 1024:
+        if not path.is_file() or path.stat().st_size > _MAX_STUDENT_CHECKPOINT_BYTES:
             raise ValueError('선정 학생 모델을 확인해 주세요.')
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         if digest != BEST_CLOSE_SHA256 or (expected_hash is not None and expected_hash != digest):
@@ -2751,8 +2759,8 @@ class DemoService:
         import torch
         scene = scene_recall.scene(layout)
         path = Path(model_path).resolve()
-        if not path.is_file() or path.stat().st_size > 32 * 1024 * 1024:
-            raise ValueError('32MB 이하의 호환되는 학생 모델 파일을 선택해 주세요.')
+        if not path.is_file() or path.stat().st_size > _MAX_STUDENT_CHECKPOINT_BYTES:
+            raise ValueError(f'{_MAX_STUDENT_CHECKPOINT_MB}MB 이하의 호환되는 학생 모델 파일을 선택해 주세요.')
         raw = path.read_bytes()
         digest = hashlib.sha256(raw).hexdigest()
         if path == CLOSE_STUDENT.resolve() and digest != CLOSE_SHA256:
@@ -2969,6 +2977,30 @@ class DemoService:
                 self.coordinator.register_pending_voice(request)
             return request
 
+    @staticmethod
+    def _hold_pending_followup(coordinator, text, payload):
+        with coordinator._lock:
+            capture = coordinator.begin_interpretation(text, request_id=_request_id())
+            hold = coordinator.hold_pending_voice(capture['interpretation_id'], payload['target'])
+            if hold is None:
+                coordinator.discard_interpretation(capture['interpretation_id'])
+                return None
+            return {'coordinator': coordinator, 'capture': capture, 'hold': hold, **payload}
+
+    @staticmethod
+    def _resolve_followup_disposition(coordinator, hold, ident, cancelled, disposition, result, on_replace):
+        if disposition == 'replace':
+            coordinator.replace_pending_text_plan(hold, ident, result)
+            on_replace(result)
+            return '변경한 요청으로 이어서 실행합니다.'
+        if disposition in ('stop', 'uncertain'):
+            cancelled.set()
+            coordinator.resolve_pending_voice(hold, ident, cancel=True)
+            return ('이전 요청을 취소했습니다.' if disposition == 'stop' else
+                    '변경할 내용을 확인하지 못해 이전 요청을 실행하지 않았습니다. 다시 입력해 주세요.')
+        coordinator.resolve_pending_voice(hold, ident)
+        return '이전 요청을 유지합니다.'
+
     def begin_pending_text_followup(self, target, text):
         """Capture a correction before an interpreting text request can start."""
         with self._text_request_lock:
@@ -2976,14 +3008,8 @@ class DemoService:
             if (entry is None or entry[0] != target or entry[2] is not coordinator
                     or entry[1].is_set() or coordinator is None or target not in self._pending_text_plans):
                 return None
-            with coordinator._lock:
-                capture = coordinator.begin_interpretation(text, request_id=_request_id())
-                hold = coordinator.hold_pending_voice(capture['interpretation_id'], target)
-                if hold is None:
-                    coordinator.discard_interpretation(capture['interpretation_id'])
-                    return None
-                return {'coordinator': coordinator, 'capture': capture, 'hold': hold,
-                        'cancelled': entry[1], 'plan': self._pending_text_plans[target], 'target': target}
+            return self._hold_pending_followup(coordinator, text, {
+                'cancelled': entry[1], 'plan': self._pending_text_plans[target], 'target': target})
 
     def begin_pending_voice_text_followup(self, chat, target, text):
         """Hold the same unstarted spoken request while a typed edit is interpreted."""
@@ -2994,14 +3020,8 @@ class DemoService:
                     or chat._pending_phase != 'processing' or chat._pending_cancel is None
                     or chat._pending_cancel.is_set()):
                 return None
-            with coordinator._lock:
-                capture = coordinator.begin_interpretation(text, request_id=_request_id())
-                hold = coordinator.hold_pending_voice(capture['interpretation_id'], target)
-                if hold is None:
-                    coordinator.discard_interpretation(capture['interpretation_id'])
-                    return None
-                return {'coordinator': coordinator, 'capture': capture, 'hold': hold,
-                        'cancelled': chat._pending_cancel, 'chat': chat, 'target': target}
+            return self._hold_pending_followup(coordinator, text, {
+                'cancelled': chat._pending_cancel, 'chat': chat, 'target': target})
 
     def interpret_pending_voice_text_followup(self, followup):
         """Apply a typed edit to a held spoken plan without starting another request."""
@@ -3069,27 +3089,20 @@ class DemoService:
             interpreter = TaskProgramInterpreter(self.interpreter.start(cancelled).client)
             _text, result, disposition = interpreter.interpret_pending_text(
                 capture['text'], request_id=target, reference_context=capture['reference_context'],
-                pending=pending, cancel_event=_EitherCancellation(self.cancelled,
-                    _EitherCancellation(cancelled, chat.stop_event)))
+                pending=pending, cancel_event=_EitherCancellation(self.cancelled, cancelled, chat.stop_event))
             with self._text_request_lock, chat._state_lock, coordinator._lock:
                 if (self.coordinator is not coordinator or chat.stop_event.is_set() or cancelled.is_set()
                         or chat._pending_id != target or chat._pending_cancel is not cancelled
                         or chat._pending_phase != 'processing'):
                     raise InterruptedError('이전 요청이 취소되었습니다.')
-                if disposition == 'replace':
-                    coordinator.replace_pending_text_plan(hold, ident, result)
+
+                def apply_voice_replace(replaced):
                     chat._pending_plan = {'transcript': pending['transcript'] + '\n' + capture['text'],
-                                          'program': copy.deepcopy(result.program)}
-                    coordinator._pending_model_results[target] = copy.deepcopy(result)
-                    message = '변경한 요청으로 이어서 실행합니다.'
-                elif disposition in ('stop', 'uncertain'):
-                    cancelled.set()
-                    coordinator.resolve_pending_voice(hold, ident, cancel=True)
-                    message = ('이전 요청을 취소했습니다.' if disposition == 'stop' else
-                               '변경할 내용을 확인하지 못해 이전 요청을 실행하지 않았습니다. 다시 입력해 주세요.')
-                else:
-                    coordinator.resolve_pending_voice(hold, ident)
-                    message = '이전 요청을 유지합니다.'
+                                          'program': copy.deepcopy(replaced.program)}
+                    coordinator._pending_model_results[target] = copy.deepcopy(replaced)
+
+                message = self._resolve_followup_disposition(
+                    coordinator, hold, ident, cancelled, disposition, result, apply_voice_replace)
                 released = True
             return {'reply': {'kind': 'pending_text_followup', 'text': message,
                               'filtered': False, 'speak': True}, 'snapshot': coordinator.snapshot()}
@@ -3102,8 +3115,7 @@ class DemoService:
                     coordinator.discard_interpretation(ident)
                 if (chat._pending_id == target and chat._pending_phase == 'nonactionable_waiting'
                         and hold.get('finished_nonactionable') and not hold.get('tokens')):
-                    chat._pending_id = chat._pending_cancel = chat._pending_phase = chat._pending_plan = None
-                    chat._pending_speech_generation = None
+                    chat._clear_pending_state_locked()
                     coordinator.forget_pending_voice(target)
 
     def execute_promoted_text(self, promotion):
@@ -3145,8 +3157,7 @@ class DemoService:
             if self._text_request is not None and self._text_request[0] == request:
                 self._text_request = None
             if chat._pending_id == request and chat._pending_cancel is request_cancel:
-                chat._pending_id = chat._pending_cancel = chat._pending_phase = chat._pending_plan = None
-                chat._pending_speech_generation = None
+                chat._clear_pending_state_locked()
 
     def interpret_pending_text_followup(self, followup):
         """Interpret one typed follow-up while its original plan remains unstarted."""
@@ -3173,19 +3184,13 @@ class DemoService:
                 if (self.coordinator is not coordinator or self._text_request is None
                         or self._text_request[0] != target or cancelled.is_set()):
                     raise InterruptedError('이전 요청이 취소되었습니다.')
-                if disposition == 'replace':
-                    coordinator.replace_pending_text_plan(hold, ident, result)
-                    pending['result'] = result
+
+                def apply_text_replace(replaced):
+                    pending['result'] = replaced
                     pending['text'] += '\n' + capture['text']
-                    message = '변경한 요청으로 이어서 실행합니다.'
-                elif disposition in ('stop', 'uncertain'):
-                    cancelled.set()
-                    coordinator.resolve_pending_voice(hold, ident, cancel=True)
-                    message = ('이전 요청을 취소했습니다.' if disposition == 'stop' else
-                               '변경할 내용을 확인하지 못해 이전 요청을 실행하지 않았습니다. 다시 입력해 주세요.')
-                else:
-                    coordinator.resolve_pending_voice(hold, ident)
-                    message = '이전 요청을 유지합니다.'
+
+                message = self._resolve_followup_disposition(
+                    coordinator, hold, ident, cancelled, disposition, result, apply_text_replace)
                 released = True
             return {'reply': {'kind': 'pending_text_followup', 'text': message,
                               'filtered': False, 'speak': True}, 'snapshot': coordinator.snapshot()}
@@ -3550,20 +3555,7 @@ class DemoService:
             return False  # no motion was requested; a later request can retry the read
         if cancelled.is_set():
             raise InterruptedError('요청을 취소했습니다.')
-        now = time.monotonic()
-        limits = controller.config.limits
-        observed = observation.get('observed_monotonic') if isinstance(observation, dict) else None
-        age = observation.get('sensor_age_seconds') if isinstance(observation, dict) else None
-        if (not isinstance(observation, dict) or observation.get('instance_id') != owner[3]
-                or observation.get('sensor_valid') is not True or observation.get('moving') is not False
-                or type(observation.get('revision')) is not int or observation['revision'] < 0
-                or type(observation.get('sensor_sequence')) is not int or observation['sensor_sequence'] < 1
-                or type(observed) not in (int, float) or not math.isfinite(observed)
-                or type(age) not in (int, float) or not math.isfinite(age)
-                or not 0 <= now - observed <= limits.observation_max_age
-                or age < 0 or age + now - observed > limits.sensor_max_age
-                or observation.get('gripper_reported_valid') is not True
-                or observation.get('gripper_feedback_fresh') is not True):
+        if not _fresh_stationary_observation_valid(observation, owner[3], controller.config.limits):
             return False
         gripper = (observation.get('gripper_command'), observation.get('gripper_reported_state'))
         with self._text_request_lock, coordinator._lock:
@@ -3737,6 +3729,14 @@ class DemoService:
             if ident is not None:
                 coordinator.discard_interpretation(ident)
 
+    @staticmethod
+    def _release_unclaimed_arm_home(coordinator, reservation_id):
+        with coordinator._lock:
+            pending = coordinator._arm_home_reservation
+            if pending is not None and pending['id'] == reservation_id and not pending['claimed']:
+                coordinator._arm_home_reservation = None
+                coordinator._bump()
+
     def _execute_admitted_plan(self, coordinator, admission, interpreted, text, request, cancelled,
                                *, before_execute, stop_only, recovery_before_admission):
         if admission['kind'] == 'arm_home':
@@ -3745,18 +3745,10 @@ class DemoService:
                     ready = self._await_temporary_connection(coordinator, admission['reservation'], request,
                                                              cancelled, kind='home')
                 except BaseException:
-                    with coordinator._lock:
-                        pending = coordinator._arm_home_reservation
-                        if pending is not None and pending['id'] == admission['reservation'] and not pending['claimed']:
-                            coordinator._arm_home_reservation = None
-                            coordinator._bump()
+                    self._release_unclaimed_arm_home(coordinator, admission['reservation'])
                     raise
                 if not ready:
-                    with coordinator._lock:
-                        pending = coordinator._arm_home_reservation
-                        if pending is not None and pending['id'] == admission['reservation'] and not pending['claimed']:
-                            coordinator._arm_home_reservation = None
-                            coordinator._bump()
+                    self._release_unclaimed_arm_home(coordinator, admission['reservation'])
                     return {'admission': {'kind': 'rejected', 'status': 'connection_unavailable',
                                           'program_executed': False},
                             'snapshot': coordinator.snapshot(),
@@ -3766,11 +3758,7 @@ class DemoService:
                 if before_execute is not None and admission.get('target_request_id') is None:
                     before_execute(interpreted.program)
             except BaseException:
-                with coordinator._lock:
-                    pending = coordinator._arm_home_reservation
-                    if pending is not None and pending['id'] == admission['reservation'] and not pending['claimed']:
-                        coordinator._arm_home_reservation = None
-                        coordinator._bump()
+                self._release_unclaimed_arm_home(coordinator, admission['reservation'])
                 raise
             self.emit('status', '정지를 확인한 뒤 팔을 초기 자세로 이동합니다.')
             result = self._execute_arm_home(coordinator, admission, cancelled,

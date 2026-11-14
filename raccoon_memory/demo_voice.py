@@ -11,7 +11,9 @@ from types import SimpleNamespace
 
 from raccoon_control.timing import span
 
-from .voice import LocalVoice, NoSpeechDetected
+from .voice import LocalVoice, NoSpeechDetected, normalize_mono_audio
+
+_WINDOWS_DRIVE_REMOTE = 4
 
 _MODEL_LOAD_LOCK = threading.Lock()
 
@@ -215,34 +217,22 @@ class DemoAutoVoice(DemoLocalVoice):
 
     @staticmethod
     def _prepare(audio, language):
-        import math
-        import numpy as np
-        if language not in ('auto', 'ko', 'en'):
-            raise ValueError('음성 언어는 auto, ko, en 중 하나여야 합니다.')
-        if isinstance(audio, (str, Path)):
-            local_path = Path(audio).absolute()
+        def _require_local_drive(candidate):
             if os.name == 'nt':
                 import ctypes
-                if str(local_path).startswith('\\\\') or ctypes.windll.kernel32.GetDriveTypeW(local_path.anchor) == 4:
+                if (str(candidate).startswith('\\\\')
+                        or ctypes.windll.kernel32.GetDriveTypeW(candidate.anchor) == _WINDOWS_DRIVE_REMOTE):
                     raise ValueError('로컬 드라이브에 있는 음성 파일을 선택해 주세요.')
+
+        def _read_local_only(path):
+            local_path = Path(path).absolute()
+            _require_local_drive(local_path)
             resolved = local_path.resolve()
-            if os.name == 'nt' and (str(resolved).startswith('\\\\')
-                                    or ctypes.windll.kernel32.GetDriveTypeW(resolved.anchor) == 4):
-                raise ValueError('로컬 드라이브에 있는 음성 파일을 선택해 주세요.')
+            _require_local_drive(resolved)
             import soundfile as sf
-            from scipy.signal import resample_poly
-            audio, rate = sf.read(str(resolved), dtype='float32', always_2d=True)
-            audio = audio.mean(axis=1)
-            if rate != 16000:
-                divisor = math.gcd(rate, 16000)
-                audio = resample_poly(audio, 16000 // divisor, rate // divisor).astype(np.float32)
-        if not isinstance(audio, np.ndarray) or audio.ndim != 1 or len(audio) == 0 or not np.isfinite(audio).all():
-            raise ValueError('유효한 모노 음성 데이터가 필요합니다.')
-        if len(audio) > 16000 * 60:
-            raise ValueError('명령 음성은 60초 이하로 입력해 주세요.')
-        if float(np.sqrt(np.mean(audio.astype(np.float64) ** 2))) < .002:
-            raise ValueError('음성이 없거나 너무 작습니다. 텍스트 입력도 사용할 수 있습니다.')
-        return audio
+            return sf.read(str(resolved), dtype='float32', always_2d=True)
+
+        return normalize_mono_audio(audio, language=language, read_audio=_read_local_only)
 
     def _gpu_backend(self):
         if self._gpu is None:

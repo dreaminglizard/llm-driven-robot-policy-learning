@@ -22,17 +22,21 @@ from raccoon_control.motion_envelope import bounds as motion_bounds, check as ch
 from raccoon_control.validation import keys, number, vector
 from raccoon_control.timing import measured,span
 from .commands import goal_for, parse, registered_state
-from .world import MOVES, state, step
+from .world import MAX_HEIGHT, MOVES, SLOTS, state, step
 from .scope import enabled_slots as validate_slots
 
 DEFAULT_BLENDED_MAX_VELOCITY_DEG_S = 12.
+SLOT_COUNT = len(SLOTS)
+MAX_STACK_HEIGHT = MAX_HEIGHT
+MAX_SAFE_SPEED_PCT = 35
+MAX_WAYPOINT_TOLERANCE_MM = 3
 
 
 def validate_slot_coordinates(value):
-    if len(value) != 4:
+    if len(value) != SLOT_COUNT:
         raise ValueError("자리 네 개의 좌표가 필요합니다.")
     xy = tuple(vector(pair, 2, "slot_xy_mm") for pair in value)
-    if len(set(xy)) != 4:
+    if len(set(xy)) != SLOT_COUNT:
         raise ValueError("자리 좌표는 서로 달라야 합니다.")
     return xy
 
@@ -58,7 +62,7 @@ class SlotCalibration:
     waypoint_tolerance_mm: float | None = None
     travel_speed_pct: float | None = None
     compact_waypoints: bool = False
-    enabled_slots: tuple = (1,2,3,4)
+    enabled_slots: tuple = tuple(range(1, SLOT_COUNT + 1))
     path_ceiling_mm: float | None = None
     blended_max_velocity_deg_s: float = DEFAULT_BLENDED_MAX_VELOCITY_DEG_S
 
@@ -75,15 +79,15 @@ class SlotCalibration:
         if self.transport_path not in ("cartesian", "radial_yaw"):
             raise ValueError("알 수 없는 이송 경로 방식입니다.")
         if self.waypoint_tolerance_mm is not None:
-            number(self.waypoint_tolerance_mm,"waypoint_tolerance_mm",minimum=.01,maximum=3)
+            number(self.waypoint_tolerance_mm,"waypoint_tolerance_mm",minimum=.01,maximum=MAX_WAYPOINT_TOLERANCE_MM)
         if self.travel_speed_pct is not None:
-            number(self.travel_speed_pct,"travel_speed_pct",minimum=1,maximum=35)
+            number(self.travel_speed_pct,"travel_speed_pct",minimum=1,maximum=MAX_SAFE_SPEED_PCT)
         number(self.blended_max_velocity_deg_s,"blended_max_velocity_deg_s",minimum=.0001)
         if type(self.compact_waypoints) is not bool:
             raise ValueError("경유점 병합 여부는 참/거짓 값이어야 합니다.")
         object.__setattr__(self, "slot_xy_mm", validate_slot_coordinates(self.slot_xy_mm))
-        if type(self.max_height) is not int or not 1<=self.max_height<=4:
-            raise ValueError("교정된 층수는 1~4 사이여야 합니다.")
+        if type(self.max_height) is not int or not 1<=self.max_height<=MAX_STACK_HEIGHT:
+            raise ValueError(f"교정된 층수는 1~{MAX_STACK_HEIGHT} 사이여야 합니다.")
         for name in ("table_z_mm","tool_forward_mm","tool_vertical_mm"):
             number(getattr(self,name),name)
         for name in ("cylinder_height_mm","grip_offset_mm","clearance_mm","vertical_corridor_mm"):
@@ -91,7 +95,7 @@ class SlotCalibration:
         number(self.travel_z_mm,"travel_z_mm")
         if self.path_ceiling_mm is not None:
             number(self.path_ceiling_mm,"path_ceiling_mm",minimum=self.travel_z_mm)
-        number(self.speed_pct,"speed_pct",minimum=1,maximum=35)
+        number(self.speed_pct,"speed_pct",minimum=1,maximum=MAX_SAFE_SPEED_PCT)
         if self.grip_offset_mm >= self.cylinder_height_mm:
             raise ValueError("집기 기준점은 원통 높이 안에 있어야 합니다.")
         if self.travel_z_mm < self.transport_floor_mm:

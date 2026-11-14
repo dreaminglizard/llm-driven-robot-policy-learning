@@ -158,16 +158,29 @@ class NativePhysicalStudent:
                  enable_mock_open_drift_reconcile=False, enable_mock_vertical_replan=False,
                  enable_mock_move_release_upper_separation=False):
         limits = controller.config.limits
-        if type(enable_blended_path) is not bool:
-            raise ValueError('enable_blended_path must be boolean')
+        for flag_name, flag_value in (
+                ('enable_blended_path', enable_blended_path),
+                ('enable_release_setdown', enable_release_setdown),
+                ('enable_arrival_correction', enable_arrival_correction),
+                ('compare_virtual_descent', compare_virtual_descent),
+                ('execute_mock_virtual_descent', execute_mock_virtual_descent),
+                ('enable_experimental_segmented_path', enable_experimental_segmented_path),
+                ('enable_mock_source_return', enable_mock_source_return),
+                ('enable_mock_interrupt_retarget', enable_mock_interrupt_retarget),
+                ('enable_runtime_source_return', enable_runtime_source_return),
+                ('require_retarget_release_check', require_retarget_release_check),
+                ('enable_mock_nominal_trim', enable_mock_nominal_trim)):
+            if type(flag_value) is not bool:
+                raise ValueError(f'{flag_name} must be boolean')
+        if any(type(flag) is not bool for flag in (
+                enable_mock_layered_grasp_lowering, enable_mock_early_source_return,
+                enable_mock_open_drift_reconcile, enable_mock_vertical_replan,
+                enable_mock_move_release_upper_separation)):
+            raise ValueError('mock development flags must be boolean')
         if enable_blended_path and not enable_arrival_correction:
             raise ValueError('blended paths require the common arrival contract')
-        if type(enable_release_setdown) is not bool:
-            raise ValueError('enable_release_setdown must be boolean')
         if enable_release_setdown and (not enable_arrival_correction or not enable_experimental_segmented_path):
             raise ValueError('release setdown requires calibrated paths and common arrival feedback')
-        if type(enable_arrival_correction) is not bool:
-            raise ValueError('enable_arrival_correction must be boolean')
         if enable_arrival_correction and enable_mock_nominal_trim:
             raise ValueError('common arrival correction and mock nominal trim are exclusive')
         if enable_arrival_correction and (path_calibration is None or not enable_experimental_segmented_path
@@ -176,28 +189,6 @@ class NativePhysicalStudent:
         if (not _number(speed_pct) or not 1 <= speed_pct <= limits.max_speed_pct
                 or type(max_decisions) is not int or not 1 <= max_decisions <= 60):
             raise ValueError('invalid speed or decision limit')
-        if type(compare_virtual_descent) is not bool:
-            raise ValueError('compare_virtual_descent must be boolean')
-        if type(execute_mock_virtual_descent) is not bool:
-            raise ValueError('execute_mock_virtual_descent must be boolean')
-        if type(enable_experimental_segmented_path) is not bool:
-            raise ValueError('enable_experimental_segmented_path must be boolean')
-        if type(enable_mock_source_return) is not bool:
-            raise ValueError('enable_mock_source_return must be boolean')
-        if type(enable_mock_interrupt_retarget) is not bool:
-            raise ValueError('enable_mock_interrupt_retarget must be boolean')
-        if type(enable_runtime_source_return) is not bool:
-            raise ValueError('enable_runtime_source_return must be boolean')
-        if type(require_retarget_release_check) is not bool:
-            raise ValueError('require_retarget_release_check must be boolean')
-        if require_retarget_release_check and (path_calibration is None or not enable_experimental_segmented_path):
-            raise ValueError('retarget release check requires calibrated paths')
-        if type(enable_mock_nominal_trim) is not bool:
-            raise ValueError('enable_mock_nominal_trim must be boolean')
-        if (type(enable_mock_layered_grasp_lowering) is not bool or type(enable_mock_early_source_return) is not bool
-                or type(enable_mock_open_drift_reconcile) is not bool or type(enable_mock_vertical_replan) is not bool
-                or type(enable_mock_move_release_upper_separation) is not bool):
-            raise ValueError('mock development flags must be boolean')
         if ((enable_mock_layered_grasp_lowering or enable_mock_early_source_return or enable_mock_open_drift_reconcile
              or enable_mock_vertical_replan)
                 and not enable_mock_nominal_trim):
@@ -555,8 +546,7 @@ class NativePhysicalStudent:
             reference = 'mock_nominal_geometry'
         expected = [float(slots[source][0]), float(slots[source][1]),
                     table + (task['source_level'] - 1) * height + grip]
-        config = self.controller.config
-        geometry = Geometry(tool_forward_mm=config.tool_forward_mm, tool_vertical_mm=config.tool_vertical_mm)
+        geometry = self._geometry()
         target = list(geometry.forward(_joints(applied)))
         observed = list(geometry.forward(_joints(observation['joints_deg'])))
         target_xy = math.dist(target[:2], expected[:2])
@@ -586,8 +576,7 @@ class NativePhysicalStudent:
 
     def _source_return_lift_parameters(self, observation, applied):
         """Choose the configured runtime height and an observed starting pose."""
-        config = self.controller.config
-        geometry = Geometry(tool_forward_mm=config.tool_forward_mm, tool_vertical_mm=config.tool_vertical_mm)
+        geometry = self._geometry()
         start = _joints(observation['joints_deg']) if self.enable_runtime_source_return else _joints(applied)
         lift_z = (self.path_calibration.travel_z_mm if self.enable_runtime_source_return
                   else _MOCK_SOURCE_RETURN_LIFT_Z_MM)
@@ -600,8 +589,7 @@ class NativePhysicalStudent:
             reference = self._source_return_state.get('grasp_reference')
         if not isinstance(reference, dict):
             raise _Abort('grasp_reference_unknown', 'the original robot grasp pose is unavailable')
-        geometry = Geometry(tool_forward_mm=self.controller.config.tool_forward_mm,
-                            tool_vertical_mm=self.controller.config.tool_vertical_mm)
+        geometry = self._geometry()
         xyz = geometry.forward(proposed)
         if math.dist(xyz[:2], slots[task['source_slot'] - 1]) > self.path_calibration.vertical_corridor_mm:
             return proposed, None
@@ -620,8 +608,7 @@ class NativePhysicalStudent:
         source_xy = slots[task['source_slot'] - 1]
         height = (calibration.table_z_mm + (task['source_level'] - 1) * calibration.cylinder_height_mm
                   + calibration.grip_offset_mm)
-        geometry = Geometry(tool_forward_mm=self.controller.config.tool_forward_mm,
-                            tool_vertical_mm=self.controller.config.tool_vertical_mm)
+        geometry = self._geometry()
         nominal_tcp, candidate_tcp = geometry.forward(nominal), geometry.forward(candidate)
         if (math.dist(nominal_tcp[:2], source_xy) > _MOCK_SOURCE_RETURN_XY_TOLERANCE_MM
                 or nominal_tcp[2] > height + _MOCK_SOURCE_RETURN_Z_ABOVE_MM):
@@ -794,6 +781,146 @@ class NativePhysicalStudent:
                                                                      path.targets_rad[tick - 1]]}
                                      for tick in ticks]
         return path, comparison
+
+    def _geometry(self):
+        """Return arm TCP geometry using the active controller dimensions."""
+        config = self.controller.config
+        return Geometry(tool_forward_mm=config.tool_forward_mm, tool_vertical_mm=config.tool_vertical_mm)
+
+    def _within_target_tolerances(self, observed, target, *, allowed_tcp_mm=None):
+        """Return whether observed joints satisfy both joint and TCP tolerances."""
+        limits = self.controller.config.limits
+        tcp_limit = limits.tcp_tolerance_mm if allowed_tcp_mm is None else allowed_tcp_mm
+        geometry = self._geometry()
+        return (_close(observed, target, limits.joint_tolerance_deg)
+                and math.dist(geometry.forward(observed), geometry.forward(target)) <= tcp_limit)
+
+    def _target_reached_flag(self, response_value, observed, target, *, allowed_tcp_mm=None):
+        """Use the controller arrival flag when reported, else check joint and TCP bounds."""
+        if response_value is not None:
+            return response_value
+        return self._within_target_tolerances(observed, target, allowed_tcp_mm=allowed_tcp_mm)
+
+    def _has_pending_retarget_locked(self, *, return_active=False, include_pregrasp=False):
+        """Check under _state_lock if a source-return or retarget admission is pending."""
+        if not self._source_return_enabled or return_active or self._source_return_state is None:
+            return False
+        state = self._source_return_state
+        return bool(state['pending'] or state['admission_waiting']
+                    or (include_pregrasp and state['pregrasp_cancel_requested']))
+
+    def _dispatch_guarded_action(self, request, *, command_id, return_active=False, include_pregrasp=False,
+                                 track_active=True, on_before_pending=None, on_pending=None, on_before_send=None):
+        """Dispatch a controller action serialized with retarget admission ownership."""
+        with self._mock_move_dispatch_lock:
+            pending_return = False
+            if self._source_return_enabled and (not return_active or not track_active):
+                with self._state_lock:
+                    pending_return = self._has_pending_retarget_locked(
+                        return_active=return_active if track_active else False,
+                        include_pregrasp=include_pregrasp)
+                    if track_active and not pending_return and not return_active:
+                        self._source_return_state['active_command_id'] = command_id
+                        self._mock_move_dispatch_owner = threading.get_ident()
+            if on_before_pending is not None:
+                on_before_pending()
+            if pending_return:
+                if on_pending is not None:
+                    on_pending()
+                return True, None
+            try:
+                if on_before_send is not None:
+                    on_before_send()
+                return False, self.controller.apply_action(request)
+            finally:
+                if track_active and self._source_return_enabled and not return_active:
+                    with self._state_lock:
+                        self._source_return_state['active_command_id'] = None
+                        self._mock_move_dispatch_owner = None
+
+    def _preempt_retained_before_send(self, lease, command_id, *, instance, seen, last_time, last_sequence,
+                                      gripper, label):
+        """Interrupt a retained SDK move before dispatching the next command and re-arm."""
+        interruption = self.controller.interrupt_motion(lease, command_id)
+        stop = interruption.get('stop') if isinstance(interruption, dict) else None
+        if (not isinstance(interruption, dict)
+                or interruption.get('instance_id') != instance
+                or interruption.get('command_id') != command_id
+                or interruption.get('superseded_by_stop') is not False
+                or not isinstance(interruption.get('interruption_id'), str)
+                or not interruption['interruption_id']
+                or not isinstance(stop, dict) or stop.get('requested') is not True
+                or stop.get('confirmed') is not True):
+            raise _Abort('stop_unconfirmed', f'retarget stop before {label} is unconfirmed')
+        stopped = self.controller.observe(lease)
+        instance, last_time, last_sequence = self._observation(
+            stopped, instance, seen, last_time, last_sequence,
+            require_new_sample=True, expected_state='stopped')
+        self._gripper(stopped, gripper)
+        if (stopped['sensor_sequence'] < stop.get('confirmed_sensor_sequence', float('inf'))
+                or stopped['observed_monotonic'] < stop.get('confirmed_sensor_monotonic', float('inf'))):
+            raise _Abort('stop_unconfirmed', 'retarget feedback predates the stop')
+        measured = _joints(stopped['joints_deg'])
+        drift = self.controller.config.limits.observation_joint_drift_deg
+        resumed = self.controller.resume_interrupted_motion(
+            lease, interruption['interruption_id'], stopped['observation_id'])
+        if (not isinstance(resumed, dict) or resumed.get('resumed') is not True
+                or not _close(_joints(resumed.get('joints_deg')), measured, drift)):
+            raise _Abort('stop_unconfirmed', 'retarget did not re-arm from the stopped observation')
+        observation = self.controller.observe(lease)
+        instance, last_time, last_sequence = self._observation(
+            observation, instance, seen, last_time, last_sequence)
+        self._gripper(observation, gripper)
+        expected_joints = _joints(observation['joints_deg'])
+        if not _close(expected_joints, measured, drift):
+            raise _Abort('state_changed', 'arm changed after the retarget stop')
+        return stop, measured, observation, expected_joints, instance, last_time, last_sequence
+
+    def _observe_interrupted_stop(self, lease, response, requested, effective, steps,
+                                  *, instance, seen, last_time, last_sequence, gripper, expected_joints,
+                                  pending_cancel, subject, cancel_stage):
+        """Validate an interrupted command reply and fetch fresh stopped joint feedback."""
+        if self._cancelled.is_set() or (pending_cancel is not None and pending_cancel.is_set()):
+            raise _Abort('cancelled', f'{cancel_stage} was cancelled')
+        if response.get('status') != 'cancelled' or type(response.get('applied')) is not bool:
+            raise _Abort('command_unconfirmed', f'{subject} outcome is unknown')
+        sent = response['applied'] is True
+        if sent:
+            self._target_response(response, requested, effective, steps)
+        stopped = self.controller.observe(lease)
+        instance, last_time, last_sequence = self._observation(
+            stopped, instance, seen, last_time, last_sequence,
+            require_new_sample=True, expected_state='stopped')
+        self._gripper(stopped, gripper)
+        stopped_joints = _joints(stopped['joints_deg'])
+        drift = self.controller.config.limits.observation_joint_drift_deg
+        if not sent and not _close(stopped_joints, expected_joints, drift):
+            raise _Abort('state_changed', f'joints changed before the {subject} was sent')
+        return sent, stopped, stopped_joints, instance, last_time, last_sequence
+
+    def _rearm_stopped_controller(self, lease, interruption, stopped, stopped_joints,
+                                  *, instance, seen, last_time, last_sequence, gripper,
+                                  pending_cancel, cancel_stage, rearm_error, post_drift_error,
+                                  force_mock=False):
+        """Resume from a validated stop and verify stationary post-resume feedback."""
+        drift = self.controller.config.limits.observation_joint_drift_deg
+        resume = (self.controller.resume_interrupted_motion
+                  if self.enable_runtime_source_return and not force_mock
+                  else self.controller.resume_mock_interrupted_motion)
+        resumed = resume(lease, interruption['interruption_id'], stopped['observation_id'])
+        if (not isinstance(resumed, dict) or resumed.get('resumed') is not True
+                or not _close(_joints(resumed.get('joints_deg')), stopped_joints, drift)):
+            raise _Abort('stop_unconfirmed', rearm_error)
+        if self._cancelled.is_set() or (pending_cancel is not None and pending_cancel.is_set()):
+            raise _Abort('cancelled', f'{cancel_stage} was cancelled before replanning')
+        observation = self.controller.observe(lease)
+        instance, last_time, last_sequence = self._observation(
+            observation, instance, seen, last_time, last_sequence)
+        self._gripper(observation, gripper)
+        rearmed_joints = _joints(observation['joints_deg'])
+        if not _close(rearmed_joints, stopped_joints, drift):
+            raise _Abort('state_changed', post_drift_error)
+        return observation, rearmed_joints, instance, last_time, last_sequence
 
     def cancel(self):
         """Request an immediate stop without taking ownership of the controller."""
@@ -1451,23 +1578,17 @@ class NativePhysicalStudent:
                 command_id = uuid.uuid4().hex
                 entry = {'command_id': command_id, 'action': copy.deepcopy(command), 'outcome': 'unknown'}
                 record['commands'].append(entry)
-                with self._mock_move_dispatch_lock:
-                    if pending_return():
-                        progress['preempted'] = True
-                        return progress
-                    if self._source_return_enabled and not returning:
-                        with self._state_lock:
-                            self._source_return_state['active_command_id'] = command_id
-                            self._mock_move_dispatch_owner = threading.get_ident()
-                    try:
-                        progress['in_flight'] = progress['sent_or_unknown'] = True
-                        response = self.controller.apply_action({'lease_id': lease, 'command_id': command_id,
-                            'observation_id': observation['observation_id'], 'action': command})
-                    finally:
-                        if self._source_return_enabled and not returning:
-                            with self._state_lock:
-                                self._source_return_state['active_command_id'] = None
-                                self._mock_move_dispatch_owner = None
+                def mark_lower_in_flight():
+                    progress['in_flight'] = progress['sent_or_unknown'] = True
+
+                preempted, response = self._dispatch_guarded_action(
+                    {'lease_id': lease, 'command_id': command_id,
+                     'observation_id': observation['observation_id'], 'action': command},
+                    command_id=command_id, return_active=returning,
+                    on_before_send=mark_lower_in_flight)
+                if preempted:
+                    progress['preempted'] = True
+                    return progress
                 if (not isinstance(response, dict) or response.get('command_id') != command_id
                         or response.get('replayed') is not False):
                     raise _Abort('reply_mismatch', 'release descent response is unconfirmed')
@@ -2865,25 +2986,18 @@ class NativePhysicalStudent:
                         self._publish_segment_plan(command_id, segment_index, segments)
                     before_command_sequence = observation['sensor_sequence']
                     if self._source_return_enabled and action == 'move' and not return_active:
-                        with self._mock_move_dispatch_lock:
-                            with self._state_lock:
-                                source_return_boundary = (self._source_return_state['pending']
-                                                          or self._source_return_state['admission_waiting'])
-                                if not source_return_boundary:
-                                    self._mock_move_dispatch_owner = threading.get_ident()
-                                    self._source_return_state['active_command_id'] = command_id
-                            if source_return_boundary:
-                                break
-                            try:
-                                if cancelled():
-                                    row['result'] = 'cancelled_before_segment'
-                                    raise _Abort('cancelled', 'cancelled before sending the next segment')
-                                in_flight = True
-                                response = self.controller.apply_action(request)
-                            finally:
-                                with self._state_lock:
-                                    self._mock_move_dispatch_owner = None
-                                    self._source_return_state['active_command_id'] = None
+                        def before_segment_send():
+                            nonlocal in_flight
+                            if cancelled():
+                                row['result'] = 'cancelled_before_segment'
+                                raise _Abort('cancelled', 'cancelled before sending the next segment')
+                            in_flight = True
+
+                        source_return_boundary, response = self._dispatch_guarded_action(
+                            request, command_id=command_id, return_active=return_active,
+                            on_before_send=before_segment_send)
+                        if source_return_boundary:
+                            break
                     elif action == 'open' and preserve_student_endpoint:
                         if (last_student_move is None or retained_move is None
                                 or last_student_move['task'] != task
@@ -2909,96 +3023,80 @@ class NativePhysicalStudent:
                             'command_id': repeat_id, 'student_move_command_id': retained_move['command_id'],
                             'requested_target_deg': list(repeat_target), 'result': 'not_sent',
                             'physical_success': None}
-                        with self._mock_move_dispatch_lock:
-                            with self._state_lock:
-                                pending_return = (self._source_return_enabled and not return_active and
-                                    (self._source_return_state['pending'] or
-                                     self._source_return_state['admission_waiting']))
-                                if self._source_return_enabled and not pending_return:
-                                    self._source_return_state['active_command_id'] = repeat_id
-                                    self._mock_move_dispatch_owner = threading.get_ident()
-                            if pending_return:
-                                source_return_boundary = True
-                                break
-                            try:
-                                if cancelled():
-                                    raise _Abort('cancelled', 'cancelled before the pre-OPEN target')
-                                repeat_record['result'] = 'outcome_unknown'
-                                in_flight = True
-                                repeat_response = self.controller.apply_action({
-                                    'lease_id': lease, 'command_id': repeat_id,
-                                    'observation_id': observation['observation_id'], 'action': repeat_action})
-                            finally:
-                                if self._source_return_enabled:
-                                    with self._state_lock:
-                                        self._source_return_state['active_command_id'] = None
-                                        self._mock_move_dispatch_owner = None
+
+                        def before_pre_open_send():
+                            nonlocal in_flight
                             if cancelled():
-                                raise _Abort('cancelled', 'cancelled during the pre-OPEN target')
-                            if (not isinstance(repeat_response, dict)
-                                    or repeat_response.get('command_id') != repeat_id
-                                    or repeat_response.get('replayed') is not False
-                                    or repeat_response.get('applied') is not True
-                                    or repeat_response.get('status') not in ('completed', 'settled')):
-                                raise _Abort('command_unconfirmed', 'the pre-OPEN target outcome is unconfirmed')
-                            self._mock_nominal_response(repeat_response, repeat_target, repeat_effective,
-                                                        repeat_steps, repeat_nominal)
-                            repeat_after = repeat_response.get('observation')
-                            instance, last_time, last_sequence = self._observation(
-                                repeat_after, instance, seen, last_time, last_sequence, require_new_sample=True)
-                            self._gripper(repeat_after, gripper)
-                            repeat_retained = self._retained_move_response(
-                                repeat_response, repeat_steps, repeat_action['speed_pct'],
-                                observation['sensor_sequence'], repeat_after)
-                            remember_student_host_frame(repeat_steps, repeat_id,
-                                repeat_response['completion']['host_frame'], repeat_response.get('receipt'))
-                            repeat_retained.update(nominal_target_deg=repeat_nominal,
-                                speed_pct=repeat_action['speed_pct'], path_constraints={},
-                                arrival_tolerance_mm=retained_move.get('arrival_tolerance_mm'),
-                                compensation_allowed=False, compensation_used=False, checked_phase=None)
-                            retained_move = repeat_retained
-                            expected_joints = _joints(repeat_after['joints_deg'])
-                            observation = repeat_after
-                            sent_reached = repeat_response.get('sent_target_reached')
-                            if sent_reached is None:
-                                geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                    tool_vertical_mm=config.tool_vertical_mm)
-                                allowed_tcp = repeat_action.get('arrival_tolerance_mm', config.limits.tcp_tolerance_mm)
-                                sent_reached = (_close(expected_joints, repeat_effective, tolerance)
-                                    and math.dist(geometry.forward(expected_joints),
-                                                  geometry.forward(repeat_effective)) <= allowed_tcp)
-                            confirmed_target = (repeat_response.get('nominal_arrival_reached') is True
-                                                and sent_reached is True)
-                            applied = list(repeat_effective if confirmed_target else expected_joints)
-                            segment_effective = list(applied)
-                            reference_source = ('controller_confirmed_move' if confirmed_target
-                                                else 'stationary_observation_unreached_target')
-                            result.update(current_target_known=confirmed_target,
-                                last_confirmed_target_deg=list(applied) if confirmed_target else None,
-                                current_control_reference_deg=list(applied),
-                                current_control_reference_source=reference_source)
-                            result['applied_command_count'] += 1
-                            repeat_record.update(result=repeat_response['status'],
-                                nominal_arrival_reached=repeat_response['nominal_arrival_reached'],
-                                observed_joints_deg=list(expected_joints),
-                                completion=copy.deepcopy(repeat_response['completion']))
-                            in_flight, sent_or_unknown = False, True
-                            with self._state_lock:
-                                pending_return = (self._source_return_enabled and not return_active and
-                                    (self._source_return_state['pending'] or
-                                     self._source_return_state['admission_waiting']))
-                                if self._source_return_enabled and not pending_return:
-                                    self._source_return_state['inflight_action'] = 'open'
-                            if cancelled():
-                                raise _Abort('cancelled', 'cancelled after the pre-OPEN target')
-                            if pending_return:
-                                source_return_boundary = True
-                                break
-                            command['retain_position_from_command_id'] = repeat_id
-                            request['observation_id'] = observation['observation_id']
-                            before_command_sequence = observation['sensor_sequence']
+                                raise _Abort('cancelled', 'cancelled before the pre-OPEN target')
+                            repeat_record['result'] = 'outcome_unknown'
                             in_flight = True
-                            response = self.controller.apply_action(request)
+
+                        source_return_boundary, repeat_response = self._dispatch_guarded_action(
+                            {'lease_id': lease, 'command_id': repeat_id,
+                             'observation_id': observation['observation_id'], 'action': repeat_action},
+                            command_id=repeat_id, return_active=return_active,
+                            on_before_send=before_pre_open_send)
+                        if source_return_boundary:
+                            break
+                        if cancelled():
+                            raise _Abort('cancelled', 'cancelled during the pre-OPEN target')
+                        if (not isinstance(repeat_response, dict)
+                                or repeat_response.get('command_id') != repeat_id
+                                or repeat_response.get('replayed') is not False
+                                or repeat_response.get('applied') is not True
+                                or repeat_response.get('status') not in ('completed', 'settled')):
+                            raise _Abort('command_unconfirmed', 'the pre-OPEN target outcome is unconfirmed')
+                        self._mock_nominal_response(repeat_response, repeat_target, repeat_effective,
+                                                    repeat_steps, repeat_nominal)
+                        repeat_after = repeat_response.get('observation')
+                        instance, last_time, last_sequence = self._observation(
+                            repeat_after, instance, seen, last_time, last_sequence, require_new_sample=True)
+                        self._gripper(repeat_after, gripper)
+                        repeat_retained = self._retained_move_response(
+                            repeat_response, repeat_steps, repeat_action['speed_pct'],
+                            observation['sensor_sequence'], repeat_after)
+                        remember_student_host_frame(repeat_steps, repeat_id,
+                            repeat_response['completion']['host_frame'], repeat_response.get('receipt'))
+                        repeat_retained.update(nominal_target_deg=repeat_nominal,
+                            speed_pct=repeat_action['speed_pct'], path_constraints={},
+                            arrival_tolerance_mm=retained_move.get('arrival_tolerance_mm'),
+                            compensation_allowed=False, compensation_used=False, checked_phase=None)
+                        retained_move = repeat_retained
+                        expected_joints = _joints(repeat_after['joints_deg'])
+                        observation = repeat_after
+                        sent_reached = self._target_reached_flag(
+                            repeat_response.get('sent_target_reached'), expected_joints, repeat_effective,
+                            allowed_tcp_mm=repeat_action.get('arrival_tolerance_mm'))
+                        confirmed_target = (repeat_response.get('nominal_arrival_reached') is True
+                                            and sent_reached is True)
+                        applied = list(repeat_effective if confirmed_target else expected_joints)
+                        segment_effective = list(applied)
+                        reference_source = ('controller_confirmed_move' if confirmed_target
+                                            else 'stationary_observation_unreached_target')
+                        result.update(current_target_known=confirmed_target,
+                            last_confirmed_target_deg=list(applied) if confirmed_target else None,
+                            current_control_reference_deg=list(applied),
+                            current_control_reference_source=reference_source)
+                        result['applied_command_count'] += 1
+                        repeat_record.update(result=repeat_response['status'],
+                            nominal_arrival_reached=repeat_response['nominal_arrival_reached'],
+                            observed_joints_deg=list(expected_joints),
+                            completion=copy.deepcopy(repeat_response['completion']))
+                        in_flight, sent_or_unknown = False, True
+                        with self._state_lock:
+                            pending_return = self._has_pending_retarget_locked(return_active=return_active)
+                            if self._source_return_enabled and not pending_return:
+                                self._source_return_state['inflight_action'] = 'open'
+                        if cancelled():
+                            raise _Abort('cancelled', 'cancelled after the pre-OPEN target')
+                        if pending_return:
+                            source_return_boundary = True
+                            break
+                        command['retain_position_from_command_id'] = repeat_id
+                        request['observation_id'] = observation['observation_id']
+                        before_command_sequence = observation['sensor_sequence']
+                        in_flight = True
+                        response = self.controller.apply_action(request)
                     elif action == 'close' and self._source_return_enabled:
                         with self._mock_move_dispatch_lock:
                             with self._state_lock:
@@ -3123,86 +3221,56 @@ class NativePhysicalStudent:
                         before_command_sequence = after['sensor_sequence']
                         request = {'lease_id': lease, 'command_id': follow_id,
                                    'observation_id': after['observation_id'], 'action': follow_command}
-                        with self._mock_move_dispatch_lock:
-                            with self._state_lock:
-                                pending_return = (self._source_return_enabled and not return_active
-                                    and (self._source_return_state['pending']
-                                         or self._source_return_state['admission_waiting']
-                                         or self._source_return_state['pregrasp_cancel_requested']))
-                                if not pending_return and self._source_return_enabled and not return_active:
-                                    self._source_return_state['active_command_id'] = follow_id
-                                    self._mock_move_dispatch_owner = threading.get_ident()
+                        def cancel_before_follow_pending():
                             if cancelled():
                                 raise _Abort('cancelled', 'cancelled before target follow-up')
-                            if pending_return:
-                                # The old target is still retained. Use the
-                                # existing interrupt/re-arm path before handing
-                                # the changed task back to the policy loop.
-                                interruption = self.controller.interrupt_motion(lease, follow_id)
-                                stop = interruption.get('stop') if isinstance(interruption, dict) else None
-                                if (not isinstance(interruption, dict)
-                                        or interruption.get('instance_id') != instance
-                                        or interruption.get('command_id') != follow_id
-                                        or interruption.get('superseded_by_stop') is not False
-                                        or not isinstance(interruption.get('interruption_id'), str)
-                                        or not interruption['interruption_id']
-                                        or not isinstance(stop, dict) or stop.get('requested') is not True
-                                        or stop.get('confirmed') is not True):
-                                    raise _Abort('stop_unconfirmed', 'retarget stop before follow-up is unconfirmed')
-                                stopped = self.controller.observe(lease)
-                                instance, last_time, last_sequence = self._observation(
-                                    stopped, instance, seen, last_time, last_sequence,
-                                    require_new_sample=True, expected_state='stopped')
-                                self._gripper(stopped, gripper)
-                                if (stopped['sensor_sequence'] < stop.get('confirmed_sensor_sequence', float('inf'))
-                                        or stopped['observed_monotonic'] < stop.get('confirmed_sensor_monotonic', float('inf'))):
-                                    raise _Abort('stop_unconfirmed', 'retarget feedback predates the stop')
-                                measured = _joints(stopped['joints_deg'])
-                                resumed = self.controller.resume_interrupted_motion(
-                                    lease, interruption['interruption_id'], stopped['observation_id'])
-                                if (not isinstance(resumed, dict) or resumed.get('resumed') is not True
-                                        or not _close(_joints(resumed.get('joints_deg')), measured, drift)):
-                                    raise _Abort('stop_unconfirmed', 'retarget did not re-arm from the stopped observation')
-                                observation = self.controller.observe(lease)
-                                instance, last_time, last_sequence = self._observation(
-                                    observation, instance, seen, last_time, last_sequence)
-                                self._gripper(observation, gripper)
-                                expected_joints = _joints(observation['joints_deg'])
-                                if not _close(expected_joints, measured, drift):
-                                    raise _Abort('state_changed', 'arm changed after the retarget stop')
-                                self.model.on_control_applied('move', list(segment_effective),
-                                                              list(segment_effective), None)
-                                row['student_history_after_interruption'] = {
-                                    'disposition': 'sdk_host_encoded_not_physical_arrival',
-                                    'previous_target_deg': list(self.model.policy.current_target),
-                                    'previous_action': self.model.policy.previous_action,
-                                    'interrupted_target_committed': True,
-                                    'target_arrival_confirmed': False,
-                                    'stopped_observation_is_applied_target': False}
-                                applied, confirmed_target = list(measured), False
-                                reference_source = 'stationary_observation_before_retarget'
-                                row['target_follow_ups'][-1].update(result='superseded_before_send',
-                                                                    preemption_stop=copy.deepcopy(stop))
-                                row.update(result='retarget_before_target_follow_up', transmitted=True)
-                                result.update(current_target_known=False, last_confirmed_target_deg=None,
-                                              current_control_reference_deg=list(measured),
-                                              current_control_reference_source=reference_source)
-                                source_return_boundary = interrupted_in_decision = True
-                                break
+
+                        def on_pending_follow():
+                            nonlocal observation, expected_joints, instance, last_time, last_sequence
+                            nonlocal applied, confirmed_target, reference_source, interrupted_in_decision
+                            # The old target is still retained. Use the
+                            # existing interrupt/re-arm path before handing
+                            # the changed task back to the policy loop.
+                            stop, measured, observation, expected_joints, instance, last_time, last_sequence = (
+                                self._preempt_retained_before_send(
+                                    lease, follow_id, instance=instance, seen=seen,
+                                    last_time=last_time, last_sequence=last_sequence,
+                                    gripper=gripper, label='follow-up'))
+                            self.model.on_control_applied('move', list(segment_effective),
+                                                          list(segment_effective), None)
+                            row['student_history_after_interruption'] = {
+                                'disposition': 'sdk_host_encoded_not_physical_arrival',
+                                'previous_target_deg': list(self.model.policy.current_target),
+                                'previous_action': self.model.policy.previous_action,
+                                'interrupted_target_committed': True,
+                                'target_arrival_confirmed': False,
+                                'stopped_observation_is_applied_target': False}
+                            applied, confirmed_target = list(measured), False
+                            reference_source = 'stationary_observation_before_retarget'
+                            row['target_follow_ups'][-1].update(result='superseded_before_send',
+                                                                preemption_stop=copy.deepcopy(stop))
+                            row.update(result='retarget_before_target_follow_up', transmitted=True)
+                            result.update(current_target_known=False, last_confirmed_target_deg=None,
+                                          current_control_reference_deg=list(measured),
+                                          current_control_reference_source=reference_source)
+                            interrupted_in_decision = True
+
+                        def before_follow_send():
+                            nonlocal in_flight
                             if stalled:
                                 row['target_follow_ups'][-1]['result'] = 'not_sent_no_progress'
                                 raise _Abort('target_unconfirmed', 'the target follow-up stopped making progress')
-                            try:
-                                if cancelled():
-                                    raise _Abort('cancelled', 'cancelled before target follow-up dispatch')
-                                in_flight = True
-                                row['target_follow_ups'][-1]['result'] = 'outcome_unknown'
-                                response = self.controller.apply_action(request)
-                            finally:
-                                if self._source_return_enabled and not return_active:
-                                    with self._state_lock:
-                                        self._source_return_state['active_command_id'] = None
-                                        self._mock_move_dispatch_owner = None
+                            if cancelled():
+                                raise _Abort('cancelled', 'cancelled before target follow-up dispatch')
+                            in_flight = True
+                            row['target_follow_ups'][-1]['result'] = 'outcome_unknown'
+
+                        source_return_boundary, response = self._dispatch_guarded_action(
+                            request, command_id=follow_id, return_active=return_active,
+                            include_pregrasp=True, on_before_pending=cancel_before_follow_pending,
+                            on_pending=on_pending_follow, on_before_send=before_follow_send)
+                        if source_return_boundary:
+                            break
                         command_id, command = follow_id, follow_command
                         row.update(command_id=command_id, result='target_follow_up_outcome_unknown')
                         if (not isinstance(response, dict) or response.get('command_id') != command_id
@@ -3339,74 +3407,42 @@ class NativePhysicalStudent:
                         before_command_sequence = correction_observation['sensor_sequence']
                         if self._cancelled.is_set():
                             raise _Abort('cancelled', 'cancelled before arrival correction')
-                        with self._mock_move_dispatch_lock:
-                            with self._state_lock:
-                                pending_return = (self._source_return_enabled and not return_active
-                                    and (self._source_return_state['pending']
-                                         or self._source_return_state['admission_waiting']
-                                         or self._source_return_state['pregrasp_cancel_requested']))
-                                if not pending_return and self._source_return_enabled and not return_active:
-                                    self._source_return_state['active_command_id'] = correction_id
-                                    self._mock_move_dispatch_owner = threading.get_ident()
-                            if pending_return:
-                                if damped_compensation_used and self.enable_runtime_source_return:
-                                    # The nominal target is still held here.
-                                    # Reserve the unsent correction ID so the
-                                    # existing interrupt/resume path performs
-                                    # a real stop before the return is planned.
-                                    interruption = self.controller.interrupt_motion(lease, correction_id)
-                                    stop = interruption.get('stop') if isinstance(interruption, dict) else None
-                                    if (not isinstance(interruption, dict)
-                                            or interruption.get('instance_id') != instance
-                                            or interruption.get('command_id') != correction_id
-                                            or interruption.get('superseded_by_stop') is not False
-                                            or not isinstance(interruption.get('interruption_id'), str)
-                                            or not interruption['interruption_id']
-                                            or not isinstance(stop, dict) or stop.get('requested') is not True
-                                            or stop.get('confirmed') is not True):
-                                        raise _Abort('stop_unconfirmed', 'retarget stop before compensation is unconfirmed')
-                                    stopped = self.controller.observe(lease)
-                                    instance, last_time, last_sequence = self._observation(
-                                        stopped, instance, seen, last_time, last_sequence,
-                                        require_new_sample=True, expected_state='stopped')
-                                    self._gripper(stopped, gripper)
-                                    if (stopped['sensor_sequence'] < stop.get('confirmed_sensor_sequence', float('inf'))
-                                            or stopped['observed_monotonic'] < stop.get('confirmed_sensor_monotonic', float('inf'))):
-                                        raise _Abort('stop_unconfirmed', 'retarget feedback predates the stop')
-                                    measured = _joints(stopped['joints_deg'])
-                                    resumed = self.controller.resume_interrupted_motion(
-                                        lease, interruption['interruption_id'], stopped['observation_id'])
-                                    if (not isinstance(resumed, dict) or resumed.get('resumed') is not True
-                                            or not _close(_joints(resumed.get('joints_deg')), measured, drift)):
-                                        raise _Abort('stop_unconfirmed', 'retarget did not re-arm from the stopped observation')
-                                    observation = self.controller.observe(lease)
-                                    instance, last_time, last_sequence = self._observation(
-                                        observation, instance, seen, last_time, last_sequence)
-                                    self._gripper(observation, gripper)
-                                    expected_joints = _joints(observation['joints_deg'])
-                                    if not _close(expected_joints, measured, drift):
-                                        raise _Abort('state_changed', 'arm changed after the retarget stop')
-                                    row['arrival_corrections'][-1]['preemption_stop'] = copy.deepcopy(stop)
-                                self.model.policy.on_move_interrupted(measured)
-                                applied, confirmed_target = list(measured), False
-                                reference_source = 'stationary_observation_before_retarget'
-                                row['arrival_corrections'][-1]['result'] = 'superseded_before_send'
-                                row.update(result='retarget_before_arrival_correction', transmitted=True)
-                                result.update(current_target_known=False, last_confirmed_target_deg=None,
-                                              current_control_reference_deg=list(measured),
-                                              current_control_reference_source=reference_source)
-                                source_return_boundary = interrupted_in_decision = True
-                                break
-                            try:
-                                if self._cancelled.is_set():
-                                    raise _Abort('cancelled', 'cancelled before arrival correction dispatch')
-                                in_flight = True
-                                response = self.controller.apply_action(request)
-                            finally:
-                                if self._source_return_enabled and not return_active:
-                                    with self._state_lock:
-                                        self._source_return_state['active_command_id'] = None
-                                        self._mock_move_dispatch_owner = None
+                        def on_pending_correction():
+                            nonlocal observation, expected_joints, instance, last_time, last_sequence, measured
+                            nonlocal applied, confirmed_target, reference_source, interrupted_in_decision
+                            if damped_compensation_used and self.enable_runtime_source_return:
+                                # The nominal target is still held here.
+                                # Reserve the unsent correction ID so the
+                                # existing interrupt/resume path performs
+                                # a real stop before the return is planned.
+                                stop, measured, observation, expected_joints, instance, last_time, last_sequence = (
+                                    self._preempt_retained_before_send(
+                                        lease, correction_id, instance=instance, seen=seen,
+                                        last_time=last_time, last_sequence=last_sequence,
+                                        gripper=gripper, label='compensation'))
+                                row['arrival_corrections'][-1]['preemption_stop'] = copy.deepcopy(stop)
+                            self.model.policy.on_move_interrupted(measured)
+                            applied, confirmed_target = list(measured), False
+                            reference_source = 'stationary_observation_before_retarget'
+                            row['arrival_corrections'][-1]['result'] = 'superseded_before_send'
+                            row.update(result='retarget_before_arrival_correction', transmitted=True)
+                            result.update(current_target_known=False, last_confirmed_target_deg=None,
+                                          current_control_reference_deg=list(measured),
+                                          current_control_reference_source=reference_source)
+                            interrupted_in_decision = True
+
+                        def before_correction_send():
+                            nonlocal in_flight
+                            if self._cancelled.is_set():
+                                raise _Abort('cancelled', 'cancelled before arrival correction dispatch')
+                            in_flight = True
+
+                        source_return_boundary, response = self._dispatch_guarded_action(
+                            request, command_id=correction_id, return_active=return_active,
+                            include_pregrasp=True, on_pending=on_pending_correction,
+                            on_before_send=before_correction_send)
+                        if source_return_boundary:
+                            break
                         command_id, command = correction_id, correction
                         segment_requested = correction_requested
                         segment_effective, segment_steps = list(correction_effective), correction_steps
@@ -3438,24 +3474,15 @@ class NativePhysicalStudent:
                             if isinstance(candidate, dict) and candidate.get('command_id') == command_id:
                                 interruption = candidate
                     if interruption is not None:
-                        if self._cancelled.is_set() or (pending_cancel is not None and pending_cancel.is_set()):
-                            raise _Abort('cancelled', 'interrupted retarget was cancelled')
-                        if status != 'cancelled' or type(response.get('applied')) is not bool:
-                            raise _Abort('command_unconfirmed', 'interrupted command outcome is unknown')
-                        sent = response['applied'] is True
-                        if sent:
-                            self._target_response(response, segment_requested, segment_effective, segment_steps)
-                        stopped = self.controller.observe(lease)
-                        instance, last_time, last_sequence = self._observation(
-                            stopped, instance, seen, last_time, last_sequence,
-                            require_new_sample=True, expected_state='stopped')
-                        self._gripper(stopped, gripper)
-                        stopped_joints = _joints(stopped['joints_deg'])
+                        sent, stopped, stopped_joints, instance, last_time, last_sequence = (
+                            self._observe_interrupted_stop(
+                                lease, response, segment_requested, segment_effective, segment_steps,
+                                instance=instance, seen=seen, last_time=last_time, last_sequence=last_sequence,
+                                gripper=gripper, expected_joints=expected_joints, pending_cancel=pending_cancel,
+                                subject='interrupted command', cancel_stage='interrupted retarget'))
                         # The controller has stopped: any earlier SDK hold is
                         # no longer evidence for a later gripper command.
                         retained_move = None
-                        if not sent and not _close(stopped_joints, expected_joints, drift):
-                            raise _Abort('state_changed', 'joints changed before the interrupted command was sent')
                         in_flight = False
                         sent_or_unknown = sent_or_unknown or sent
                         interrupted_target = None
@@ -3541,21 +3568,13 @@ class NativePhysicalStudent:
                         applied = list(stopped_joints)
                         confirmed_target = False
                         reference_source = 'stationary_observation_after_interruption'
-                        resume = (self.controller.resume_interrupted_motion if self.enable_runtime_source_return
-                                  else self.controller.resume_mock_interrupted_motion)
-                        resumed = resume(lease, interruption['interruption_id'], stopped['observation_id'])
-                        if (not isinstance(resumed, dict) or resumed.get('resumed') is not True
-                                or not _close(_joints(resumed.get('joints_deg')), stopped_joints, drift)):
-                            raise _Abort('stop_unconfirmed', 'controller did not re-arm from the stopped observation')
-                        if self._cancelled.is_set() or (pending_cancel is not None and pending_cancel.is_set()):
-                            raise _Abort('cancelled', 'interrupted retarget was cancelled before replanning')
-                        observation = self.controller.observe(lease)
-                        instance, last_time, last_sequence = self._observation(
-                            observation, instance, seen, last_time, last_sequence)
-                        self._gripper(observation, gripper)
-                        expected_joints = _joints(observation['joints_deg'])
-                        if not _close(expected_joints, stopped_joints, drift):
-                            raise _Abort('state_changed', 'joints changed after interrupted stop')
+                        observation, expected_joints, instance, last_time, last_sequence = (
+                            self._rearm_stopped_controller(
+                                lease, interruption, stopped, stopped_joints,
+                                instance=instance, seen=seen, last_time=last_time, last_sequence=last_sequence,
+                                gripper=gripper, pending_cancel=pending_cancel, cancel_stage='interrupted retarget',
+                                rearm_error='controller did not re-arm from the stopped observation',
+                                post_drift_error='joints changed after interrupted stop'))
                         result.update(current_target_known=confirmed_target,
                                       last_confirmed_target_deg=list(applied) if confirmed_target else None,
                                       current_control_reference_deg=list(applied),
@@ -3739,21 +3758,12 @@ class NativePhysicalStudent:
                                 if isinstance(candidate, dict) and candidate.get('command_id') == retry_id:
                                     retry_interruption = candidate
                         if retry_interruption is not None:
-                            if self._cancelled.is_set() or (pending_cancel is not None and pending_cancel.is_set()):
-                                raise _Abort('cancelled', 'mock retry retarget was cancelled')
-                            if status != 'cancelled' or type(response.get('applied')) is not bool:
-                                raise _Abort('command_unconfirmed', 'interrupted mock retry outcome is unknown')
-                            sent = response['applied'] is True
-                            if sent:
-                                self._target_response(response, segment_requested, segment_effective, segment_steps)
-                            stopped = self.controller.observe(lease)
-                            instance, last_time, last_sequence = self._observation(
-                                stopped, instance, seen, last_time, last_sequence,
-                                require_new_sample=True, expected_state='stopped')
-                            self._gripper(stopped, gripper)
-                            stopped_joints = _joints(stopped['joints_deg'])
-                            if not sent and not _close(stopped_joints, expected_joints, drift):
-                                raise _Abort('state_changed', 'joints changed before the mock retry was sent')
+                            sent, stopped, stopped_joints, instance, last_time, last_sequence = (
+                                self._observe_interrupted_stop(
+                                    lease, response, segment_requested, segment_effective, segment_steps,
+                                    instance=instance, seen=seen, last_time=last_time, last_sequence=last_sequence,
+                                    gripper=gripper, expected_joints=expected_joints, pending_cancel=pending_cancel,
+                                    subject='mock retry', cancel_stage='mock retry retarget'))
                             in_flight = False
                             sent_or_unknown = True
                             if sent:
@@ -3764,20 +3774,15 @@ class NativePhysicalStudent:
                                 result['interrupted_command_count'] = result.get('interrupted_command_count', 0) + 1
                             else:
                                 self.model.on_control_applied('move', list(applied), list(applied), None)
-                            resumed = self.controller.resume_mock_interrupted_motion(
-                                lease, retry_interruption['interruption_id'], stopped['observation_id'])
-                            if (not isinstance(resumed, dict) or resumed.get('resumed') is not True
-                                    or not _close(_joints(resumed.get('joints_deg')), stopped_joints, drift)):
-                                raise _Abort('stop_unconfirmed', 'controller did not re-arm after mock retry interruption')
-                            if self._cancelled.is_set() or (pending_cancel is not None and pending_cancel.is_set()):
-                                raise _Abort('cancelled', 'mock retry retarget was cancelled before replanning')
-                            observation = self.controller.observe(lease)
-                            instance, last_time, last_sequence = self._observation(
-                                observation, instance, seen, last_time, last_sequence)
-                            self._gripper(observation, gripper)
-                            expected_joints = _joints(observation['joints_deg'])
-                            if not _close(expected_joints, stopped_joints, drift):
-                                raise _Abort('state_changed', 'joints changed after the mock retry stop')
+                            observation, expected_joints, instance, last_time, last_sequence = (
+                                self._rearm_stopped_controller(
+                                    lease, retry_interruption, stopped, stopped_joints,
+                                    instance=instance, seen=seen, last_time=last_time, last_sequence=last_sequence,
+                                    gripper=gripper, pending_cancel=pending_cancel,
+                                    cancel_stage='mock retry retarget',
+                                    rearm_error='controller did not re-arm after mock retry interruption',
+                                    post_drift_error='joints changed after the mock retry stop',
+                                    force_mock=True))
                             result.update(current_target_known=confirmed_target,
                                           last_confirmed_target_deg=list(applied) if confirmed_target else None,
                                           current_control_reference_deg=list(applied),
@@ -3957,28 +3962,20 @@ class NativePhysicalStudent:
                         correction_before_sequence = after['sensor_sequence']
                         if self._cancelled.is_set():
                             raise _Abort('cancelled', 'cancelled after OPEN and before arm correction')
-                        with self._mock_move_dispatch_lock:
-                            with self._state_lock:
-                                pending_return = (self._source_return_enabled and
-                                    (self._source_return_state['pending']
-                                     or self._source_return_state['admission_waiting']
-                                     or self._source_return_state['pregrasp_cancel_requested']))
-                                if not pending_return and self._source_return_enabled:
-                                    self._source_return_state['active_command_id'] = correction_id
-                                    self._mock_move_dispatch_owner = threading.get_ident()
-                            if pending_return:
-                                raise _Abort('cancelled', 'retarget requested after OPEN and before arm correction')
-                            try:
-                                if self._cancelled.is_set():
-                                    raise _Abort('cancelled', 'cancelled before post-OPEN correction dispatch')
-                                in_flight = True
-                                row['post_gripper_correction']['result'] = 'outcome_unknown'
-                                correction_response = self.controller.apply_action(correction_request)
-                            finally:
-                                if self._source_return_enabled:
-                                    with self._state_lock:
-                                        self._source_return_state['active_command_id'] = None
-                                        self._mock_move_dispatch_owner = None
+                        def on_pending_post_open():
+                            raise _Abort('cancelled', 'retarget requested after OPEN and before arm correction')
+
+                        def before_post_open_send():
+                            nonlocal in_flight
+                            if self._cancelled.is_set():
+                                raise _Abort('cancelled', 'cancelled before post-OPEN correction dispatch')
+                            in_flight = True
+                            row['post_gripper_correction']['result'] = 'outcome_unknown'
+
+                        _, correction_response = self._dispatch_guarded_action(
+                            correction_request, command_id=correction_id, return_active=False,
+                            include_pregrasp=True, on_pending=on_pending_post_open,
+                            on_before_send=before_post_open_send)
                         if (not isinstance(correction_response, dict)
                                 or correction_response.get('command_id') != correction_id
                                 or correction_response.get('replayed') is not False):
@@ -4034,8 +4031,7 @@ class NativePhysicalStudent:
                         arrival_target = nominal_segment if (self.enable_mock_nominal_trim or self.enable_arrival_correction
                                                              or allow_damped_compensation) else segment_effective
                         if checked_move or direct_student_move:
-                            arrival_geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                        tool_vertical_mm=config.tool_vertical_mm)
+                            arrival_geometry = self._geometry()
                             arrival_tcp_error = math.dist(arrival_geometry.forward(after_joints),
                                                           arrival_geometry.forward(arrival_target))
                             row.setdefault('arrival_observations', []).append({
@@ -4053,10 +4049,8 @@ class NativePhysicalStudent:
                         if not preserve_student_endpoint and not _close(after_joints, arrival_target, tolerance):
                             raise _Abort('target_unconfirmed', 'observed joints do not agree with the arrival target')
                         if not preserve_student_endpoint and (self.enable_mock_nominal_trim or self.enable_arrival_correction or allow_damped_compensation):
-                            geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                tool_vertical_mm=config.tool_vertical_mm)
                             allowed_tcp = command.get('arrival_tolerance_mm', config.limits.tcp_tolerance_mm)
-                            if math.dist(geometry.forward(after_joints), geometry.forward(arrival_target)) > allowed_tcp:
+                            if math.dist(self._geometry().forward(after_joints), self._geometry().forward(arrival_target)) > allowed_tcp:
                                 raise _Abort('target_unconfirmed', 'observed TCP does not agree with the nominal target')
                             nominal_applied = list(nominal_segment)
                             result['last_confirmed_nominal_target_deg'] = list(nominal_applied)
@@ -4068,14 +4062,11 @@ class NativePhysicalStudent:
                                                    nominal_arrival_confirmed=True,
                                                    final_sent_target_deg=(list(applied) if is_noop
                                                                           else list(segment_effective)))
-                        if retain_move_requested and not preserve_student_endpoint and not damped_compensation_used:
-                            geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                tool_vertical_mm=config.tool_vertical_mm)
-                            allowed_tcp = command.get('arrival_tolerance_mm', config.limits.tcp_tolerance_mm)
-                            if (not _close(after_joints, segment_effective, tolerance)
-                                    or math.dist(geometry.forward(after_joints),
-                                                 geometry.forward(segment_effective)) > allowed_tcp):
-                                raise _Abort('target_unconfirmed', 'observed joints or TCP do not agree with the sent target')
+                        if (retain_move_requested and not preserve_student_endpoint and not damped_compensation_used
+                                and not self._within_target_tolerances(
+                                    after_joints, segment_effective,
+                                    allowed_tcp_mm=command.get('arrival_tolerance_mm'))):
+                            raise _Abort('target_unconfirmed', 'observed joints or TCP do not agree with the sent target')
                     if action != 'move' and not _close(after_joints, expected_joints, drift):
                         if preserve_student_endpoint:
                             row['gripper_observed_joint_change_deg'] = [a-b for a, b in zip(after_joints, expected_joints)]
@@ -4114,13 +4105,9 @@ class NativePhysicalStudent:
                         result['retarget_grasp_pose_confirmed'] = True
                     if is_noop:
                         if preserve_student_endpoint:
-                            sent_reached = response.get('sent_target_reached')
-                            if sent_reached is None:
-                                geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                    tool_vertical_mm=config.tool_vertical_mm)
-                                sent_reached = (_close(after_joints, segment_effective, tolerance)
-                                    and math.dist(geometry.forward(after_joints), geometry.forward(segment_effective))
-                                        <= command.get('arrival_tolerance_mm', config.limits.tcp_tolerance_mm))
+                            sent_reached = self._target_reached_flag(
+                                response.get('sent_target_reached'), after_joints, segment_effective,
+                                allowed_tcp_mm=command.get('arrival_tolerance_mm'))
                             confirmed_target = (response.get('nominal_arrival_reached') is True
                                                 and sent_reached is True)
                             row['nominal_arrival_confirmed'] = confirmed_target
@@ -4178,13 +4165,9 @@ class NativePhysicalStudent:
                         if not gripper_already_counted:
                             result['applied_command_count'] += 1
                         if action == 'move':
-                            sent_reached = response.get('sent_target_reached')
-                            if preserve_student_endpoint and sent_reached is None:
-                                geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                    tool_vertical_mm=config.tool_vertical_mm)
-                                sent_reached = (_close(after_joints, segment_effective, tolerance)
-                                    and math.dist(geometry.forward(after_joints), geometry.forward(segment_effective))
-                                        <= command.get('arrival_tolerance_mm', config.limits.tcp_tolerance_mm))
+                            sent_reached = self._target_reached_flag(
+                                response.get('sent_target_reached'), after_joints, segment_effective,
+                                allowed_tcp_mm=command.get('arrival_tolerance_mm'))
                             reached = (not preserve_student_endpoint or
                                        (response.get('nominal_arrival_reached') is True and sent_reached is True))
                             row['nominal_arrival_confirmed'] = reached
@@ -4199,23 +4182,16 @@ class NativePhysicalStudent:
                                                     else 'controller_confirmed_move')
                         elif preserve_student_endpoint and retained_move is not None:
                             row['arm_nominal_arrival_reached'] = response.get('arm_nominal_arrival_reached')
-                            arm_reached = response.get('arm_nominal_arrival_reached')
-                            if arm_reached is None:
-                                geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                    tool_vertical_mm=config.tool_vertical_mm)
-                                nominal = retained_move['nominal_target_deg']
-                                allowed_tcp = retained_move.get('arrival_tolerance_mm')
-                                if allowed_tcp is None:
-                                    allowed_tcp = config.limits.tcp_tolerance_mm
-                                arm_reached = (_close(after_joints, nominal, tolerance)
-                                    and math.dist(geometry.forward(after_joints), geometry.forward(nominal)) <= allowed_tcp)
+                            arm_reached = self._target_reached_flag(
+                                response.get('arm_nominal_arrival_reached'), after_joints,
+                                retained_move['nominal_target_deg'],
+                                allowed_tcp_mm=retained_move.get('arrival_tolerance_mm'))
                             if arm_reached is not True:
                                 confirmed_target = False
                                 applied = list(after_joints)
                                 reference_source = 'stationary_observation_unreached_target'
                         if action == 'close' and self.enable_release_setdown:
-                            grasp_geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                      tool_vertical_mm=config.tool_vertical_mm)
+                            grasp_geometry = self._geometry()
                             grasp_reference = {'joints_deg': _joints(closing_reference),
                                 'nominal_tcp_mm': list(grasp_geometry.forward(closing_reference)),
                                 'source': 'stationary_observation_before_confirmed_close',
@@ -4229,8 +4205,7 @@ class NativePhysicalStudent:
                                 if action == 'close':
                                     if self.enable_runtime_source_return and not state['ever_closed']:
                                         grasp_joints = _joints(state['preclose_observed_joints_deg'])
-                                        grasp_geometry = Geometry(tool_forward_mm=config.tool_forward_mm,
-                                                                  tool_vertical_mm=config.tool_vertical_mm)
+                                        grasp_geometry = self._geometry()
                                         state['grasp_reference'] = {
                                             'joints_deg': grasp_joints,
                                             'nominal_tcp_mm': list(grasp_geometry.forward(grasp_joints)),
