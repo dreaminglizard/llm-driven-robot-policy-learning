@@ -6,7 +6,31 @@ The broader hypothesis is that AI participation in data preparation, training an
 **비전은 AI가 학습과 가중치 개선에 참여해 더 많은 검증된 모델을 만드는 것입니다. 로봇 조작 모델은 첫 사례입니다.**
 다만 “LLM이 개발을 돕는다”, “학습기가 가중치를 갱신한다”, “실행 중 Gemma가 명령을 해석한다”는 서로 다른 단계입니다.
 
-## 1. Two paths, not one / 개발과 실행 구분
+## Target architecture / 목표하는 전체 고리
+
+**사람은 만들 모델과 목적을 정하고, 완성된 모델을 현실에서 사용한 뒤 피드백합니다. 중간 제작 과정은 AI가 주도하는 것이 목표입니다.**
+
+```mermaid
+flowchart TD
+    H["사람: 만들 모델·목적 지정"] --> D["AI: 행동 데이터 생성"]
+    D --> T["AI: 모델 학습"]
+    T --> W["LLM: 대상 모델 가중치 수정"]
+    W --> E["AI: 테스트·결과 평가"]
+    E -->|"개선 필요"| W
+    E -->|"데이터·재학습 필요"| D
+    E -->|"완료 기준 충족"| M["완성 모델"]
+    M --> U["사람: 현실에서 사용"]
+    U --> F["사람: 결과·요구 피드백"]
+    F --> D
+```
+
+이 그림은 **최종 비전**입니다. AI가 데이터 생성부터 학습·가중치 수정·테스트 반복을 주도하고, 사람의 실제 사용 피드백을 다음 개선으로 연결하는 구조입니다. 여기서 수정 대상은 만들고 있는 모델의 가중치이며, 로봇 사례에서는 조작 모델입니다. 사람은 반복 단계마다 수동으로 학습 코드를 수정하는 역할로 한정되지 않습니다.
+
+**현재 확인된 구현과의 차이:** 공개 코드에는 학습 손실·역전파·옵티마이저에 의한 가중치 갱신이 있습니다. LLM이 가중치 또는 변화량을 직접 생성·적용하는 단계와 위 전체 고리의 자율 작동은 아직 공개 자료로 입증되지 않았습니다. 완성 판정 기준, 사람의 승인·개입 경계, 실제 사용 피드백의 검증 방식도 후속 연구에서 정해야 합니다.
+
+**English:** People specify the model and its purpose, then use the finished model in the real world and provide feedback. The intended AI-led middle loop is behavior-data generation → training → LLM modification of the target model's weights → testing and repeated improvement. Real-use feedback returns to that loop. This is the target architecture, not a claim that the published optimizer-based code already implements direct LLM weight editing or the autonomous end-to-end cycle.
+
+## 1. Published-code paths / 현재 코드의 개발·실행 구분
 
 The diagrams are conceptual maps of the published source, not proof that every experimental variant uses the same runtime.
 
