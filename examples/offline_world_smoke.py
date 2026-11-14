@@ -9,10 +9,13 @@ from raccoon_memory.world import INITIAL, action_id, features, key, state, step
 def main():
     before = state(INITIAL)
     after = step(before, action_id("A", "B"))
-    assert after == ((), (2, 1), (3,), (4,))
-    assert len(features(after)) == 80
+    if after != ((), (2, 1), (3,), (4,)):
+        raise AssertionError("Unexpected transfer result")
+    if len(features(after)) != 80:
+        raise AssertionError("Expected an 80-value state encoding")
     restored = step(after, action_id("B", "A"))
-    assert restored == before
+    if restored != before:
+        raise AssertionError("Reverse transfer did not restore the initial state")
     try:
         state(((1,), (1,), (3,), (4,)))
     except ValueError:
