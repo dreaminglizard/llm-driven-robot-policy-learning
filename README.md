@@ -8,9 +8,9 @@
 >
 > **라쿤봇은 이 방향을 탐색하는 첫 사례입니다.** 현재 공개한 것은 로봇 조작 모델의 코드·선정 가중치·연구 자료이며, 모든 종류의 모델에 적용되는 생산 체계는 장기 비전입니다.
 
-[구조와 코드 / Architecture & code](docs/TECHNICAL_GUIDE.md) · [학습 코드 / Training](raccoon_memory/scene_trajectory_training.py) · [논문 초안 / Paper draft](papers/paper-draft.pdf) · [공개 패키지 / Downloads](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/releases/tag/v0.1.0-research)
+[구조와 코드 / Architecture & code](docs/TECHNICAL_GUIDE.md) · [학습 코드 / Training](raccoon_memory/scene_trajectory_training.py) · [개정 초안 v0.7 / Revised draft](papers/paper-draft-v0.7.pdf) · [공개 패키지 / Downloads](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/releases/tag/v0.1.0-research)
 
-**처음 보는 분께:** 아래에서 개발·실행 구조를 보고, 로봇 없이 첫 예제를 실행한 다음, 코드와 공개 근거를 확인할 수 있습니다. 라쿤봇은 더 넓은 모델 제작 비전을 로봇 조작에 적용해 탐색하는 첫 사례입니다.
+**읽는 순서:** 문제의식·기사 영감 → AI 주도 전체 고리 → 현재 구현과 비전의 차이 → 핵심 자료·첫 실행 → 후속 비교 검증. [기술 안내](docs/TECHNICAL_GUIDE.md)는 코드 진입점, [개정 초안 v0.7](papers/paper-draft-v0.7.pdf)은 연구 설명을 담습니다.
 
 ## 목표하는 전체 고리 / Target loop
 
@@ -173,7 +173,9 @@ For English readers: this dependency-free example checks the symbolic task repre
 ## 공개 자료
 
 - [소스·선정 가중치 패키지 다운로드](https://github.com/dreaminglizard/llm-driven-robot-policy-learning/releases/tag/v0.1.0-research): 2026년 11월 13일 오전 스냅샷, 8,751개 파일, ZIP 42,941,082바이트. 소스, 학습·평가 스크립트, 테스트, 설정, 소형 자료, 선정 조작·기억 가중치와 파일별 SHA-256 목록을 포함합니다.
-- [논문 초안 PDF](papers/paper-draft.pdf) · [논문 및 근거 자료 ZIP](papers/paper-materials.zip)
+- [개정 초안 v0.7 PDF](papers/paper-draft-v0.7.pdf): 22쪽. 전체 제작·개선 고리, 사람의 현실 사용·피드백, 현재 증거와 후속 비교를 정리한 연구 초안입니다. 새 실험 결과를 추가한 판본은 아닙니다.
+- 보존 자료: [이전 공개 초안 PDF](papers/paper-draft.pdf) · [이전 논문 및 근거 자료 ZIP](papers/paper-materials.zip). 이 ZIP은 v0.7 개정 패키지가 아닙니다.
+- v0.7 PDF SHA-256: `69947691d5be26007a6fa799ecacc36487761fd2bff63744ae08a28db36d1197`.
 - 코드 바로 보기: [조작 모델·기억 모듈](raccoon_memory/) · [제어 모듈](raccoon_control/) · [설정](configs/) · [선정 모델 파일](models/)
 
 **기호 예제는 현재 저장소만으로 실행합니다. 전체 연구 스크립트의 실행 준비에는 릴리스의 패키지 ZIP을 참고하세요.** 저장소에서 바로 볼 수 있는 코드는 주요 모듈 발췌이며, ZIP은 원래의 스크립트·테스트·가중치 경로를 보존합니다. 설치와 장치 설정은 패키지의 안내 문서를 참고하세요. 이번 공개 과정에서 새 학습이나 실물 로봇 실행은 하지 않았습니다.
