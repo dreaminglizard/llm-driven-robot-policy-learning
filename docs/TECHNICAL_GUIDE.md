@@ -112,6 +112,17 @@ Each slash separates a registered slot. Stack IDs are written bottom to top: `21
 
 **검증 범위:** 2026-11-13, Python 3.12.14의 별도 클라우드 작업공간에서 공개된 `world.py`와 `__init__.py`를 사용해 위 출력을 확인했습니다. 모델 가중치·LLM·물리 시뮬레이터·실물 성공률 검사는 아닙니다. 이 확인에는 모터 작동이나 새 학습이 없습니다.
 
+### Selected-model loader / 선정 모델 로더
+
+A separate [Hugging Face release](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning/tree/377387ae089d4482d03dad060f7926ba86c19ac2) provides `selected_policy.pt` and `offline_loader.zip`. This is distinct from the dependency-free symbolic check above. The model card at that pinned revision reports a strict checkpoint load and synthetic CPU shape/finite check on 2026-11-14, not task success or training reproduction. Follow its loader instructions; this custom checkpoint is not a Transformers pipeline.
+
+선정 모델은 기호 예제와 별개입니다. HF에 고정된 위 판본의 안내에 따라 가중치와 로더 ZIP을 같은 폴더에 내려받아 실행합니다. 모델카드에 기록된 검사는 엄격한 체크포인트 로드와 합성 입력의 출력 형태·유한값 검사이며, 실제 과제 수행 성능을 뜻하지 않습니다.
+
+- Selected weight SHA-256: `48170fc8aa8e05b231115367fb2960f9a8f69920c359cf3019472d5c911d3977`.
+- Checkpoint format: `terra-native-source-distance-close-evidence.v1`; loader: `raccoon_memory.terra_native_close_evidence.load_student_checkpoint`.
+- The current published bilingual paper and prior versions are distinguished in [Published paper](../papers/PUBLISHED_VERSION.md). Paper version, source revision and weight identity are separate identifiers.
+- No code/model license is designated by the model card. The paper's CC BY 4.0 license does not automatically cover code, weights or data.
+
 ## 4. What the evidence does and does not establish
 
 - **Recorded-observation metrics:** next-action accuracy / target error on saved observations. They do not establish closed-loop or physical success. See `RECORDED_METRIC_SCOPE` in [scene_policy.py](../raccoon_memory/scene_policy.py).
@@ -119,7 +130,7 @@ Each slash separates a registered slot. Stack IDs are written bottom to top: `21
 - **Memory boundary:** `LearnedRecall` rejects recall beyond the documented 48-step sequence scope. A new explicit write replaces the remembered episode.
 - **Terminal boundary:** trajectory training documents `apply_then_finish`: stopping before applying the last output creates a one-tick mismatch.
 - **Physical demonstration:** a successful demonstration is valuable, but it must not be presented as a measured success rate without a trial count, conditions and observations.
-- **Current verification here:** only the small symbolic smoke check above was executed. Full clean-environment installation, pretrained inference, training reproduction and physical testing were not performed for this guide.
+- **Original guide verification:** only the small symbolic smoke check above was executed when this guide was written. The later selected-model loader check is separately documented in the pinned HF model card above. Neither check establishes clean-environment installation, training reproduction, task performance or physical success.
 
 No performance number or demo video has been invented. This guide intentionally does not turn source-code assertions into measured benchmark results.
 
