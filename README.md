@@ -196,6 +196,12 @@ ZIP SHA-256: `508826d83762dc602d783bee1c0c27aed9dd919d024a827b233a0b4f8abd2d3e`
 
 2026년 11월 13일 IRC에서 발표와 시연은 성공했지만, 결과는 16팀 중 16등이었습니다. 솔직히 많이 우울했고, 제 아이디어와 판단을 믿기 어려웠습니다. 그래도 제가 보여주고 싶었던 핵심은 특정 로봇 한 대가 아니라, 앞으로 로봇의 능력을 만드는 방식이었습니다. 그래서 결과를 숨기기보다 코드와 과정을 공개하고, 이 방향이 어디까지 가능한지 구체적인 피드백을 받고 싶습니다.
 
+## 저자 소개 / About the author
+
+한국공학대학교 메카트로닉스·AI로봇 전공 1학년으로, AI가 로봇 모델 제작 과정에 참여하는 방법을 연구하고 있습니다.
+
+I am a first-year student studying Mechatronics and AI Robotics at Tech University of Korea, exploring how AI can participate in the creation of robot models.
+
 ## 이용 안내
 
 실물 로봇 실행 전 장치·SDK·관절 제한과 정지 방법을 확인해야 합니다. 공개 자체가 재배포 라이선스 부여를 뜻하지는 않으며, 별도 라이선스를 임의로 지정하지 않았습니다. 외부 모델과 의존성은 각각의 라이선스를 따릅니다.
