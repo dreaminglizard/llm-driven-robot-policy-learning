@@ -1,6 +1,6 @@
 # Published paper
 
-## Current GitHub release: v0.8.2
+## Current GitHub and Zenodo release: v0.8.2
 
 **한국어 / English · 2026-11-14**
 
@@ -10,9 +10,9 @@
 
 The repository's [representative PDF](paper-draft.pdf) matches the v0.8.2 Korean file. This revision integrates the prior-work comparison and clarifies the proposed model-production loop and evaluation plan. It adds no training, simulation or physical experiment. Sections 4 and 5 and all five tables retain the preceding version's empirical content.
 
-**Zenodo status:** v0.8.2 has not yet been published on Zenodo and has no verified version-specific DOI. The existing [Zenodo DOI](https://doi.org/10.5281/zenodo.24212741) identifies **v0.8.1**, not the v0.8.2 files linked above. GitHub publication is not peer review.
+**Zenodo status:** the Korean and English v0.8.2 PDFs are published at the verified version-specific DOI [10.5281/zenodo.24217129](https://doi.org/10.5281/zenodo.24217129). Their SHA-256 hashes match the v0.8.2 PDFs linked above. The [v0.8.1 record](https://doi.org/10.5281/zenodo.24212741) remains preserved as an earlier version. GitHub or Zenodo publication is not peer review.
 
-현재 GitHub 한영 공개판은 v0.8.2입니다. Zenodo는 v0.8.1이며 새 버전 발행을 기다리고 있습니다. 논문 판본은 코드 커밋·가중치 버전과 별개입니다.
+현재 GitHub와 Zenodo의 한영 공개판은 v0.8.2이며, 두 PDF의 해시 일치를 확인했습니다. v0.8.1은 이전 판본으로 보존됩니다. 논문 판본은 코드 커밋·가중치 버전과 별개입니다.
 
 | v0.8.2 file | SHA-256 |
 |---|---|
