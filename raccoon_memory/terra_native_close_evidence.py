@@ -52,11 +52,19 @@ def contract():
 
 def load_student_checkpoint(path,device="cpu"):
     record=torch.load(path,map_location="cpu",weights_only=True)
-    model=CloseEvidencePolicy()
+    if not isinstance(record,dict) or record.get("contract")!=contract():
+        raise ValueError("invalid learned CLOSE evidence checkpoint")
+    # Validate on the same CPU device used by torch.load, independent of a
+    # caller's default device. Do not rewind shared RNG state: another thread
+    # may legitimately draw random values while this model is constructed.
+    with torch.device("cpu"):
+        model=CloseEvidencePolicy()
     expected=model.state_dict()
-    state=record["state_dict"]
-    if (record.get("contract")!=contract() or set(state)!=set(expected) or
-        any(v.shape!=state[k].shape or v.dtype!=state[k].dtype or not torch.isfinite(state[k]).all() for k,v in expected.items()) or
+    state=record.get("state_dict")
+    if (not isinstance(state,dict) or set(state)!=set(expected) or
+        any(not isinstance(state[k],torch.Tensor) or state[k].layout!=torch.strided or state[k].device.type!="cpu" or
+            v.shape!=state[k].shape or v.dtype!=state[k].dtype or not torch.isfinite(state[k]).all()
+            for k,v in expected.items()) or
         any(not torch.equal(expected[k],state[k]) for k in ("joint_low","joint_high"))):
         raise ValueError("invalid learned CLOSE evidence checkpoint")
     limits=state["demonstrated_close_pose"]
