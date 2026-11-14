@@ -10,6 +10,10 @@ Gemma는 명령 해석을 담당하고, 소형 조작 모델은 관측과 이력
 
 ## 포함 자료
 
+이 절의 경로는 **릴리스 소스·선정 가중치 ZIP 내부 구조**를 설명합니다. GitHub의 현재 저장소 트리와 동일한 목록은 아닙니다. 저장소에서는 선정 가중치를 `models/`에서 볼 수 있으며, `scripts/`, `tests/`, `artifacts/`, `모델_가중치/`는 현재 루트에 없습니다. 해당 원본 경로가 필요한 스크립트는 릴리스 ZIP을 내려받아 압축을 푼 위치에서 확인하세요. `Code → Download ZIP`은 현재 저장소 사본이므로 릴리스 패키지를 대신하지 않습니다.
+
+The paths below describe the release source-and-weights ZIP, not the browsable GitHub tree. In this repository, selected weights are under `models/`. GitHub's **Code → Download ZIP** downloads the repository snapshot, not the release package containing the original script/test/artifact paths.
+
 - `raccoon_memory/`: 명령 해석, 조작·기억 모델, 앱과 가상 환경 코드
 - `raccoon_control/`: 제어기와 SDK 연결 코드
 - `scripts/`, `tests/`: 개발·학습·평가 스크립트와 테스트 소스
