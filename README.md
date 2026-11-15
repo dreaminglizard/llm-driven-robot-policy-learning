@@ -4,9 +4,9 @@
 
 이 연구의 목표는 로봇 한 대가 아니라 **모델을 만드는 과정**입니다. 사람이 목적을 정하고 완성된 모델을 현실에서 사용하면, AI가 중간의 데이터 생성·학습·가중치 개선을 맡고 사용자의 피드백을 다음 개선에 연결하는 구조를 탐구합니다. 라쿤봇은 그 첫 사례입니다.
 
-[논문 · 한국어/English v0.8.2](papers/PUBLISHED_VERSION.md) · [구현과 첫 실행](docs/TECHNICAL_GUIDE.md) · [선정 모델](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning) · [연구 패키지](PUBLIC_PACKAGE_README.md)
+[논문 · 한국어/English v0.8.3](papers/PUBLISHED_VERSION.md) · [구현과 첫 실행](docs/TECHNICAL_GUIDE.md) · [선정 모델](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning) · [연구 패키지](PUBLIC_PACKAGE_README.md)
 
-GitHub와 Zenodo의 최신 한영 논문은 v0.8.2입니다. [v0.8.2 Zenodo DOI](https://doi.org/10.5281/zenodo.24217129)에서 확인할 수 있으며, v0.8.1은 이전 판본으로 보존됩니다.
+GitHub와 Zenodo의 최신 한영 논문은 [v0.8.3](https://doi.org/10.5281/zenodo.24237878)입니다. 판본별 파일과 이력은 [논문 안내](papers/PUBLISHED_VERSION.md)에 정리했습니다.
 
 ## 연구 질문
 
@@ -27,6 +27,8 @@ flowchart TD
     U --> D
 ```
 
+장기적으로는 LLM이 현실을 더 잘 인식하고 모델 파라미터와 실제 행동의 관계를 이해해, 필요한 가중치를 직접 수정하는 방식도 탐구합니다. 이는 추가 경사 기반 학습 대신 표적 편집으로 모델을 개선할 수 있다는 가설이며, 초기 학습·시험·현실 사용 피드백을 생략한다는 뜻은 아닙니다.
+
 **위 그림은 목표 구조입니다.** 중간 단계마다 사람이 코드를 고치거나 학습을 다시 지시하는 일을 줄이되, 안전 승인과 중단 권한은 유지합니다. 서로 다른 목적·로봇에 맞는 모델을 더 많이 만드는 것이 확장 방향이며, 동일한 가중치를 모든 로봇에 그대로 적용한다는 뜻은 아닙니다.
 
 ## 지금 공개한 것
@@ -39,7 +41,7 @@ flowchart TD
 | 확인된 검사 | 기호 상태 검사, 선정 모델의 엄격한 로드와 합성 입력 CPU 검사. [조건과 범위](docs/TECHNICAL_GUIDE.md) |
 | 후속 검증 | LLM의 직접 가중치·변화량 생성, 전체 고리의 자율 작동, 다른 과제에서의 생산성·일반화 |
 
-논문 v0.8.2의 사례에서는 LLM이 보정 방법을 설계하고 코드를 작성·실행했으며, 실제 수치 갱신에는 AdamW 학습과 닫힌식·Newton 보정이 사용됐습니다. 이는 LLM이 가중치 수치를 직접 출력했다거나 전체 제작 고리가 자율적으로 작동했다는 뜻은 아닙니다. 저장된 예측 지표나 한 번의 시연을 실물 성공률로 바꾸어 주장하지 않습니다.
+논문 v0.8.3의 사례에서는 LLM이 보정 방법을 설계하고 코드를 작성·실행했으며, 실제 수치 갱신에는 AdamW 학습과 닫힌식·Newton 보정이 사용됐습니다. 이는 LLM이 가중치 수치를 직접 출력했다거나 전체 제작 고리가 자율적으로 작동했다는 뜻은 아닙니다. 저장된 예측 지표나 한 번의 시연을 실물 성공률로 바꾸어 주장하지 않습니다.
 
 ## 어디서 시작하나요?
 
@@ -66,9 +68,11 @@ flowchart TD
 
 Can AI help produce more useful models, rather than only operate one robot? The intended loop is human specification → AI-generated behavior data → training → LLM modification of the target model's weights and repeated testing → real-world use and human feedback. RaccoonBot is the first case study.
 
-In the v0.8.2 case study, the LLM designed corrections and wrote and executed the code; numerical updates used AdamW training and closed-form and Newton-based corrections. This does not establish direct LLM generation of weight values or the full autonomous production loop. Current entry checks cover symbolic state handling and selected-checkpoint loading with synthetic inputs, not physical performance. The next study should compare validated-model yield, human effort and resource cost across methods and tasks.
+A long-term hypothesis is that better physical-world understanding could let an LLM analyze parameter–behavior relationships and improve models through targeted direct weight edits. This does not eliminate initial training, testing, or real-use feedback.
 
-Read the [English technical guide](docs/TECHNICAL_GUIDE.md), [bilingual paper v0.8.2](papers/PUBLISHED_VERSION.md), or [model card](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning).
+In the v0.8.3 case study, the LLM designed corrections and wrote and executed the code; numerical updates used AdamW training and closed-form and Newton-based corrections. This does not establish direct LLM generation of weight values or the full autonomous production loop. Current entry checks cover symbolic state handling and selected-checkpoint loading with synthetic inputs, not physical performance. The next study should compare validated-model yield, human effort and resource cost across methods and tasks.
+
+Read the [English technical guide](docs/TECHNICAL_GUIDE.md), [bilingual paper v0.8.3](papers/PUBLISHED_VERSION.md), or [model card](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning).
 
 ## 공개하는 이유
 
