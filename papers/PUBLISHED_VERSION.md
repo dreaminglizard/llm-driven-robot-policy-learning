@@ -1,26 +1,28 @@
 # Published paper
 
-## Current GitHub and Zenodo release: v0.8.3
+## Current GitHub and Zenodo release: v0.8.4
 
-**한국어 / English · 2026-11-15**
+**한국어 / English · 2026-11-17**
 
-- [Korean PDF](v0.8.3/paper_ko.pdf) · [English PDF](v0.8.3/paper_en.pdf)
-- [Editable manuscripts, figures and PDFs](v0.8.3/paper-materials.zip)
-- [Revision notes](v0.8.3/REVISION.md) · [SHA-256 manifest for ZIP contents](v0.8.3/SHA256SUMS.txt)
+- [Korean PDF](v0.8.4/paper_ko.pdf) · [English PDF](v0.8.4/paper_en.pdf)
+- [Editable manuscripts, figures and PDFs](v0.8.4/paper-materials.zip)
+- [Revision notes](v0.8.4/REVISION.md) · [SHA-256 manifest for ZIP contents](v0.8.4/SHA256SUMS.txt)
 
-The [representative PDF](paper-draft.pdf) matches the v0.8.3 Korean file. This revision integrates the long-term hypothesis of physical-world understanding, parameter–behavior analysis and targeted direct weight editing into the introduction and Section 6.3. It preserves the wider production loop, testing and human real-use feedback. Methods, results, all five tables and evidence are unchanged; no new experiment was performed.
+The [representative PDF](paper-draft.pdf) matches the v0.8.4 Korean file. The introduction, new Section 6.4, and conclusion explicitly extend the research vision to humanoid bimanual manipulation, dexterous hands, and whole-body coordination. The proposed loop connects AI-generated behavior data, task construction and evaluation, repeated weight improvement and re-evaluation, and human real-use feedback. Cumulative or vertical development means validated model-production experience supporting subsequent capabilities, not guaranteed progress or unbounded self-improvement. This is a research direction, not a demonstrated humanoid result. The direct-weight-editing hypothesis in Section 6.3 is retained. Methods, numerical results, all five tables, references and evidence are unchanged; no new experiments were performed. Both PDFs are 13 pages; pagination changed during rendering.
 
-**Zenodo status:** the bilingual v0.8.3 paper is published at [DOI 10.5281/zenodo.24237878](https://doi.org/10.5281/zenodo.24237878). Both remote PDF hashes were verified against the approved files listed below. Earlier versions remain preserved. GitHub or Zenodo publication is not peer review.
+**Zenodo status:** the bilingual v0.8.4 paper is published at [DOI 10.5281/zenodo.24297575](https://doi.org/10.5281/zenodo.24297575). Both public PDF checksums were verified against the approved files below. Earlier versions remain preserved. GitHub or Zenodo publication is not peer review.
 
-현재 GitHub와 Zenodo 한영판은 v0.8.3입니다. 현실 인식의 발전과 파라미터·행동 관계 이해를 바탕으로 필요한 가중치를 직접 수정해 모델을 만드는 장기 가설을 통합했습니다. 기존 실험 결과가 이 가설을 입증했다는 뜻은 아닙니다. 구판은 보존되며, 논문 판본은 코드·가중치 버전과 별개입니다.
+현재 GitHub와 Zenodo 한영판은 v0.8.4입니다. 양팔·다관절 손·전신 협응을 갖춘 휴머노이드까지 제작 절차를 확장하고, AI의 데이터 생성·과제 설정 및 평가·반복 가중치 개선에 실제 사용자의 피드백을 연결하는 비전을 서론·6.4절·결론에 통합했습니다. 제작 경험이 다음 능력의 개발을 돕는 누적적 발전을 제안하며, 기존 결과가 휴머노이드 성능을 입증했다는 뜻은 아닙니다. 구판은 보존되며 논문 판본은 코드·가중치 버전과 별개입니다.
 
-| v0.8.3 file | SHA-256 |
+| v0.8.4 file | SHA-256 |
 |---|---|
-| Korean / repository representative PDF | `ef0849c4185b6cbc3872a839e905d9095170050518dc78fe2634a72cc644ef19` |
-| English PDF | `e472279cd223f60a6cca47cf4fca15cce1181b94e30ab5bae03deeecbcf86960` |
-| Materials ZIP | `6c2e512d58e3ed652ccb12ca30f6633d2742a72bcc52077153ea487fd6b09ce0` |
+| Korean / repository representative PDF | `aa254d55ee59bcc8dee0ce2577b62b69c1d1ea5df9797efb01bc650c367776a1` |
+| English PDF | `9a756e46facc60891f1d44acebff6f032879b918ab591f32d2bc25d1381f4117` |
+| Materials ZIP | `c2bb9d5d4bf6e9a7134e5efe5de2a989bc996f66d01f55e403f2be7dd5f14759` |
 
 ## Earlier versions
+
+- [v0.8.3 · Korean](v0.8.3/paper_ko.pdf) / [English](v0.8.3/paper_en.pdf), [materials](v0.8.3/paper-materials.zip), [Zenodo DOI](https://doi.org/10.5281/zenodo.24237878).
 
 - [v0.8.2 · Korean](v0.8.2/paper_ko.pdf) / [English](v0.8.2/paper_en.pdf), [materials](v0.8.2/paper-materials.zip), [Zenodo DOI](https://doi.org/10.5281/zenodo.24217129).
 

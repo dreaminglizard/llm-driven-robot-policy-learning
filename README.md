@@ -4,9 +4,9 @@
 
 이 연구의 목표는 로봇 한 대가 아니라 **모델을 만드는 과정**입니다. 사람이 목적을 정하고 완성된 모델을 현실에서 사용하면, AI가 중간의 데이터 생성·학습·가중치 개선을 맡고 사용자의 피드백을 다음 개선에 연결하는 구조를 탐구합니다. 라쿤봇은 그 첫 사례입니다.
 
-[논문 · 한국어/English v0.8.3](papers/PUBLISHED_VERSION.md) · [구현과 첫 실행](docs/TECHNICAL_GUIDE.md) · [선정 모델](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning) · [연구 패키지](PUBLIC_PACKAGE_README.md)
+[논문 · 한국어/English v0.8.4](papers/PUBLISHED_VERSION.md) · [구현과 첫 실행](docs/TECHNICAL_GUIDE.md) · [선정 모델](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning) · [연구 패키지](PUBLIC_PACKAGE_README.md)
 
-GitHub와 Zenodo의 최신 한영 논문은 [v0.8.3](https://doi.org/10.5281/zenodo.24237878)입니다. 판본별 파일과 이력은 [논문 안내](papers/PUBLISHED_VERSION.md)에 정리했습니다.
+GitHub와 Zenodo의 최신 한영 논문은 [v0.8.4](https://doi.org/10.5281/zenodo.24297575)입니다. 판본별 파일과 이력은 [논문 안내](papers/PUBLISHED_VERSION.md)에 정리했습니다.
 
 ## 연구 질문
 
@@ -41,7 +41,7 @@ flowchart TD
 | 확인된 검사 | 기호 상태 검사, 선정 모델의 엄격한 로드와 합성 입력 CPU 검사. [조건과 범위](docs/TECHNICAL_GUIDE.md) |
 | 후속 검증 | LLM의 직접 가중치·변화량 생성, 전체 고리의 자율 작동, 다른 과제에서의 생산성·일반화 |
 
-논문 v0.8.3의 사례에서는 LLM이 보정 방법을 설계하고 코드를 작성·실행했으며, 실제 수치 갱신에는 AdamW 학습과 닫힌식·Newton 보정이 사용됐습니다. 이는 LLM이 가중치 수치를 직접 출력했다거나 전체 제작 고리가 자율적으로 작동했다는 뜻은 아닙니다. 저장된 예측 지표나 한 번의 시연을 실물 성공률로 바꾸어 주장하지 않습니다.
+논문 v0.8.4의 사례에서는 LLM이 보정 방법을 설계하고 코드를 작성·실행했으며, 실제 수치 갱신에는 AdamW 학습과 닫힌식·Newton 보정이 사용됐습니다. 이는 LLM이 가중치 수치를 직접 출력했다거나 전체 제작 고리가 자율적으로 작동했다는 뜻은 아닙니다. 저장된 예측 지표나 한 번의 시연을 실물 성공률로 바꾸어 주장하지 않습니다.
 
 ## 어디서 시작하나요?
 
@@ -70,9 +70,9 @@ Can AI help produce more useful models, rather than only operate one robot? The 
 
 A long-term hypothesis is that better physical-world understanding could let an LLM analyze parameter–behavior relationships and improve models through targeted direct weight edits. This does not eliminate initial training, testing, or real-use feedback.
 
-In the v0.8.3 case study, the LLM designed corrections and wrote and executed the code; numerical updates used AdamW training and closed-form and Newton-based corrections. This does not establish direct LLM generation of weight values or the full autonomous production loop. Current entry checks cover symbolic state handling and selected-checkpoint loading with synthetic inputs, not physical performance. The next study should compare validated-model yield, human effort and resource cost across methods and tasks.
+In the v0.8.4 case study, the LLM designed corrections and wrote and executed the code; numerical updates used AdamW training and closed-form and Newton-based corrections. This does not establish direct LLM generation of weight values or the full autonomous production loop. Current entry checks cover symbolic state handling and selected-checkpoint loading with synthetic inputs, not physical performance. The next study should compare validated-model yield, human effort and resource cost across methods and tasks.
 
-Read the [English technical guide](docs/TECHNICAL_GUIDE.md), [bilingual paper v0.8.3](papers/PUBLISHED_VERSION.md), or [model card](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning).
+Read the [English technical guide](docs/TECHNICAL_GUIDE.md), [bilingual paper v0.8.4](papers/PUBLISHED_VERSION.md), or [model card](https://huggingface.co/DreamingLizard/llm-driven-robot-policy-learning).
 
 ## 공개하는 이유
 
