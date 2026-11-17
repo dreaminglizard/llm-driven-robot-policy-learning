@@ -18,7 +18,7 @@ The [representative PDF](paper-draft.pdf) matches the v0.8.4 Korean file. The in
 |---|---|
 | Korean / repository representative PDF | `aa254d55ee59bcc8dee0ce2577b62b69c1d1ea5df9797efb01bc650c367776a1` |
 | English PDF | `9a756e46facc60891f1d44acebff6f032879b918ab591f32d2bc25d1381f4117` |
-| Materials ZIP | `c2bb9d5d4bf6e9a7134e5efe5de2a989bc996f66d01f55e403f2be7dd5f14759` |
+| Materials ZIP | `044a4de3e903d38f844e7e744eddd2f76fe044d8dd5dd88de0c575552733b8ef` |
 
 ## Earlier versions
 
