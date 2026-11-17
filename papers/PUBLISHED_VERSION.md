@@ -1,26 +1,29 @@
 # Published paper
 
-## Current GitHub and Zenodo release: v0.8.4
+## Current GitHub and Zenodo release: v0.8.5
 
-**한국어 / English · 2026-11-17**
+**한국어 / English · 2026-11-17 · 16 pages each**
 
-- [Korean PDF](v0.8.4/paper_ko.pdf) · [English PDF](v0.8.4/paper_en.pdf)
-- [Editable manuscripts, figures and PDFs](v0.8.4/paper-materials.zip)
-- [Revision notes](v0.8.4/REVISION.md) · [SHA-256 manifest for ZIP contents](v0.8.4/SHA256SUMS.txt)
+- [Korean PDF](v0.8.5/paper_ko.pdf) · [English PDF](v0.8.5/paper_en.pdf)
+- [Editable manuscripts, figures and PDFs](v0.8.5/paper-materials.zip)
+- [Revision notes](v0.8.5/REVISION.md) · [SHA-256 manifest for ZIP contents](v0.8.5/SHA256SUMS.txt)
+- [Zenodo DOI 10.5281/zenodo.24299562](https://doi.org/10.5281/zenodo.24299562)
 
-The [representative PDF](paper-draft.pdf) matches the v0.8.4 Korean file. The introduction, new Section 6.4, and conclusion explicitly extend the research vision to humanoid bimanual manipulation, dexterous hands, and whole-body coordination. The proposed loop connects AI-generated behavior data, task construction and evaluation, repeated weight improvement and re-evaluation, and human real-use feedback. Cumulative or vertical development means validated model-production experience supporting subsequent capabilities, not guaranteed progress or unbounded self-improvement. This is a research direction, not a demonstrated humanoid result. The direct-weight-editing hypothesis in Section 6.3 is retained. Methods, numerical results, all five tables, references and evidence are unchanged; no new experiments were performed. Both PDFs are 13 pages; pagination changed during rendering.
+The [representative PDF](paper-draft.pdf) matches the v0.8.5 Korean file. This revision adds a readable policy architecture and correction flow, verified three-seed cumulative initial-BC results, and a matched distance re-estimation × CLOSE 2×2 development comparison. opened48 contains 24 four-step and 24 five-step conditions. The November 13 real-use feedback case distinguishes a controller revision and 164 mock checks from post-revision physical validation, which remains pending. Humanoid extension and direct-weight-editing research directions are retained. Original checkpoint/result hashes and initial conditions were checked; no new experiments were performed.
 
-**Zenodo status:** the bilingual v0.8.4 paper is published at [DOI 10.5281/zenodo.24297575](https://doi.org/10.5281/zenodo.24297575). Both public PDF checksums were verified against the approved files below. Earlier versions remain preserved. GitHub or Zenodo publication is not peer review.
+현재 GitHub와 Zenodo 한영판은 v0.8.5이며 각각 16쪽입니다. 정책 구조·보정 순서도, 3개 시드의 초기 BC부터 누적 개선 결과, 동일 초기 조건의 거리 재추정 × CLOSE 2×2 비교를 통합했습니다. opened48은 4단계 24개와 5단계 24개 조건입니다. 실물 사용 피드백 사례는 제어기 수정과 모의 검사 164개를 구분하고, 수정 후 실물 검증을 완료한 것으로 표현하지 않습니다. 휴머노이드 확장 비전은 유지했습니다. 구판은 보존되며 논문 판본은 코드·가중치 버전과 별개입니다.
 
-현재 GitHub와 Zenodo 한영판은 v0.8.4입니다. 양팔·다관절 손·전신 협응을 갖춘 휴머노이드까지 제작 절차를 확장하고, AI의 데이터 생성·과제 설정 및 평가·반복 가중치 개선에 실제 사용자의 피드백을 연결하는 비전을 서론·6.4절·결론에 통합했습니다. 제작 경험이 다음 능력의 개발을 돕는 누적적 발전을 제안하며, 기존 결과가 휴머노이드 성능을 입증했다는 뜻은 아닙니다. 구판은 보존되며 논문 판본은 코드·가중치 버전과 별개입니다.
+Both public Zenodo PDF checksums match these files. Earlier releases are preserved. GitHub or Zenodo publication is not peer review.
 
-| v0.8.4 file | SHA-256 |
+| v0.8.5 file | SHA-256 |
 |---|---|
-| Korean / repository representative PDF | `aa254d55ee59bcc8dee0ce2577b62b69c1d1ea5df9797efb01bc650c367776a1` |
-| English PDF | `9a756e46facc60891f1d44acebff6f032879b918ab591f32d2bc25d1381f4117` |
-| Materials ZIP | `044a4de3e903d38f844e7e744eddd2f76fe044d8dd5dd88de0c575552733b8ef` |
+| Korean / repository representative PDF | `63860d8941210f0034911a0b78461bd4d79661b7a135275a6b63498c80532cf7` |
+| English PDF | `dbbc07e587d8821a6c926af6780917f799e15a76860e5d1c1442498d0ce42555` |
+| Materials ZIP | `e060aa7fcaa3d23ad3ae1026fbc0fbf406049ba79e6f7263efd1f865740e0e6b` |
 
 ## Earlier versions
+
+- [v0.8.4 · Korean](v0.8.4/paper_ko.pdf) / [English](v0.8.4/paper_en.pdf), [materials](v0.8.4/paper-materials.zip), [Zenodo DOI](https://doi.org/10.5281/zenodo.24297575).
 
 - [v0.8.3 · Korean](v0.8.3/paper_ko.pdf) / [English](v0.8.3/paper_en.pdf), [materials](v0.8.3/paper-materials.zip), [Zenodo DOI](https://doi.org/10.5281/zenodo.24237878).
 
