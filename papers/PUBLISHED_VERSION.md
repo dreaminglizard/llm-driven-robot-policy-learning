@@ -1,27 +1,29 @@
 # Published paper
 
-## Current GitHub and Zenodo release: v0.8.5
+## Current GitHub and Zenodo release: v0.8.6
 
-**한국어 / English · 2026-11-17 · 16 pages each**
+**한국어 21 pages / English 17 pages · 2026-11-18**
 
-- [Korean PDF](v0.8.5/paper_ko.pdf) · [English PDF](v0.8.5/paper_en.pdf)
-- [Editable manuscripts, figures and PDFs](v0.8.5/paper-materials.zip)
-- [Revision notes](v0.8.5/REVISION.md) · [SHA-256 manifest for ZIP contents](v0.8.5/SHA256SUMS.txt)
-- [Zenodo DOI 10.5281/zenodo.24299562](https://doi.org/10.5281/zenodo.24299562)
+- [Korean PDF](v0.8.6/paper_ko.pdf) · [English PDF](v0.8.6/paper_en.pdf)
+- [Editable manuscripts, figures and PDFs](v0.8.6/paper-materials.zip)
+- [Revision notes](v0.8.6/REVISION.md) · [SHA-256 manifest](v0.8.6/SHA256SUMS.txt)
+- [Zenodo DOI 10.5281/zenodo.24332117](https://doi.org/10.5281/zenodo.24332117)
 
-The [representative PDF](paper-draft.pdf) matches the v0.8.5 Korean file. This revision adds a readable policy architecture and correction flow, verified three-seed cumulative initial-BC results, and a matched distance re-estimation × CLOSE 2×2 development comparison. opened48 contains 24 four-step and 24 five-step conditions. The November 13 real-use feedback case distinguishes a controller revision and 164 mock checks from post-revision physical validation, which remains pending. Humanoid extension and direct-weight-editing research directions are retained. Original checkpoint/result hashes and initial conditions were checked; no new experiments were performed.
+The [representative PDF](paper-draft.pdf) matches the v0.8.6 Korean file. Section 6.5 and the conclusion now describe producing and improving VLA models themselves through behavior-data generation, task design and evaluation, failure analysis, data and weight revision, reevaluation, and feedback from human use. This is distinct from command generation or single-task fine-tuning. VLA is the core robotics case within a broader vision of reusable AI-led model production across model families, connected to shared robot foundation models and humanoids.
 
-현재 GitHub와 Zenodo 한영판은 v0.8.5이며 각각 16쪽입니다. 정책 구조·보정 순서도, 3개 시드의 초기 BC부터 누적 개선 결과, 동일 초기 조건의 거리 재추정 × CLOSE 2×2 비교를 통합했습니다. opened48은 4단계 24개와 5단계 24개 조건입니다. 실물 사용 피드백 사례는 제어기 수정과 모의 검사 164개를 구분하고, 수정 후 실물 검증을 완료한 것으로 표현하지 않습니다. 휴머노이드 확장 비전은 유지했습니다. 구판은 보존되며 논문 판본은 코드·가중치 버전과 별개입니다.
+국·영 논문에 VLA 자체 제작·개선과 특정 모델 종류에 한정되지 않는 AI 주도 모델 제작 방식의 비전을 반영했습니다. 기존 실험 결과·수치·인용·표·그림은 보존했으며 새 실험을 보고하지 않습니다. 이는 모든 모델에서 검증한 성과가 아니라 후속 연구 방향입니다.
 
-Both public Zenodo PDF checksums match these files. Earlier releases are preserved. GitHub or Zenodo publication is not peer review.
+The PDFs were rendered with LibreOffice; pagination and font substitution differ from the previous Word-rendered release. Publication is not peer review. Paper versions are separate from code and weight versions. Earlier releases are preserved.
 
-| v0.8.5 file | SHA-256 |
+| v0.8.6 file | SHA-256 |
 |---|---|
-| Korean / repository representative PDF | `63860d8941210f0034911a0b78461bd4d79661b7a135275a6b63498c80532cf7` |
-| English PDF | `dbbc07e587d8821a6c926af6780917f799e15a76860e5d1c1442498d0ce42555` |
-| Materials ZIP | `e060aa7fcaa3d23ad3ae1026fbc0fbf406049ba79e6f7263efd1f865740e0e6b` |
+| Korean / repository representative PDF | `f03fe9b76d62467ad8bdb95b1e8b71584aeac5c25b2ef37b3117b4005362db80` |
+| English PDF | `f6a1aea2d8fdccc0c68c1b3164d1ff721da077c3868fed4dacef591d844b9983` |
+| Materials ZIP | `adaa6b0e41b8099a6a6cab1ff1fdcd3c763f80a20e5eef01a38482a6bc627dea` |
 
 ## Earlier versions
+
+- [v0.8.5 · Korean](v0.8.5/paper_ko.pdf) / [English](v0.8.5/paper_en.pdf), [materials](v0.8.5/paper-materials.zip), [Zenodo DOI](https://doi.org/10.5281/zenodo.24299562).
 
 - [v0.8.4 · Korean](v0.8.4/paper_ko.pdf) / [English](v0.8.4/paper_en.pdf), [materials](v0.8.4/paper-materials.zip), [Zenodo DOI](https://doi.org/10.5281/zenodo.24297575).
 
